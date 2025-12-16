@@ -1,0 +1,53 @@
+extends ../layouts/main
+
+block content
+  // Encabezado
+  div(class="flex justify-between items-center mb-8")
+    h1(class="text-3xl font-bold text-gray-800") Mapa de Habitaciones
+    // Leyenda de colores
+    div(class="flex items-center text-sm text-gray-600 bg-white px-4 py-2 rounded shadow-sm")
+      span(class="flex items-center mr-4")
+        span(class="w-3 h-3 bg-green-500 rounded-full mr-2")
+        | Disponible
+      span(class="flex items-center mr-4")
+        span(class="w-3 h-3 bg-red-500 rounded-full mr-2")
+        | Ocupada
+      span(class="flex items-center")
+        span(class="w-3 h-3 bg-yellow-400 rounded-full mr-2")
+        | Mantenimiento
+
+  // Grid de Habitaciones
+  div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6")
+    each hab in habitaciones
+      // Tarjeta de Habitación
+      div(class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200")
+        // Cabecera de la tarjeta
+        div(class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center")
+          div
+            h3(class="text-lg font-bold text-gray-700") Habitación #{hab.numero}
+            p(class="text-xs text-gray-500") #{hab.tipo}
+          // Icono de edificio
+          svg(class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4")
+        
+        // Cuerpo: Lista de Camas
+        div(class="p-4 space-y-3")
+          each cama in hab.camas
+            // Condicional para el color del borde y fondo segun estado
+            - var estadoClass = cama.estado === 'Disponible' ? 'border-green-200 bg-green-50' : (cama.estado === 'Ocupada' ? 'border-red-200 bg-red-50' : 'border-yellow-200 bg-yellow-50')
+            - var textoClass = cama.estado === 'Disponible' ? 'text-green-700' : (cama.estado === 'Ocupada' ? 'text-red-700' : 'text-yellow-700')
+            
+            div(class="flex items-center justify-between p-3 rounded-lg border " + estadoClass)
+              div(class="flex items-center")
+                // Icono Cama
+                svg(class="w-6 h-6 mr-3 " + textoClass fill="none" stroke="currentColor" viewBox="0 0 24 24")
+                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6h18v4a2 2 0 01-2 2M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7")
+                
+                div
+                  p(class="font-semibold text-sm " + textoClass) Cama #{cama.numero}
+                  p(class="text-xs opacity-75 " + textoClass) #{cama.estado}
+
+              // Botón de Acción (Solo si está disponible)
+              if cama.estado === 'Disponible'
+                a(href="/internacion/asignar/" + cama.id class="text-xs bg-white border border-green-600 text-green-600 hover:bg-green-600 hover:text-white px-3 py-1 rounded transition-colors uppercase font-bold tracking-wider")
+                  | Asignar

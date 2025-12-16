@@ -6,32 +6,32 @@ html(lang="es")
     title #{title} | Sistema HIS
     // Tailwind CSS vía CDN
     script(src="https://cdn.tailwindcss.com")
-    // Fuente Google Fonts (Inter) para un look profesional
+    // Fuente Google Fonts (Inter)
     link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap", rel="stylesheet")
     style.
       body { font-family: 'Inter', sans-serif; }
-  body.bg-gray-50.text-gray-800
+  body(class="bg-gray-50 text-gray-800")
     // Navbar Moderno
-    nav.bg-white.shadow-sm
-      .max-w-7xl.mx-auto.px-4.sm:px-6.lg:px-8
-        .flex.justify-between.h-16
-          .flex
-            .flex-shrink-0.flex.items-center
-              // Logotipo simple
-              a.text-2xl.font-bold.text-blue-600(href="/") HIS Hospital
-            .hidden.sm:ml-6.sm:flex.sm:space-x-8
-              // Enlaces de navegación con efectos hover
-              a.border-transparent.text-gray-500.hover:border-blue-500.hover:text-gray-900.inline-flex.items-center.px-1.pt-1.border-b-2.text-sm.font-medium(href="/admision") 
+    nav(class="bg-white shadow-sm")
+      div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8")
+        div(class="flex justify-between h-16")
+          div(class="flex")
+            div(class="flex-shrink-0 flex items-center")
+              // Logotipo
+              a(href="/" class="text-2xl font-bold text-blue-600") HIS Hospital
+            div(class="hidden sm:ml-6 sm:flex sm:space-x-8")
+              // Enlaces de navegación con class="..." para soportar hover:
+              a(href="/admision" class="border-transparent text-gray-500 hover:border-blue-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium") 
                 | Admisión
-              a.border-transparent.text-gray-500.hover:border-blue-500.hover:text-gray-900.inline-flex.items-center.px-1.pt-1.border-b-2.text-sm.font-medium(href="/medicos") 
+              a(href="/medicos" class="border-transparent text-gray-500 hover:border-blue-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium") 
                 | Médicos
 
     // Contenedor principal
-    main.max-w-7xl.mx-auto.py-6.sm:px-6.lg:px-8
+    main(class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8")
       block content
 
     // Footer simple
-    footer.bg-white.border-t.border-gray-200.mt-12
-      .max-w-7xl.mx-auto.py-6.px-4.overflow-hidden.sm:px-6.lg:px-8
-        p.mt-8.text-center.text-base.text-gray-400
-          | &copy; 2025 Final de Programación Web II. Todos los derechos reservados.
+    footer(class="bg-white border-t border-gray-200 mt-12")
+      div(class="max-w-7xl mx-auto py-6 px-4 overflow-hidden sm:px-6 lg:px-8")
+        p(class="mt-8 text-center text-base text-gray-400")
+          | &copy; 2025 Taller de Programación Web II. Todos los derechos reservados.

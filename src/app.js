@@ -3,6 +3,10 @@ const path = require('path');
 const morgan = require('morgan');
 require('dotenv').config();
 
+// Importar rutas
+const admisionRoutes = require('./routes/admision');
+const habitacionesRoutes = require('./routes/habitaciones');
+
 const app = express();
 
 // Configuraciones
@@ -16,9 +20,14 @@ app.use(express.urlencoded({ extended: false })); // Para recibir datos de formu
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public'))); // Archivos estáticos
 
-// Rutas (Las agregaremos luego)
+// Rutas
+app.use('/admision', admisionRoutes); // Módulo de admisión
+app.use('/habitaciones', habitacionesRoutes); // Módulo de habitaciones 
+
+
+// Redireccionar la raíz a admisión (por ahora)
 app.get('/', (req, res) => {
-    res.render('index', { title: 'HIS Hospital' }); // Página de inicio
+    res.redirect('/admision');
 });
 
 // Iniciar servidor

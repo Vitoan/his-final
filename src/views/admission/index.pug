@@ -1,0 +1,31 @@
+extends ../layouts/main
+
+block content
+  .flex.justify-between.items-center.mb-6
+    h1.text-3xl.font-bold.text-gray-800 Admisión de Pacientes
+    // CORRECCIÓN: Usamos class="..." para soportar los dos puntos de Tailwind (hover:)
+    a(href="/admision/nuevo" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow")
+      | + Nuevo Paciente
+
+  // Tabla responsiva
+  .bg-white.shadow-md.rounded-lg.overflow-hidden
+    table.min-w-full.divide-y.divide-gray-200
+      thead.bg-gray-50
+        tr
+          th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Nombre Completo
+          th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") DNI
+          th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Obra Social
+          th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Acciones
+      tbody.bg-white.divide-y.divide-gray-200
+        each paciente in pacientes
+          tr
+            td.px-6.py-4.whitespace-nowrap
+              .text-sm.font-medium.text-gray-900 #{paciente.nombre} #{paciente.apellido}
+              .text-sm.text-gray-500 #{paciente.sexo} - #{new Date(paciente.fecha_nacimiento).toLocaleDateString()}
+            td(class="px-6 py-4 whitespace-nowrap text-sm text-gray-500") #{paciente.dni}
+            td(class="px-6 py-4 whitespace-nowrap text-sm text-gray-500") #{paciente.obra_social || '-'}
+            td(class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium")
+              a(href="#" class="text-indigo-600 hover:text-indigo-900") Ver Ficha
+        else
+          tr
+            td(class="px-6 py-4 text-center text-gray-500" colspan="4") No hay pacientes registrados aún.
