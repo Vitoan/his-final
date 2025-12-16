@@ -1,31 +1,42 @@
 extends ../layouts/main
 
 block content
-  .flex.justify-between.items-center.mb-6
-    h1.text-3xl.font-bold.text-gray-800 Admisión de Pacientes
-    // CORRECCIÓN: Usamos class="..." para soportar los dos puntos de Tailwind (hover:)
+  div(class="flex justify-between items-center mb-6")
+    h1(class="text-3xl font-bold text-gray-800") Admisión de Pacientes
     a(href="/admision/nuevo" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow")
       | + Nuevo Paciente
 
+  // --- BLOQUE DE ERROR AGREGADO ---
+  if error
+    div(class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 shadow-sm" role="alert")
+      p(class="font-bold") Operación Bloqueada
+      p= error
+  // --------------------------------
+
   // Tabla responsiva
-  .bg-white.shadow-md.rounded-lg.overflow-hidden
-    table.min-w-full.divide-y.divide-gray-200
-      thead.bg-gray-50
+  div(class="bg-white shadow-md rounded-lg overflow-hidden")
+    table(class="min-w-full divide-y divide-gray-200")
+      thead(class="bg-gray-50")
         tr
           th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Nombre Completo
           th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") DNI
           th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Obra Social
-          th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Acciones
-      tbody.bg-white.divide-y.divide-gray-200
+          th(class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider") Acciones
+      tbody(class="bg-white divide-y divide-gray-200")
         each paciente in pacientes
           tr
-            td.px-6.py-4.whitespace-nowrap
-              .text-sm.font-medium.text-gray-900 #{paciente.nombre} #{paciente.apellido}
-              .text-sm.text-gray-500 #{paciente.sexo} - #{new Date(paciente.fecha_nacimiento).toLocaleDateString()}
+            td(class="px-6 py-4 whitespace-nowrap")
+              div(class="text-sm font-medium text-gray-900") #{paciente.nombre} #{paciente.apellido}
+              div(class="text-sm text-gray-500") #{paciente.sexo} - #{new Date(paciente.fecha_nacimiento).toLocaleDateString()}
             td(class="px-6 py-4 whitespace-nowrap text-sm text-gray-500") #{paciente.dni}
             td(class="px-6 py-4 whitespace-nowrap text-sm text-gray-500") #{paciente.obra_social || '-'}
             td(class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium")
-              a(href="#" class="text-indigo-600 hover:text-indigo-900") Ver Ficha
+              // Botón Editar
+              a(href="/admision/editar/" + paciente.id class="text-indigo-600 hover:text-indigo-900 mr-4 font-bold") Editar
+              
+              // Botón Borrar
+              form(action="/admision/borrar/" + paciente.id method="POST" class="inline-block" onsubmit="return confirm('¿Está seguro de eliminar este paciente?');")
+                button(type="submit" class="text-red-600 hover:text-red-900 font-bold") Borrar
         else
           tr
             td(class="px-6 py-4 text-center text-gray-500" colspan="4") No hay pacientes registrados aún.
