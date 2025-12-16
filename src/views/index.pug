@@ -1,0 +1,46 @@
+extends layouts/main
+
+block content
+  // Encabezado de la sección
+  .text-center.py-10
+    h1.text-4xl.tracking-tight.font-extrabold.text-gray-900.sm:text-5xl.md:text-6xl
+      span.block Bienvenido al Sistema
+      span.block.text-blue-600 Hospitalario HIS
+    p.mt-3.max-w-md.mx-auto.text-base.text-gray-500.sm:text-lg.md:mt-5.md:text-xl.md:max-w-3xl
+      | Gestión integral de pacientes, internaciones y recursos hospitalarios. Seleccione un módulo para comenzar.
+
+  // Grid de Tarjetas (Opciones rápidas)
+  .mt-10
+    .grid.grid-cols-1.gap-8.sm:grid-cols-2.lg:grid-cols-3
+      // Tarjeta 1: Admisión (La prioritaria)
+      .bg-white.overflow-hidden.shadow.rounded-lg.hover:shadow-lg.transition-shadow.duration-300
+        .px-4.py-5.sm:p-6
+          .flex.items-center
+            .flex-shrink-0.bg-blue-500.rounded-md.p-3
+              // Icono SVG (User Plus)
+              svg.h-6.w-6.text-white(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z")
+            .ml-5.w-0.flex-1
+              dt.text-sm.font-medium.text-gray-500 Módulo
+              dd.flex.items-baseline
+                .text-2xl.font-semibold.text-gray-900 Admisión
+          .mt-4
+            p.text-sm.text-gray-500 Registrar nuevos pacientes o gestionar ingresos de guardia.
+            .mt-3
+              a.text-sm.font-medium.text-blue-600.hover:text-blue-500(href="/admision") 
+                | Ir a Admisión &rarr;
+
+      // Tarjeta 2: Habitaciones (Visualización)
+      .bg-white.overflow-hidden.shadow.rounded-lg.hover:shadow-lg.transition-shadow.duration-300.opacity-50
+        .px-4.py-5.sm:p-6
+          .flex.items-center
+            .flex-shrink-0.bg-green-500.rounded-md.p-3
+              // Icono SVG (Home)
+              svg.h-6.w-6.text-white(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                 path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6")
+            .ml-5.w-0.flex-1
+              dt.text-sm.font-medium.text-gray-500 Módulo
+              dd.flex.items-baseline
+                .text-2xl.font-semibold.text-gray-900 Habitaciones
+          .mt-4
+            p.text-sm.text-gray-500 Visualizar estado de camas y ocupación. (Próximamente)
