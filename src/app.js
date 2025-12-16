@@ -6,6 +6,7 @@ require('dotenv').config();
 // Importar rutas
 const admisionRoutes = require('./routes/admision');
 const habitacionesRoutes = require('./routes/habitaciones');
+const internacionesRoutes = require('./routes/internaciones'); // <--- Verifica que el archivo routes/internaciones.js exista
 
 const app = express();
 
@@ -16,16 +17,16 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Middlewares
 app.use(morgan('dev'));
-app.use(express.urlencoded({ extended: false })); // Para recibir datos de formularios
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../public'))); // Archivos estáticos
+app.use(express.static(path.join(__dirname, '../public')));
 
-// Rutas
-app.use('/admision', admisionRoutes); // Módulo de admisión
-app.use('/habitaciones', habitacionesRoutes); // Módulo de habitaciones 
+// Usar Rutas
+app.use('/admision', admisionRoutes);
+app.use('/habitaciones', habitacionesRoutes);
+app.use('/internacion', internacionesRoutes); // <--- Aquí estaba fallando
 
-
-// Redireccionar la raíz a admisión (por ahora)
+// Redireccionar raíz
 app.get('/', (req, res) => {
     res.redirect('/admision');
 });

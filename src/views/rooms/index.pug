@@ -47,7 +47,19 @@ block content
                   p(class="font-semibold text-sm " + textoClass) Cama #{cama.numero}
                   p(class="text-xs opacity-75 " + textoClass) #{cama.estado}
 
-              // Botón de Acción (Solo si está disponible)
+              // ACCIONES SEGÚN ESTADO
               if cama.estado === 'Disponible'
+                // Botón Asignar
                 a(href="/internacion/asignar/" + cama.id class="text-xs bg-white border border-green-600 text-green-600 hover:bg-green-600 hover:text-white px-3 py-1 rounded transition-colors uppercase font-bold tracking-wider")
                   | Asignar
+              
+              else if cama.estado === 'Ocupada'
+                // Botón Dar Alta (Formulario POST)
+                form(action="/internacion/alta" method="POST" onsubmit="return confirm('¿Confirmar el alta médica del paciente? La cama quedará disponible.');")
+                    input(type="hidden" name="cama_id" value=cama.id)
+                    button(type="submit" class="text-xs bg-white border border-red-500 text-red-600 hover:bg-red-500 hover:text-white px-3 py-1 rounded transition-colors uppercase font-bold tracking-wider")
+                      | Dar Alta
+              
+              else
+                // Estado Mantenimiento u otro
+                span(class="text-xs font-bold text-yellow-600 uppercase tracking-wider") Mantenimiento
