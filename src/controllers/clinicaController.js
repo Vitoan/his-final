@@ -36,14 +36,32 @@ exports.dashboard = async (req, res) => {
 exports.verHistorialCompleto = async (req, res) => {
     const { idInternacion } = req.params;
     
-    // Aquí traemos TODO el historial de un paciente específico
-    const internacion = await Internacion.findByPk(idInternacion, {
-        include: [
-            { model: Paciente },
-            { model: Evolucion, include: [{ model: Usuario, as: 'Autor' }] } // Historial completo
-        ],
-        order: [[Evolucion, 'createdAt', 'DESC']]
-    });
+    try {
+        const internacion = await Internacion.findByPk(idInternacion, {
+            include: [
+                { model: Paciente },
+                // --- AGREGADO: Cama y Habitación ---
+                { 
+                    model: Cama, 
+                    include: [{ model: Habitacion }] 
+                },
+                // -----------------------------------
+                { 
+                    model: Evolucion, 
+                    include: [{ model: Usuario, as: 'Autor' }] 
+                }
+            ],
+            order: [[Evolucion, 'createdAt', 'DESC']]
+        });
 
-    res.render('clinical/detalle', { internacion });
+        if (!internacion) {
+            return res.redirect('/clinica/dashboard');
+        }
+
+        res.render('clinical/detalle', { internacion });
+        
+    } catch (error) {
+        console.error(error);
+        res.redirect('/clinica/dashboard');
+    }
 };

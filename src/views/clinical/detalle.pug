@@ -1,0 +1,109 @@
+extends ../layouts/main
+
+block content
+  div(class="max-w-5xl mx-auto")
+    
+    // --- ENCABEZADO DEL PACIENTE ---
+    div(class="bg-white rounded-2xl shadow-md overflow-hidden mb-8 border border-slate-200")
+      div(class="bg-slate-800 p-6 text-white flex justify-between items-start")
+        div
+          h1(class="text-3xl font-bold") #{internacion.Paciente.nombre} #{internacion.Paciente.apellido}
+          p(class="text-slate-400 font-mono text-sm mt-1") DNI: #{internacion.Paciente.dni} | Edad: #{Math.floor((new Date() - new Date(internacion.Paciente.fecha_nacimiento)) / 31557600000)} años
+        
+        div(class="text-right")
+          div(class="inline-block bg-teal-500 text-white px-3 py-1 rounded-full text-xs font-bold mb-2") Activo
+          h2(class="text-xl font-bold") Habitación #{internacion.Cama.Habitacion ? internacion.Cama.Habitacion.numero : 'N/A'}
+          p(class="text-sm opacity-80") Cama #{internacion.Cama.numero_cama}
+
+      div(class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6")
+        div
+          h3(class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1") Obra Social
+          p(class="font-semibold text-slate-700") #{internacion.Paciente.obra_social || 'Particular'}
+        
+        div
+          h3(class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1") Fecha Ingreso
+          p(class="font-semibold text-slate-700") #{new Date(internacion.fecha_ingreso).toLocaleString()}
+        
+        div
+          h3(class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1") Motivo Internación
+          p(class="font-semibold text-slate-700 italic") "#{internacion.motivo}"
+
+      // Barra de Acciones Rápidas
+      div(class="bg-slate-50 p-4 border-t border-slate-100 flex gap-3 justify-end")
+        a(href="/clinica/dashboard" class="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors") Volver al Tablero
+        
+        // Botones de Acción (Llevan a los formularios que ya creamos)
+        a(href=`/enfermeria/evaluar/${internacion.id}` class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg shadow-sm font-medium transition-colors flex items-center") 
+          span(class="mr-2") 🩺
+          | Nueva Evaluación
+        
+        a(href=`/medico/evolucionar/${internacion.id}` class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-sm font-medium transition-colors flex items-center")
+          span(class="mr-2") 👨‍⚕️
+          | Evolución Médica
+
+    // --- LÍNEA DE TIEMPO (HISTORIA CLÍNICA) ---
+    h2(class="text-2xl font-bold text-slate-800 mb-6 flex items-center")
+      span(class="bg-slate-200 p-2 rounded-lg mr-3") 📋
+      | Historia Clínica
+
+    if internacion.Evolucions.length === 0
+      div(class="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300")
+        p(class="text-slate-400") No hay registros clínicos aún para esta internación.
+    
+    else
+      div(class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent")
+        
+        each evo in internacion.Evolucions
+          // Determinamos estilos según tipo (Medico vs Enfermeria)
+          - const esMedico = evo.tipo === 'Medico'
+          - const colorBorde = esMedico ? 'border-blue-500' : 'border-teal-500'
+          - const colorBg = esMedico ? 'bg-blue-50' : 'bg-teal-50'
+          - const icono = esMedico ? '👨‍⚕️' : '🩺'
+          - const titulo = esMedico ? 'Evolución Médica' : 'Control de Enfermería'
+
+          div(class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active")
+            
+            // Icono central en la línea de tiempo
+            div(class=`flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-200 group-hover:bg-slate-300 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2`)
+              span(class="text-lg") #{icono}
+            
+            // Tarjeta de Contenido
+            div(class=`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-5 rounded-xl shadow-sm border-l-4 ${colorBorde} bg-white hover:shadow-md transition-all`)
+              
+              // Encabezado de la nota
+              div(class="flex justify-between items-center mb-2")
+                div
+                  span(class=`text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wide ${esMedico ? 'text-blue-700 bg-blue-100' : 'text-teal-700 bg-teal-100'}`) #{titulo}
+                  span(class="text-xs text-slate-400 ml-2") #{new Date(evo.createdAt).toLocaleString()}
+                
+                // Autor
+                div(class="text-right")
+                   p(class="text-xs font-bold text-slate-700") #{evo.Autor ? evo.Autor.nombre : 'Desconocido'}
+              
+              // Contenido Texto
+              div(class="text-slate-700 mb-3")
+                p #{evo.nota}
+
+              // Signos Vitales (Solo si existen en el JSON)
+              if evo.signos_vitales
+                div(class="mt-3 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-sm")
+                  
+                  if evo.signos_vitales.presion
+                    div
+                      span(class="block text-xs text-slate-400") Presión
+                      span(class="font-mono font-bold text-slate-700") #{evo.signos_vitales.presion} mmHg
+                  
+                  if evo.signos_vitales.temperatura || evo.signos_vitales.temp
+                    div
+                      span(class="block text-xs text-slate-400") Temperatura
+                      span(class="font-mono font-bold text-slate-700") #{evo.signos_vitales.temperatura || evo.signos_vitales.temp}°C
+                  
+                  if evo.signos_vitales.frecuencia_cardiaca
+                    div
+                      span(class="block text-xs text-slate-400") Pulso
+                      span(class="font-mono font-bold text-slate-700") #{evo.signos_vitales.frecuencia_cardiaca} bpm
+
+                  if evo.signos_vitales.diagnostico
+                     div(class="col-span-2 mt-1")
+                        span(class="block text-xs text-slate-400") Diagnóstico
+                        span(class="font-semibold text-slate-700") #{evo.signos_vitales.diagnostico}
