@@ -2,7 +2,18 @@ const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
 require('dotenv').config();
-const session = require('express-session'); 
+const session = require('express-session');
+const clinicaRoutes = require('./routes/clinica'); 
+const { sequelize } = require('./models');
+
+// Sincronizar modelos y luego iniciar servidor
+sequelize.sync({ alter: false }).then(() => { // alter: false para no tocar nada si ya está creado
+    app.listen(app.get('port'), () => {
+        console.log(`Servidor corriendo en http://localhost:${app.get('port')}`);
+    });
+}).catch(err => {
+    console.error('No se pudo conectar a la BD:', err);
+});
 
 // Importar rutas y middlewares
 const authRoutes = require('./routes/auth');
@@ -50,7 +61,8 @@ app.use('/admision', authMiddleware, admisionRoutes);
 app.use('/habitaciones', authMiddleware, habitacionesRoutes);
 app.use('/internacion', authMiddleware, internacionesRoutes);
 app.use('/enfermeria', authMiddleware, enfermeriaRoutes);
-app.use('/medico', authMiddleware, medicoRoutes); // <--- 2. IMPORTANTE: Usar las rutas de médico
+app.use('/medico', authMiddleware, medicoRoutes); 
+app.use('/clinica', authMiddleware, clinicaRoutes);
 
 // Redirección Raíz Inteligente
 app.get('/', (req, res) => {

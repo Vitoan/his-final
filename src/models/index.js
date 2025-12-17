@@ -29,13 +29,7 @@ Evolucion.belongsTo(Internacion, { foreignKey: 'internacion_id' });
 Usuario.hasMany(Evolucion, { foreignKey: 'autor_id' });
 Evolucion.belongsTo(Usuario, { as: 'Autor', foreignKey: 'autor_id' });
 
-// Sincronización automática (Crea tablas si no existen)
-// OJO: 'alter: true' intenta ajustar las tablas sin borrar datos, pero haz backup siempre.
-sequelize.sync({ alter: true }).then(() => {
-    console.log("✅ Base de datos sincronizada con Sequelize");
-}).catch(err => {
-    console.error("❌ Error al sincronizar BD:", err);
-});
+
 
 module.exports = { 
     sequelize, Usuario, Paciente, Habitacion, Cama, Internacion, Evolucion, Auditoria 

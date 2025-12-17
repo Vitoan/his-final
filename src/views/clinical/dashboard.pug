@@ -1,72 +1,59 @@
 extends ../layouts/main
 
 block content
-  div(class="grid grid-cols-1 md:grid-cols-2 gap-4")
-    // Columna Izquierda: Datos Paciente
-    div(class="bg-white p-4 rounded shadow")
-      h2(class="text-xl font-bold text-slate-700") Paciente: #{paciente.nombre}
-      p(class="text-sm") Estado: #{internacion.estado}
-      
-      // Botón de Cancelación (Requisito "Arrepentimiento/Error")
-      if usuario.rol === 'Admision' || usuario.rol === 'Admin'
-        button(onclick="cancelarInternacion(" + internacion.id + ")" class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs mt-2") Cancelar Internación (Error de Carga)
+  div(class="flex justify-between items-center mb-8")
+    div
+      h1(class="text-3xl font-bold text-slate-800") Tablero Clínico
+      p(class="text-slate-500") Pacientes activos e internados
+    
+    div(class="bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200")
+      span(class="font-bold text-teal-600 text-xl mr-2") #{pacientes.length}
+      span(class="text-slate-500 text-sm") Pacientes en seguimiento
 
-    // Columna Derecha: Evoluciones (AJAX)
-    div(class="bg-white p-4 rounded shadow")
-      h3(class="font-bold mb-2") Historial Clínico
-      
-      // Lista de evoluciones (Se llena dinámicamente o carga inicial)
-      div#lista-evoluciones(class="h-64 overflow-y-auto border p-2 mb-2 bg-slate-50")
-        each ev in evoluciones
-          div(class=`mb-2 p-2 rounded ${ev.tipo === 'Medico' ? 'bg-blue-100' : 'bg-green-100'}`)
-            small(class="font-bold") #{ev.tipo} - #{new Date(ev.createdAt).toLocaleString()}
-            p #{ev.nota}
+  // GRID DE PACIENTES
+  if pacientes.length === 0
+    div(class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded shadow-sm")
+      p No hay pacientes internados actualmente.
+  else
+    div(class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6")
+      each internacion in pacientes
+        div(class="bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all overflow-hidden flex flex-col")
+          
+          // Encabezado de la Tarjeta (Datos Paciente)
+          div(class="p-5 border-b border-slate-50 bg-slate-50/50")
+            div(class="flex justify-between items-start")
+              div
+                h3(class="text-lg font-bold text-slate-800") #{internacion.Paciente.nombre} #{internacion.Paciente.apellido}
+                p(class="text-xs text-slate-500 font-mono mt-1") DNI: #{internacion.Paciente.dni}
+              
+              // Badge de Ubicación
+              div(class="text-right")
+                span(class="block text-xs font-bold text-teal-600 bg-teal-50 px-2 py-1 rounded-lg border border-teal-100")
+                  | Hab #{internacion.Cama.Habitacion.numero}
+                span(class="block text-xs text-slate-400 mt-1") Cama #{internacion.Cama.numero_cama}
 
-      // Formulario AJAX
-      form#form-evolucion
-        input(type="hidden" name="internacion_id" value=internacion.id)
-        textarea(id="txtNota" class="w-full border p-2 rounded" placeholder="Escriba la evolución..." required)
-        
-        // Si es enfermería, mostrar inputs de signos vitales
-        if usuario.rol === 'Enfermeria'
-           div(class="flex gap-2 mt-2")
-             input(id="txtPresion" placeholder="Presión (120/80)" class="border p-1 rounded w-1/2")
-             input(id="txtTemp" placeholder="Temp (36.5)" class="border p-1 rounded w-1/2")
+          // Cuerpo (Última Evolución)
+          div(class="p-5 flex-1")
+            p(class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2") Última Evolución
+            
+            if internacion.Evolucions.length > 0
+              - const ultimaEvo = internacion.Evolucions[0]
+              div(class="bg-amber-50 border-l-2 border-amber-300 p-3 rounded text-sm text-slate-700 italic relative")
+                // Comillas decorativas
+                span(class="absolute top-0 left-1 text-2xl text-amber-200 font-serif leading-none") "
+                p(class="pl-2") #{ultimaEvo.nota}
+                
+                div(class="mt-2 flex items-center justify-between")
+                  span(class="text-xs text-slate-400") Hace #{Math.floor((new Date() - new Date(ultimaEvo.createdAt)) / (1000 * 60 * 60))} horas
+                  span(class="text-xs font-bold text-teal-600") #{ultimaEvo.Autor ? ultimaEvo.Autor.nombre : 'Personal'}
+            else
+              div(class="text-center py-4 text-slate-400 text-sm")
+                p Sin evoluciones registradas.
+                p(class="text-xs opacity-70") Ingrese la primera nota.
 
-        button(type="submit" class="mt-2 bg-teal-600 text-white px-4 py-2 rounded w-full") Agregar Nota
-
-  // SCRIPT AJAX
-  script.
-    document.getElementById('form-evolucion').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const nota = document.getElementById('txtNota').value;
-      const presion = document.getElementById('txtPresion') ? document.getElementById('txtPresion').value : null;
-      const internacionId = '#{internacion.id}'; // Variable de PUG
-      
-      try {
-        const response = await fetch('/api/evoluciones', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ internacion_id: internacionId, nota, presion })
-        });
-        
-        if(response.ok) {
-          const data = await response.json();
-          // Agregar al DOM sin recargar
-          const lista = document.getElementById('lista-evoluciones');
-          const div = document.createElement('div');
-          div.className = data.tipo === 'Medico' ? 'bg-blue-100 mb-2 p-2 rounded' : 'bg-green-100 mb-2 p-2 rounded';
-          div.innerHTML = `<small class="font-bold">${data.tipo} - Ahora</small><p>${data.nota}</p>`;
-          lista.prepend(div);
-          document.getElementById('form-evolucion').reset();
-        }
-      } catch (err) {
-        alert('Error guardando evolución');
-      }
-    });
-
-    async function cancelarInternacion(id) {
-        if(!confirm('¿Seguro que desea cancelar esta internación por error de carga?')) return;
-        // Fetch a ruta de cancelación...
-    }
+          // Pie (Acciones)
+          div(class="p-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center")
+            span(class="text-xs text-slate-400") Ingreso: #{new Date(internacion.fecha_ingreso).toLocaleDateString()}
+            
+            a(href=`/clinica/paciente/${internacion.id}` class="bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors shadow-lg shadow-slate-200")
+              | Ver Historia →

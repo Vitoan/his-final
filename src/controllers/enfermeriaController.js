@@ -1,39 +1,44 @@
-const db = require('../config/db');
+const { Internacion, Paciente, Cama, Habitacion, Evolucion, Usuario } = require('../models');
 
 // 1. Mostrar formulario de evaluación
 exports.mostrarFormulario = async (req, res) => {
     const { idInternacion } = req.params;
     try {
-        // CORRECCIÓN: Quitamos los corchetes [ ] en la declaración
-        // Ahora 'resultados' es el array completo de filas encontradas
-        const resultados = await db.query(`
-            SELECT i.id, p.nombre, p.apellido, c.numero_cama, h.numero as hab_numero
-            FROM internaciones i
-            JOIN pacientes p ON i.paciente_id = p.id
-            JOIN camas c ON i.cama_id = c.id
-            JOIN habitaciones h ON c.habitacion_id = h.id
-            WHERE i.id = ?
-        `, [idInternacion]);
+        // Buscamos la internación con todos los datos relacionados
+        const internacion = await Internacion.findByPk(idInternacion, {
+            include: [
+                { model: Paciente },
+                { 
+                    model: Cama, 
+                    include: [{ model: Habitacion }] 
+                }
+            ]
+        });
 
-        // Validamos si encontró algo
-        if (resultados.length === 0) {
+        if (!internacion) {
             return res.redirect('/habitaciones');
         }
 
-        const pacienteEncontrado = resultados[0]; // Tomamos la primera fila
+        // Buscamos el historial de enfermería previo
+        const historial = await Evolucion.findAll({
+            where: { 
+                internacion_id: idInternacion,
+                tipo: 'Enfermeria' // Filtramos solo notas de enfermería
+            },
+            include: [{ model: Usuario, as: 'Autor' }],
+            order: [['createdAt', 'DESC']]
+        });
 
-        // Buscamos evaluaciones previas (Historial)
-        // NOTA: Aquí también recibimos un array directamente
-        const evaluaciones = await db.query(`
-            SELECT * FROM evaluaciones_enfermeria 
-            WHERE internacion_id = ? 
-            ORDER BY fecha DESC
-        `, [idInternacion]);
-
+        // NOTA: Pasamos 'internacion.Paciente' a la vista porque así lo espera tu PUG
         res.render('clinical/nursing', { 
             title: 'Evaluación de Enfermería',
-            paciente: pacienteEncontrado, // Pasamos el objeto correcto
-            historial: evaluaciones
+            paciente: {
+                ...internacion.Paciente.toJSON(),
+                id: internacion.id, // ID de la internación para el form
+                hab_numero: internacion.Cama.Habitacion.numero,
+                numero_cama: internacion.Cama.numero_cama
+            },
+            historial: historial
         });
 
     } catch (error) {
@@ -47,13 +52,21 @@ exports.guardarEvaluacion = async (req, res) => {
     const { internacion_id, presion, pulso, temperatura, antecedentes, observaciones } = req.body;
     
     try {
-        await db.query(`
-            INSERT INTO evaluaciones_enfermeria 
-            (internacion_id, presion_arterial, frecuencia_cardiaca, temperatura, antecedentes, observaciones)
-            VALUES (?, ?, ?, ?, ?, ?)
-        `, [internacion_id, presion, pulso, temperatura, antecedentes, observaciones]);
+        // Guardamos en la tabla unificada Evolucions
+        await Evolucion.create({
+            internacion_id,
+            tipo: 'Enfermeria',
+            nota: observaciones,
+            // Guardamos los signos vitales en el campo JSON
+            signos_vitales: {
+                presion,
+                frecuencia_cardiaca: pulso,
+                temperatura,
+                antecedentes // Si es relevante guardarlo aquí
+            },
+            autor_id: req.session.usuario.id
+        });
         
-        // Volvemos al formulario para ver el historial actualizado
         res.redirect('/enfermeria/evaluar/' + internacion_id);
 
     } catch (error) {

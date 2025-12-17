@@ -1,47 +1,45 @@
-const db = require('../config/db');
+const { Habitacion, Cama, Internacion } = require('../models');
 
 exports.listarMapa = async (req, res) => {
-    // MAGIA AQUÍ: Hacemos LEFT JOIN con internaciones para obtener el ID de la internación activa
-    // Si la cama está ocupada, 'internacion_id' tendrá un número. Si está libre, será NULL.
-    const sql = `
-        SELECT 
-            h.id, 
-            h.numero, 
-            h.tipo, 
-            IFNULL(CONCAT('[', GROUP_CONCAT(JSON_OBJECT(
-                'id', c.id,
-                'numero', c.numero_cama,
-                'estado', c.estado,
-                'internacion_id', i.id  -- <--- ESTO ES LO NUEVO
-            )), ']'), '[]') as camas
-        FROM habitaciones h
-        LEFT JOIN camas c ON h.id = c.habitacion_id
-        LEFT JOIN internaciones i ON c.id = i.cama_id AND i.estado = 'Activa' -- Solo internaciones activas
-        GROUP BY h.id, h.numero, h.tipo
-        ORDER BY h.numero ASC
-    `;
-
     try {
-        const resultados = await db.query(sql);
+        // Traemos Habitaciones -> Camas -> Internacion Activa
+        const habitacionesData = await Habitacion.findAll({
+            include: [{
+                model: Cama,
+                include: [{
+                    model: Internacion,
+                    where: { estado: 'Activa' },
+                    required: false // LEFT JOIN (Trae cama aunque no tenga internación)
+                }]
+            }],
+            order: [['numero', 'ASC']]
+        });
 
-        const habitaciones = resultados.map(hab => {
-            return {
-                ...hab,
-                camas: JSON.parse(hab.camas)
-            };
+        // Formateamos para que la vista PUG lo entienda fácil
+        // La vista espera: habitacion.camas (array) y dentro cama.internacion_id
+        const habitaciones = habitacionesData.map(hab => {
+            const h = hab.toJSON(); // Convertir a objeto JS limpio
+            
+            // Procesamos las camas para facilitar la vida a la vista PUG
+            h.camas = h.Camas.map(cama => {
+                const internacionActiva = cama.Internacions.length > 0 ? cama.Internacions[0] : null;
+                return {
+                    id: cama.id,
+                    numero: cama.numero_cama,
+                    estado: cama.estado,
+                    internacion_id: internacionActiva ? internacionActiva.id : null
+                };
+            });
+            return h;
         });
 
         res.render('rooms/index', { 
             title: 'Mapa de Camas', 
-            habitaciones: habitaciones 
+            habitaciones 
         });
 
     } catch (error) {
-        console.error("Error cargando mapa:", error);
-        res.render('rooms/index', { 
-            title: 'Mapa de Camas', 
-            habitaciones: [], 
-            error: 'No se pudo cargar el mapa del hospital.' 
-        });
+        console.error(error);
+        res.send("Error cargando mapa: " + error.message);
     }
 };

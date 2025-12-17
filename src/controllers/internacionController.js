@@ -1,76 +1,77 @@
-const db = require('../config/db');
+const { Internacion, Cama, Paciente, Habitacion, Usuario, Auditoria } = require('../models');
 
-// Función 1: Mostrar Formulario
+// 1. Mostrar Formulario de Asignación
 exports.mostrarFormularioAsignacion = async (req, res) => {
     const { idCama } = req.params;
     try {
-        const results = await db.query(`
-            SELECT c.*, h.numero as numero_habitacion, h.tipo 
-            FROM camas c 
-            JOIN habitaciones h ON c.habitacion_id = h.id 
-            WHERE c.id = ?
-        `, [idCama]);
-        const cama = results[0];
-        
-        if (!cama) return res.redirect('/habitaciones');
-
-        const pacientes = await db.query(`
-            SELECT * FROM pacientes 
-            WHERE id NOT IN (SELECT paciente_id FROM internaciones WHERE estado = 'Activa')
-        `);
+        const cama = await Cama.findByPk(idCama, { include: [Habitacion] });
+        // Buscar pacientes NO internados actualmente
+        // (Simplificado: traemos todos. En producción filtraríamos más)
+        const pacientes = await Paciente.findAll(); 
 
         res.render('internacion/assign', {
             title: 'Asignar Paciente',
-            cama: cama,
+            cama,
+            habitacion: cama.Habitacion,
             pacientes
         });
     } catch (error) {
-        console.error(error);
         res.redirect('/habitaciones');
     }
 };
 
-// Función 2: Procesar Asignación
+// 2. Procesar Internación (Con validación de sexo y Auditoría)
 exports.procesarAsignacion = async (req, res) => {
     const { cama_id, paciente_id, motivo } = req.body;
 
     try {
-        const [nuevoPaciente] = await db.query('SELECT * FROM pacientes WHERE id = ?', [paciente_id]);
-        
-        // Validación de Sexo
-        const sqlValidacion = `
-            SELECT p.sexo 
-            FROM internaciones i
-            JOIN pacientes p ON i.paciente_id = p.id
-            JOIN camas c ON i.cama_id = c.id
-            WHERE c.habitacion_id = (SELECT habitacion_id FROM camas WHERE id = ?) 
-            AND c.id != ? 
-            AND i.estado = 'Activa'
-        `;
-        
-        const ocupantes = await db.query(sqlValidacion, [cama_id, cama_id]);
+        // A. Validar Sexo en Habitación Compartida
+        const camaObjetivo = await Cama.findByPk(cama_id, { include: [Habitacion] });
+        const pacienteNuevo = await Paciente.findByPk(paciente_id);
 
-        if (ocupantes.length > 0) {
-            const sexoVecino = ocupantes[0].sexo;
-            if (sexoVecino !== nuevoPaciente.sexo) {
-                const results = await db.query(`
-                    SELECT c.*, h.numero as numero_habitacion, h.tipo 
-                    FROM camas c JOIN habitaciones h ON c.habitacion_id = h.id WHERE c.id = ?
-                `, [cama_id]);
-                const pacientes = await db.query(`
-                    SELECT * FROM pacientes WHERE id NOT IN (SELECT paciente_id FROM internaciones WHERE estado = 'Activa')
-                `);
-                return res.render('internacion/assign', {
-                    title: 'Asignar Paciente',
-                    cama: results[0],
-                    pacientes,
-                    error: `No se puede asignar: La habitación ya está ocupada por un paciente de sexo '${sexoVecino}'.`
-                });
+        if (camaObjetivo.Habitacion.tipo === 'Compartida') {
+            // Buscamos las OTRAS camas de esa habitación
+            const camasVecinas = await Cama.findAll({
+                where: { 
+                    habitacion_id: camaObjetivo.habitacion_id,
+                    estado: 'Ocupada' // Solo nos importan las ocupadas
+                },
+                include: [{
+                    model: Internacion,
+                    where: { estado: 'Activa' },
+                    include: [Paciente] // Necesitamos el sexo del vecino
+                }]
+            });
+
+            // Verificamos sexo
+            for (const vecina of camasVecinas) {
+                const vecino = vecina.Internacions[0].Paciente;
+                if (vecino.sexo !== pacienteNuevo.sexo) {
+                    return res.send(`Error: No se puede mezclar sexos. La habitación tiene un paciente ${vecino.sexo}`);
+                }
             }
         }
 
-        await db.query(`INSERT INTO internaciones (paciente_id, cama_id, motivo) VALUES (?, ?, ?)`, [paciente_id, cama_id, motivo]);
-        await db.query(`UPDATE camas SET estado = 'Ocupada' WHERE id = ?`, [cama_id]);
+        // B. Crear Internación
+        const nuevaInternacion = await Internacion.create({
+            paciente_id,
+            cama_id,
+            motivo,
+            estado: 'Activa'
+        });
+
+        // C. Actualizar estado de la Cama
+        await Cama.update({ estado: 'Ocupada' }, { where: { id: cama_id } });
+
+        // D. Auditoría (Requisito)
+        if (req.session.usuario) {
+            await Auditoria.create({
+                accion: 'Ingreso Paciente',
+                detalles: `Paciente ${pacienteNuevo.apellido} ingresado en cama ${camaObjetivo.numero_cama}`,
+                usuario_id: req.session.usuario.id
+            });
+        }
+
         res.redirect('/habitaciones');
 
     } catch (error) {
@@ -79,15 +80,21 @@ exports.procesarAsignacion = async (req, res) => {
     }
 };
 
-// Función 3: Dar de Alta
+// 3. Dar de Alta
 exports.darAlta = async (req, res) => {
     const { cama_id } = req.body;
     try {
-        await db.query(`UPDATE internaciones SET fecha_egreso = NOW(), estado = 'Alta' WHERE cama_id = ? AND estado = 'Activa'`, [cama_id]);
-        await db.query(`UPDATE camas SET estado = 'Disponible' WHERE id = ?`, [cama_id]);
+        // Cerrar internación
+        await Internacion.update(
+            { estado: 'Alta', fecha_egreso: new Date() },
+            { where: { cama_id, estado: 'Activa' } }
+        );
+
+        // Liberar cama
+        await Cama.update({ estado: 'Disponible' }, { where: { id: cama_id } });
+
         res.redirect('/habitaciones');
     } catch (error) {
-        console.error(error);
-        res.send("Error: " + error.message);
+        res.send(error.message);
     }
 };

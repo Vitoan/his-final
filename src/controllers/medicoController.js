@@ -1,32 +1,40 @@
-const db = require('../config/db');
+const { Internacion, Paciente, Cama, Habitacion, Evolucion, Usuario } = require('../models');
 
 // 1. Mostrar formulario de evolución médica
 exports.mostrarEvolucion = async (req, res) => {
     const { idInternacion } = req.params;
     try {
-        // Datos del paciente
-        const [internacion] = await db.query(`
-            SELECT i.id, p.nombre, p.apellido, c.numero_cama, h.numero as hab_numero
-            FROM internaciones i
-            JOIN pacientes p ON i.paciente_id = p.id
-            JOIN camas c ON i.cama_id = c.id
-            JOIN habitaciones h ON c.habitacion_id = h.id
-            WHERE i.id = ?
-        `, [idInternacion]);
+        const internacion = await Internacion.findByPk(idInternacion, {
+            include: [
+                { model: Paciente },
+                { 
+                    model: Cama, 
+                    include: [{ model: Habitacion }] 
+                }
+            ]
+        });
 
         if (!internacion) return res.redirect('/habitaciones');
 
-        // Historial médico
-        const evoluciones = await db.query(`
-            SELECT * FROM evoluciones_medicas 
-            WHERE internacion_id = ? 
-            ORDER BY fecha DESC
-        `, [idInternacion]);
+        // Historial Médico
+        const historial = await Evolucion.findAll({
+            where: { 
+                internacion_id: idInternacion,
+                tipo: 'Medico'
+            },
+            include: [{ model: Usuario, as: 'Autor' }],
+            order: [['createdAt', 'DESC']]
+        });
 
         res.render('clinical/medical', { 
             title: 'Evolución Médica',
-            paciente: internacion, // Ya viene limpio (sin array) si usas mi corrección anterior
-            historial: evoluciones 
+            paciente: {
+                ...internacion.Paciente.toJSON(),
+                id: internacion.id,
+                hab_numero: internacion.Cama.Habitacion.numero,
+                numero_cama: internacion.Cama.numero_cama
+            },
+            historial: historial 
         });
 
     } catch (error) {
@@ -39,10 +47,18 @@ exports.mostrarEvolucion = async (req, res) => {
 exports.guardarEvolucion = async (req, res) => {
     const { internacion_id, diagnostico, tratamiento } = req.body;
     try {
-        await db.query(`
-            INSERT INTO evoluciones_medicas (internacion_id, diagnostico, tratamiento) 
-            VALUES (?, ?, ?)
-        `, [internacion_id, diagnostico, tratamiento]);
+        // Concatenamos diagnóstico y tratamiento en la nota
+        // O podrías guardarlos en el JSON si prefieres separarlos
+        const notaCompleta = `Diagnóstico: ${diagnostico}. Tratamiento: ${tratamiento}`;
+
+        await Evolucion.create({
+            internacion_id,
+            tipo: 'Medico',
+            nota: notaCompleta,
+            // Guardamos detalle estructurado también por si acaso
+            signos_vitales: { diagnostico, tratamiento }, 
+            autor_id: req.session.usuario.id
+        });
         
         res.redirect('/medico/evolucionar/' + internacion_id);
     } catch (error) {
