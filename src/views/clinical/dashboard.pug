@@ -1,60 +1,87 @@
 extends ../layouts/main
 
 block content
-  div(class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4")
-    div
-      h1(class="text-3xl font-bold text-slate-900 dark:text-white") Tablero Clínico
-      p(class="text-slate-500 dark:text-slate-400") Monitoreo de pacientes internados en tiempo real
+  // --- HEADER BENTO ---
+  div(class="max-w-7xl mx-auto mb-10")
+    div(class="flex flex-col md:flex-row md:items-end justify-between gap-6")
+      div
+        h2(class="text-xs font-bold text-indigo-500 dark:text-purple-400 mb-1 tracking-widest uppercase") Área Médica
+        h1(class="text-4xl font-bold tracking-tight text-slate-900 dark:text-white")
+          | Tablero <span class="text-indigo-600 dark:text-purple-500">Clínico</span>
+      
+      // Buscador Bento
+      div(class="w-full max-w-md")
+        div(class="relative group")
+          span(class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-indigo-500 dark:group-focus-within:text-purple-400 transition-colors") 
+            svg(class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+               path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z")
+          input(type="text" id="searchInput" placeholder="Buscar paciente, diagnóstico, cama..." class="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm focus:ring-4 focus:ring-indigo-100 dark:focus:ring-purple-900/30 focus:border-indigo-500 dark:focus:border-purple-500 outline-none transition-all dark:text-white")
 
-    // BUSCADOR CON BORDE MÁS FUERTE
-    div(class="relative w-full md:w-96")
-      span(class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400") 🔍
-      input(type="text" id="searchInput" placeholder="Buscar paciente, DNI o cama..." class="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all dark:text-white")
-
+  // --- GRID DE PACIENTES ---
   if pacientes.length === 0
-    div(class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 text-blue-700 dark:text-blue-300 p-6 rounded-r-xl shadow-sm")
-      p(class="font-medium") No hay pacientes internados actualmente.
+    // Empty State Moderno
+    div(class="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm text-center")
+      div(class="text-6xl mb-4 opacity-50") 🛌
+      h3(class="text-xl font-bold text-slate-700 dark:text-white") Sin Pacientes Internados
+      p(class="text-slate-500 dark:text-slate-400 max-w-sm mt-2") Actualmente no hay internaciones activas en el sistema.
+
   else
-    div(id="gridPacientes" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6")
+    div(id="gridPacientes" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-7xl mx-auto")
       each internacion in pacientes
-        // TARJETA CON BORDES MÁS MARCADOS (border-slate-300)
-        div(class="paciente-card bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-300 dark:border-slate-600 hover:shadow-md transition-all overflow-hidden flex flex-col group")
+        // CARD BENTO
+        div(class="paciente-card bg-white dark:bg-slate-800 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden group")
           
-          // Encabezado
-          div(class="p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30")
-            div(class="flex justify-between items-start")
-              div
-                h3(class="nombre-paciente text-lg font-bold text-slate-900 dark:text-white") #{internacion.Paciente.nombre} #{internacion.Paciente.apellido}
-                p(class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-1") DNI: 
-                   span(class="dni-paciente") #{internacion.Paciente.dni}
+          // Header Card
+          div(class="p-6 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/20")
+            div(class="flex items-start justify-between")
+              div(class="flex items-center gap-4")
+                // Avatar Dinámico
+                - let avatarBg = internacion.Paciente.sexo === 'F' ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-300' : 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300'
+                div(class=`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-bold shadow-sm ${avatarBg}`)
+                  | #{internacion.Paciente.nombre.charAt(0)}#{internacion.Paciente.apellido.charAt(0)}
+                
+                div
+                  h3(class="nombre-paciente text-lg font-bold text-slate-900 dark:text-white leading-tight") #{internacion.Paciente.nombre} #{internacion.Paciente.apellido}
+                  p(class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5") DNI: <span class="dni-paciente">#{internacion.Paciente.dni}</span>
               
+              // Badge Habitación
               div(class="text-right")
-                span(class="block text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800")
-                  | Hab #{internacion.Cama.Habitacion.numero}
-                span(class="cama-paciente block text-xs text-slate-400 mt-1") Cama #{internacion.Cama.numero_cama}
+                div(class="inline-flex flex-col items-end")
+                  span(class="text-[10px] font-bold uppercase tracking-wider text-slate-400") Ubicación
+                  span(class="text-sm font-bold text-slate-700 dark:text-slate-200") Hab <span class="text-indigo-600 dark:text-purple-400">#{internacion.Cama.Habitacion.numero}</span>
 
-          // Cuerpo
-          div(class="p-5 flex-1")
-            p(class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2") Última Evolución
-            if internacion.Evolucions.length > 0
-              - const ultimaEvo = internacion.Evolucions[0]
-              div(class="bg-amber-50 dark:bg-amber-900/20 border-l-2 border-amber-300 dark:border-amber-600 p-3 rounded text-sm text-slate-700 dark:text-slate-300 italic")
-                p "#{ultimaEvo.nota}"
-                div(class="mt-2 text-right")
-                   span(class="text-xs font-bold text-teal-600 dark:text-teal-400") #{ultimaEvo.Autor ? ultimaEvo.Autor.nombre : 'Personal'}
-            else
-              p(class="text-slate-400 text-sm italic") Sin notas recientes.
+          // Body Card
+          div(class="p-6 flex-1 flex flex-col")
+            // Detalle Cama
+            div(class="flex items-center gap-2 mb-4 text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 py-1.5 px-3 rounded-lg w-fit")
+               span(class="cama-paciente") 🛏️ Cama #{internacion.Cama.numero_cama}
+               span •
+               span #{internacion.motivo}
 
-          // Acciones
-          div(class="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 text-right")
-            a(href=`/clinica/paciente/${internacion.id}` class="inline-block bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 dark:hover:bg-slate-600 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors shadow-sm") Ver Historia →
+            // Última Evolución
+            div(class="flex-1")
+              if internacion.Evolucions.length > 0
+                - const ultimaEvo = internacion.Evolucions[0]
+                div(class="relative pl-4 border-l-2 border-indigo-200 dark:border-indigo-800")
+                  p(class="text-sm text-slate-600 dark:text-slate-300 italic line-clamp-3") "#{ultimaEvo.nota}"
+                  p(class="text-xs font-bold text-indigo-500 dark:text-indigo-400 mt-2") — #{ultimaEvo.Autor ? ultimaEvo.Autor.nombre : 'Personal'}
+              else
+                div(class="h-full flex items-center justify-center text-slate-400 text-sm italic border-2 border-dashed border-slate-100 dark:border-slate-700 rounded-xl p-4")
+                  | Sin evoluciones registradas
 
+          // Footer Actions
+          div(class="p-4 bg-slate-50 dark:bg-slate-900/30 border-t border-slate-100 dark:border-slate-700")
+            a(href=`/clinica/paciente/${internacion.id}` class="flex items-center justify-center w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20 group-hover:scale-[1.02]")
+               | Ver Historia Clínica &rarr;
+
+  // --- SCRIPT BÚSQUEDA ---
   script.
     const searchInput = document.getElementById('searchInput');
     const cards = document.querySelectorAll('.paciente-card');
     searchInput.addEventListener('keyup', (e) => {
       const term = e.target.value.toLowerCase();
       cards.forEach(card => {
+        // Buscamos en todo el texto, pero el código asegura encontrar nombre/dni/cama
         const text = card.textContent.toLowerCase();
         card.style.display = text.includes(term) ? 'flex' : 'none';
       });

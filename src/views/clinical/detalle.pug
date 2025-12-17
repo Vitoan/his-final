@@ -1,109 +1,203 @@
 extends ../layouts/main
 
 block content
-  div(class="max-w-5xl mx-auto")
-    
-    // --- ENCABEZADO DEL PACIENTE ---
-    div(class="bg-white rounded-2xl shadow-md overflow-hidden mb-8 border border-slate-200")
-      div(class="bg-slate-800 p-6 text-white flex justify-between items-start")
-        div
-          h1(class="text-3xl font-bold") #{internacion.Paciente.nombre} #{internacion.Paciente.apellido}
-          p(class="text-slate-400 font-mono text-sm mt-1") DNI: #{internacion.Paciente.dni} | Edad: #{Math.floor((new Date() - new Date(internacion.Paciente.fecha_nacimiento)) / 31557600000)} años
-        
-        div(class="text-right")
-          div(class="inline-block bg-teal-500 text-white px-3 py-1 rounded-full text-xs font-bold mb-2") Activo
-          h2(class="text-xl font-bold") Habitación #{internacion.Cama.Habitacion ? internacion.Cama.Habitacion.numero : 'N/A'}
-          p(class="text-sm opacity-80") Cama #{internacion.Cama.numero_cama}
+  // --- HEADER DE NAVEGACIÓN ---
+  div(class="max-w-6xl mx-auto mb-8")
+    div(class="flex flex-col md:flex-row md:items-end justify-between gap-6")
+      div
+        h2(class="text-xs font-bold text-indigo-500 dark:text-purple-400 mb-1 tracking-widest uppercase") Historia Clínica Digital
+        h1(class="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-white")
+          | Paciente <span class="text-indigo-600 dark:text-purple-500">#{internacion.Paciente.nombre} #{internacion.Paciente.apellido}</span>
+      
+      div(class="flex gap-3")
+        a(href="/clinica/dashboard" class="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold transition-colors text-sm flex items-center gap-2")
+          span &larr;
+          | Volver
 
-      div(class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6")
-        div
-          h3(class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1") Obra Social
-          p(class="font-semibold text-slate-700") #{internacion.Paciente.obra_social || 'Particular'}
+  // --- TARJETA DE PACIENTE (INFO PRINCIPAL) ---
+  div(class="max-w-6xl mx-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2rem] shadow-sm overflow-hidden mb-10")
+    div(class="p-8 md:p-10")
+      div(class="flex flex-col lg:flex-row gap-8 lg:items-start")
         
-        div
-          h3(class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1") Fecha Ingreso
-          p(class="font-semibold text-slate-700") #{new Date(internacion.fecha_ingreso).toLocaleString()}
-        
-        div
-          h3(class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1") Motivo Internación
-          p(class="font-semibold text-slate-700 italic") "#{internacion.motivo}"
+        // 1. Avatar y Datos Básicos
+        div(class="flex items-start gap-5 flex-1")
+          - let avatarBg = internacion.Paciente.sexo === 'F' ? 'bg-rose-100 text-rose-600 dark:bg-rose-900/50 dark:text-rose-300' : 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300'
+          div(class=`w-20 h-20 rounded-3xl flex items-center justify-center text-3xl font-bold shrink-0 ${avatarBg}`)
+            | #{internacion.Paciente.nombre.charAt(0)}#{internacion.Paciente.apellido.charAt(0)}
+          
+          div
+            h2(class="text-2xl font-bold text-slate-900 dark:text-white leading-tight mb-1") #{internacion.Paciente.nombre} #{internacion.Paciente.apellido}
+            div(class="flex flex-wrap gap-2 mb-3")
+              span(class="px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold font-mono") DNI: #{internacion.Paciente.dni}
+              span(class="px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold") #{Math.floor((new Date() - new Date(internacion.Paciente.fecha_nacimiento)) / 31557600000)} Años
+            
+            p(class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed")
+              span(class="font-bold uppercase text-[10px] tracking-wider text-slate-400 dark:text-slate-500 block mb-1") Motivo de Ingreso
+              | "#{internacion.motivo}"
 
-      // Barra de Acciones Rápidas
-      div(class="bg-slate-50 p-4 border-t border-slate-100 flex gap-3 justify-end")
-        a(href="/clinica/dashboard" class="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium transition-colors") Volver al Tablero
-        
-        // Botones de Acción (Llevan a los formularios que ya creamos)
-        a(href=`/enfermeria/evaluar/${internacion.id}` class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg shadow-sm font-medium transition-colors flex items-center") 
-          span(class="mr-2") 🩺
-          | Nueva Evaluación
-        
-        a(href=`/medico/evolucionar/${internacion.id}` class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-sm font-medium transition-colors flex items-center")
-          span(class="mr-2") 👨‍⚕️
+        // 2. Ubicación y Estado
+        div(class="flex flex-col gap-4 min-w-[200px] border-l border-slate-100 dark:border-slate-700 pl-0 lg:pl-8")
+           div
+             span(class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1") Ubicación Actual
+             div(class="flex items-center gap-3")
+               div(class="text-3xl") 🏥
+               div
+                 p(class="text-sm font-bold text-slate-900 dark:text-white") Habitación #{internacion.Cama.Habitacion ? internacion.Cama.Habitacion.numero : 'N/A'}
+                 p(class="text-xs text-slate-500 dark:text-slate-400") Cama #{internacion.Cama.numero_cama}
+           
+           div
+             span(class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1") Estado
+             span(class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-xs font-bold")
+                span(class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse")
+                | Internado / Activo
+
+    // Barra de Acciones (Footer de la tarjeta)
+    div(class="bg-slate-50 dark:bg-slate-900/50 px-8 py-4 border-t border-slate-200 dark:border-slate-700 flex flex-wrap gap-3 justify-end")
+       // Botón Enfermería
+       a(href=`/enfermeria/evaluar/${internacion.id}` class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md transition-all hover:-translate-y-0.5")
+          span 🩺
+          | Signos Vitales
+       
+       // Botón Médico
+       a(href=`/medico/evolucionar/${internacion.id}` class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all hover:-translate-y-0.5")
+          span 👨‍⚕️
           | Evolución Médica
 
-    // --- LÍNEA DE TIEMPO (HISTORIA CLÍNICA) ---
-    h2(class="text-2xl font-bold text-slate-800 mb-6 flex items-center")
-      span(class="bg-slate-200 p-2 rounded-lg mr-3") 📋
-      | Historia Clínica
-
-    if internacion.Evolucions.length === 0
-      div(class="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300")
-        p(class="text-slate-400") No hay registros clínicos aún para esta internación.
-    
-    else
-      div(class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent")
+  // --- SECCIÓN: NOTA RÁPIDA (AJAX) ---
+  div(class="max-w-4xl mx-auto mb-12")
+    div(class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-1 shadow-sm flex gap-2")
+      form(id="formAjax" class="w-full flex gap-2")
+        input(type="hidden" name="internacion_id" value=internacion.id)
+        // Detección automática de rol para el tipo de nota
+        input(type="hidden" name="tipo" value=usuario.rol === 'Enfermeria' ? 'Enfermeria' : 'Medico')
         
-        each evo in internacion.Evolucions
-          // Determinamos estilos según tipo (Medico vs Enfermeria)
-          - const esMedico = evo.tipo === 'Medico'
-          - const colorBorde = esMedico ? 'border-blue-500' : 'border-teal-500'
-          - const colorBg = esMedico ? 'bg-blue-50' : 'bg-teal-50'
-          - const icono = esMedico ? '👨‍⚕️' : '🩺'
-          - const titulo = esMedico ? 'Evolución Médica' : 'Control de Enfermería'
+        input(type="text" id="inputNota" name="nota" placeholder="Escribe una evolución rápida y presiona Enter..." class="flex-1 px-4 py-3 bg-transparent border-none focus:ring-0 text-slate-800 dark:text-white placeholder-slate-400 outline-none" required autocomplete="off")
+        
+        button(type="submit" class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity")
+          | Enviar
 
-          div(class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active")
-            
-            // Icono central en la línea de tiempo
-            div(class=`flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-200 group-hover:bg-slate-300 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2`)
-              span(class="text-lg") #{icono}
-            
-            // Tarjeta de Contenido
-            div(class=`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-5 rounded-xl shadow-sm border-l-4 ${colorBorde} bg-white hover:shadow-md transition-all`)
+  // --- LÍNEA DE TIEMPO ---
+  div(class="max-w-4xl mx-auto")
+    div(class="flex items-center gap-4 mb-8")
+       div(class="h-px flex-1 bg-slate-200 dark:bg-slate-700")
+       h3(class="text-sm font-bold text-slate-400 uppercase tracking-widest") Historial Clínico
+       div(class="h-px flex-1 bg-slate-200 dark:bg-slate-700")
+
+    // Contenedor Timeline
+    div(id="timelineContainer" class="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-slate-200 dark:before:bg-slate-700")
+      
+      if internacion.Evolucions.length === 0
+         div(class="text-center py-12 relative bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600 z-10")
+            p(class="text-slate-400") No hay evoluciones registradas aún.
+      
+      else
+         each evo in internacion.Evolucions
+            - const esMedico = evo.tipo === 'Medico'
+            - const colorBorde = esMedico ? 'border-indigo-500' : 'border-teal-500'
+            - const colorIcono = esMedico ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-300' : 'bg-teal-100 text-teal-600 dark:bg-teal-900 dark:text-teal-300'
+            - const icono = esMedico ? '👨‍⚕️' : '🩺'
+            - const titulo = esMedico ? 'Médico' : 'Enfermería'
+
+            div(class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group")
               
-              // Encabezado de la nota
-              div(class="flex justify-between items-center mb-2")
-                div
-                  span(class=`text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wide ${esMedico ? 'text-blue-700 bg-blue-100' : 'text-teal-700 bg-teal-100'}`) #{titulo}
-                  span(class="text-xs text-slate-400 ml-2") #{new Date(evo.createdAt).toLocaleString()}
+              // ICONO CENTRAL
+              div(class=`flex items-center justify-center w-10 h-10 rounded-full border-4 border-white dark:border-slate-900 ${colorIcono} shadow-sm shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10`)
+                span(class="text-sm") #{icono}
+              
+              // TARJETA DE CONTENIDO
+              div(class=`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 border-l-4 ${colorBorde} hover:shadow-md transition-shadow`)
                 
-                // Autor
-                div(class="text-right")
-                   p(class="text-xs font-bold text-slate-700") #{evo.Autor ? evo.Autor.nombre : 'Desconocido'}
-              
-              // Contenido Texto
-              div(class="text-slate-700 mb-3")
-                p #{evo.nota}
+                // Header Nota
+                div(class="flex justify-between items-center mb-3")
+                  span(class=`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide ${esMedico ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' : 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'}`) #{titulo}
+                  span(class="text-xs text-slate-400 font-mono") #{new Date(evo.createdAt).toLocaleString()}
+                
+                // Texto Nota
+                div(class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-4")
+                  | #{evo.nota}
 
-              // Signos Vitales (Solo si existen en el JSON)
-              if evo.signos_vitales
-                div(class="mt-3 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-sm")
-                  
-                  if evo.signos_vitales.presion
-                    div
-                      span(class="block text-xs text-slate-400") Presión
-                      span(class="font-mono font-bold text-slate-700") #{evo.signos_vitales.presion} mmHg
-                  
-                  if evo.signos_vitales.temperatura || evo.signos_vitales.temp
-                    div
-                      span(class="block text-xs text-slate-400") Temperatura
-                      span(class="font-mono font-bold text-slate-700") #{evo.signos_vitales.temperatura || evo.signos_vitales.temp}°C
-                  
-                  if evo.signos_vitales.frecuencia_cardiaca
-                    div
-                      span(class="block text-xs text-slate-400") Pulso
-                      span(class="font-mono font-bold text-slate-700") #{evo.signos_vitales.frecuencia_cardiaca} bpm
+                // Signos Vitales (Grid Mini)
+                if evo.signos_vitales
+                   div(class="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 dark:border-slate-700")
+                      if evo.signos_vitales.presion
+                        div(class="text-center")
+                          span(class="block text-[10px] text-slate-400 uppercase") Presión
+                          span(class="font-bold text-slate-700 dark:text-white font-mono") #{evo.signos_vitales.presion}
+                      if evo.signos_vitales.temperatura
+                        div(class="text-center")
+                          span(class="block text-[10px] text-slate-400 uppercase") Temp.
+                          span(class="font-bold text-slate-700 dark:text-white font-mono") #{evo.signos_vitales.temperatura}°
+                      if evo.signos_vitales.frecuencia_cardiaca
+                        div(class="text-center")
+                          span(class="block text-[10px] text-slate-400 uppercase") Pulso
+                          span(class="font-bold text-slate-700 dark:text-white font-mono") #{evo.signos_vitales.frecuencia_cardiaca}
 
-                  if evo.signos_vitales.diagnostico
-                     div(class="col-span-2 mt-1")
-                        span(class="block text-xs text-slate-400") Diagnóstico
-                        span(class="font-semibold text-slate-700") #{evo.signos_vitales.diagnostico}
+                // Autor Footer
+                div(class="mt-3 pt-2 text-right")
+                   p(class="text-xs font-bold text-slate-400 dark:text-slate-500") Por: #{evo.Autor ? evo.Autor.nombre : 'Desconocido'}
+
+  // --- SCRIPT AJAX ---
+  script.
+    const form = document.getElementById('formAjax');
+    const container = document.getElementById('timelineContainer');
+    const input = document.getElementById('inputNota');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = {
+        internacion_id: form.internacion_id.value,
+        tipo: form.tipo.value,
+        nota: input.value
+      };
+
+      try {
+        const response = await fetch('/api/evolucion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          const evo = result.data;
+          const esMedico = evo.tipo === 'Medico';
+          const colorBorde = esMedico ? 'border-indigo-500' : 'border-teal-500';
+          const colorIcono = esMedico ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-300' : 'bg-teal-100 text-teal-600 dark:bg-teal-900 dark:text-teal-300';
+          const icono = esMedico ? '👨‍⚕️' : '🩺';
+          const titulo = esMedico ? 'Médico' : 'Enfermería';
+          const badgeClass = esMedico ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' : 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300';
+
+          const nuevoHtml = `
+            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group animate-pulse">
+              <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white dark:border-slate-900 ${colorIcono} shadow-sm shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                <span class="text-sm">${icono}</span>
+              </div>
+              <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 border-l-4 ${colorBorde}">
+                <div class="flex justify-between items-center mb-3">
+                  <span class="text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide ${badgeClass}">${titulo}</span>
+                  <span class="text-xs text-slate-400 font-mono">Ahora mismo</span>
+                </div>
+                <div class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-4">
+                  ${evo.nota}
+                </div>
+                <div class="mt-3 pt-2 text-right">
+                   <p class="text-xs font-bold text-slate-400 dark:text-slate-500">Por: ${evo.Autor.nombre}</p>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          // Remover mensaje de vacío si existe
+          const emptyMsg = container.querySelector('.text-center.py-12');
+          if(emptyMsg) emptyMsg.remove();
+
+          container.insertAdjacentHTML('afterbegin', nuevoHtml);
+          input.value = '';
+        } else {
+          alert('Error: ' + result.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error de conexión');
+      }
+    });

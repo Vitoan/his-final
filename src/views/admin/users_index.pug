@@ -1,44 +1,83 @@
 extends ../layouts/main
 
 block content
-  div(class="flex justify-between items-center mb-6")
-    h1(class="text-2xl font-bold text-slate-800") Gestión de Personal
-    a(href="/admin/usuarios/nuevo" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-colors")
-      | + Nuevo Usuario
-
-  div(class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden")
-    table(class="min-w-full divide-y divide-slate-200")
-      thead(class="bg-slate-50")
-        tr
-          th(class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider") Nombre
-          th(class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider") Rol
-          th(class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider") Email
-          th(class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider") Acciones
+  // --- HEADER BENTO ---
+  div(class="max-w-7xl mx-auto mb-10")
+    div(class="flex flex-col md:flex-row md:items-end justify-between gap-6")
+      div
+        h2(class="text-xs font-bold text-blue-500 dark:text-rose-500 mb-1 tracking-widest uppercase") Administración
+        h1(class="text-4xl font-bold tracking-tight text-slate-900 dark:text-white")
+          | Gestión de <span class="text-blue-600 dark:text-rose-500">Personal</span>
       
-      tbody(class="bg-white divide-y divide-slate-200")
-        each user in usuarios
-          tr
-            td(class="px-6 py-4 whitespace-nowrap")
-              div(class="flex items-center")
-                div(class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold")
-                   | #{user.nombre.charAt(0)}
-                div(class="ml-4")
-                  div(class="text-sm font-medium text-slate-900") #{user.nombre}
-            
-            td(class="px-6 py-4 whitespace-nowrap")
-              // Badges de colores según rol
-              if user.rol === 'Admin'
-                span(class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800") Admin
-              else if user.rol === 'Medico'
-                span(class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800") Médico
-              else if user.rol === 'Enfermeria'
-                span(class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-teal-100 text-teal-800") Enfermería
-              else
-                span(class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800") Admisión
+      div
+        a(href="/admin/usuarios/nuevo" class="inline-flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5")
+          span +
+          | Nuevo Usuario
 
-            td(class="px-6 py-4 whitespace-nowrap text-sm text-slate-500") #{user.email}
-            
-            td(class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium")
-              if usuario.id !== user.id
-                form(action=`/admin/usuarios/eliminar/${user.id}` method="POST" onsubmit="return confirm('¿Eliminar a este usuario?');" class="inline")
-                   button(type="submit" class="text-red-600 hover:text-red-900") Eliminar
+  // --- TABLA BENTO (Card Container) ---
+  div(class="max-w-7xl mx-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2rem] shadow-sm overflow-hidden")
+    
+    div(class="overflow-x-auto")
+      table(class="min-w-full divide-y divide-slate-100 dark:divide-slate-700")
+        
+        // Encabezado Tabla
+        thead(class="bg-slate-50 dark:bg-slate-700/30")
+          tr
+            th(class="px-8 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider") Personal
+            th(class="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider") Rol / Cargo
+            th(class="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider") Contacto
+            th(class="px-8 py-5 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider") Acciones
+        
+        // Cuerpo Tabla
+        tbody(class="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700")
+          each user in usuarios
+            tr(class="hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors group")
+              
+              // Columna: Nombre + Avatar
+              td(class="px-8 py-5 whitespace-nowrap")
+                div(class="flex items-center")
+                  // Avatar con color dinámico según rol
+                  - let avatarBg = 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                  if user.rol === 'Admin' 
+                     - avatarBg = 'bg-purple-100 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300'
+                  else if user.rol === 'Medico'
+                     - avatarBg = 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300'
+                  else if user.rol === 'Enfermeria'
+                     - avatarBg = 'bg-teal-100 text-teal-600 dark:bg-teal-900/50 dark:text-teal-300'
+
+                  div(class=`h-12 w-12 rounded-2xl flex items-center justify-center text-lg font-bold mr-4 ${avatarBg}`)
+                     | #{user.nombre.charAt(0)}
+                  
+                  div
+                    div(class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-rose-400 transition-colors") #{user.nombre}
+                    div(class="text-xs text-slate-400 dark:text-slate-500") ID: ##{user.id}
+              
+              // Columna: Rol (Badges Modernos)
+              td(class="px-6 py-5 whitespace-nowrap")
+                if user.rol === 'Admin'
+                  span(class="px-3 py-1 inline-flex text-xs font-bold rounded-lg bg-purple-50 text-purple-700 border border-purple-100 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800")
+                    | 🔐 Admin
+                else if user.rol === 'Medico'
+                  span(class="px-3 py-1 inline-flex text-xs font-bold rounded-lg bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800")
+                    | 👨‍⚕️ Médico
+                else if user.rol === 'Enfermeria'
+                  span(class="px-3 py-1 inline-flex text-xs font-bold rounded-lg bg-teal-50 text-teal-700 border border-teal-100 dark:bg-teal-900/20 dark:text-teal-300 dark:border-teal-800")
+                    | 🩺 Enfermería
+                else
+                  span(class="px-3 py-1 inline-flex text-xs font-bold rounded-lg bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600")
+                    | 📋 Admisión
+
+              // Columna: Email
+              td(class="px-6 py-5 whitespace-nowrap")
+                 div(class="text-sm text-slate-600 dark:text-slate-400 font-medium") #{user.email}
+              
+              // Columna: Acciones
+              td(class="px-8 py-5 whitespace-nowrap text-right text-sm font-medium")
+                if usuario.id !== user.id
+                  form(action=`/admin/usuarios/eliminar/${user.id}` method="POST" onsubmit="return confirm('¿Estás seguro de eliminar a este usuario? Esta acción no se puede deshacer.');" class="inline")
+                     button(type="submit" class="text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20")
+                        // Icono Trash SVG
+                        svg(class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+                           path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16")
+                else
+                  span(class="text-xs text-slate-300 dark:text-slate-600 italic") (Tú)

@@ -1,42 +1,122 @@
 extends ../layouts/main
 
 block content
-  div(class="flex justify-between items-center mb-6")
-    h1(class="text-3xl font-bold text-gray-800") Admisión de Pacientes
-    a(href="/admision/nuevo" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow")
-      | + Nuevo Paciente
+  // --- HEADER BENTO ---
+  div(class="max-w-7xl mx-auto mb-10")
+    div(class="flex flex-col lg:flex-row lg:items-end justify-between gap-6")
+      div
+        h2(class="text-xs font-bold text-blue-500 dark:text-rose-500 mb-1 tracking-widest uppercase") Gestión Administrativa
+        h1(class="text-4xl font-bold tracking-tight text-slate-900 dark:text-white")
+          | Listado de <span class="text-blue-600 dark:text-rose-500">Pacientes</span>
+      
+      div(class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto")
+        // Buscador
+        div(class="relative flex-1 lg:w-80")
+          span(class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400") 🔍
+          input(type="text" id="searchInput" placeholder="Buscar por nombre, DNI..." class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-xl shadow-sm focus:ring-4 focus:ring-blue-100 dark:focus:ring-rose-900/30 focus:border-blue-500 dark:focus:border-rose-500 outline-none transition-all dark:text-white")
+        
+        // Botón Nuevo
+        a(href="/admision/nuevo" class="inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap")
+          span +
+          | Nuevo Paciente
 
-  // --- BLOQUE DE ERROR AGREGADO ---
+  // --- ALERTA DE ERROR ---
   if error
-    div(class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 shadow-sm" role="alert")
-      p(class="font-bold") Operación Bloqueada
-      p= error
-  // --------------------------------
+    div(class="max-w-7xl mx-auto mb-8 animate-bounce")
+      div(class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-2xl p-4 flex items-center gap-4 shadow-lg shadow-red-500/10")
+        div(class="text-2xl") ⚠️
+        div
+          h3(class="font-bold text-red-800 dark:text-red-200") Operación Bloqueada
+          p(class="text-sm text-red-700 dark:text-red-300") #{error}
 
-  // Tabla responsiva
-  div(class="bg-white shadow-md rounded-lg overflow-hidden")
-    table(class="min-w-full divide-y divide-gray-200")
-      thead(class="bg-gray-50")
-        tr
-          th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Nombre Completo
-          th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") DNI
-          th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Obra Social
-          th(class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider") Acciones
-      tbody(class="bg-white divide-y divide-gray-200")
-        each paciente in pacientes
+  // --- TABLA BENTO ---
+  div(class="max-w-7xl mx-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2rem] shadow-sm overflow-hidden")
+    
+    div(class="overflow-x-auto")
+      table(class="min-w-full divide-y divide-slate-100 dark:divide-slate-700")
+        
+        // Encabezado Tabla
+        thead(class="bg-slate-50 dark:bg-slate-700/30")
           tr
-            td(class="px-6 py-4 whitespace-nowrap")
-              div(class="text-sm font-medium text-gray-900") #{paciente.nombre} #{paciente.apellido}
-              div(class="text-sm text-gray-500") #{paciente.sexo} - #{new Date(paciente.fecha_nacimiento).toLocaleDateString()}
-            td(class="px-6 py-4 whitespace-nowrap text-sm text-gray-500") #{paciente.dni}
-            td(class="px-6 py-4 whitespace-nowrap text-sm text-gray-500") #{paciente.obra_social || '-'}
-            td(class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium")
-              // Botón Editar
-              a(href="/admision/editar/" + paciente.id class="text-indigo-600 hover:text-indigo-900 mr-4 font-bold") Editar
+            th(class="px-8 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider") Paciente
+            th(class="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider") DNI / Edad
+            th(class="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider") Cobertura
+            th(class="px-8 py-5 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider") Acciones
+        
+        // Cuerpo Tabla
+        tbody(class="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700")
+          each paciente in pacientes
+            tr(class="paciente-row hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors group")
               
-              // Botón Borrar
-              form(action="/admision/borrar/" + paciente.id method="POST" class="inline-block" onsubmit="return confirm('¿Está seguro de eliminar este paciente?');")
-                button(type="submit" class="text-red-600 hover:text-red-900 font-bold") Borrar
-        else
-          tr
-            td(class="px-6 py-4 text-center text-gray-500" colspan="4") No hay pacientes registrados aún.
+              // Columna: Nombre + Avatar
+              td(class="px-8 py-5 whitespace-nowrap")
+                div(class="flex items-center")
+                  // Avatar con color según sexo
+                  - let avatarBg = 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                  if paciente.sexo === 'F'
+                     - avatarBg = 'bg-rose-100 text-rose-600 dark:bg-rose-900/50 dark:text-rose-300'
+                  else if paciente.sexo === 'M'
+                     - avatarBg = 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300'
+
+                  div(class=`h-12 w-12 rounded-2xl flex items-center justify-center text-lg font-bold mr-4 ${avatarBg}`)
+                     | #{paciente.nombre.charAt(0)}#{paciente.apellido.charAt(0)}
+                  
+                  div
+                    div(class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-rose-400 transition-colors") #{paciente.nombre} #{paciente.apellido}
+                    div(class="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1") 
+                       if paciente.sexo === 'F'
+                         span ♀ Femenino
+                       else if paciente.sexo === 'M'
+                         span ♂ Masculino
+                       else
+                         span Otro
+
+              // Columna: DNI + Edad
+              td(class="px-6 py-5 whitespace-nowrap")
+                 div(class="text-sm font-mono font-bold text-slate-700 dark:text-slate-300") #{paciente.dni}
+                 // Calculamos edad aproximada
+                 - const edad = Math.floor((new Date() - new Date(paciente.fecha_nacimiento)) / 31557600000)
+                 div(class="text-xs text-slate-400 dark:text-slate-500") #{edad} años • #{new Date(paciente.fecha_nacimiento).toLocaleDateString()}
+
+              // Columna: Obra Social
+              td(class="px-6 py-5 whitespace-nowrap")
+                if paciente.obra_social
+                  span(class="px-3 py-1 inline-flex text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800")
+                    | #{paciente.obra_social}
+                else
+                  span(class="px-3 py-1 inline-flex text-xs font-bold rounded-lg bg-slate-100 text-slate-500 border border-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600")
+                    | Particular
+
+              // Columna: Acciones
+              td(class="px-8 py-5 whitespace-nowrap text-right text-sm font-medium")
+                div(class="flex justify-end items-center gap-2")
+                  // Botón Editar
+                  a(href="/admision/editar/" + paciente.id class="p-2 rounded-lg text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all" title="Editar")
+                     svg(class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z")
+                  
+                  // Botón Borrar
+                  form(action="/admision/borrar/" + paciente.id method="POST" onsubmit="return confirm('¿Eliminar paciente permanentemente?');" class="inline")
+                     button(type="submit" class="p-2 rounded-lg text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all" title="Borrar")
+                        svg(class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+                           path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16")
+          
+          if pacientes.length === 0
+            tr
+              td(class="px-6 py-12 text-center text-slate-500 dark:text-slate-400" colspan="4")
+                div(class="flex flex-col items-center justify-center")
+                   span(class="text-4xl mb-3 opacity-50") 📂
+                   span No hay pacientes registrados aún.
+
+  // --- SCRIPT DE BÚSQUEDA ---
+  script.
+    const searchInput = document.getElementById('searchInput');
+    const rows = document.querySelectorAll('.paciente-row');
+
+    searchInput.addEventListener('keyup', (e) => {
+      const term = e.target.value.toLowerCase();
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(term) ? '' : 'none';
+      });
+    });
