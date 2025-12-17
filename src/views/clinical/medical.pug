@@ -1,0 +1,44 @@
+extends ../layouts/main
+
+block content
+  div(class="max-w-4xl mx-auto")
+    // Encabezado
+    div(class="bg-green-600 rounded-t-lg p-6 text-white mb-0 shadow-lg")
+      div(class="flex justify-between items-center")
+        div
+          h2(class="text-2xl font-bold") Evolución Médica
+          p(class="opacity-90") Diagnóstico y Tratamiento
+        div(class="text-right")
+          h3(class="text-xl font-bold") #{paciente.nombre} #{paciente.apellido}
+          p(class="text-sm bg-green-800 px-3 py-1 rounded inline-block mt-1") Hab: #{paciente.hab_numero} - Cama: #{paciente.numero_cama}
+
+    div(class="bg-white shadow-lg rounded-b-lg p-6 mb-8")
+      form(action="/medico/guardar" method="POST")
+        input(type="hidden" name="internacion_id" value=paciente.id)
+        
+        div(class="mb-6")
+          label(class="block text-gray-700 font-bold mb-2") Diagnóstico / Evolución Clínica
+          textarea(name="diagnostico" rows="4" required class="w-full border-gray-300 rounded p-2 border focus:ring-green-500 focus:border-green-500")
+
+        div(class="mb-6")
+          label(class="block text-gray-700 font-bold mb-2") Tratamiento / Indicaciones
+          textarea(name="tratamiento" rows="4" required class="w-full border-gray-300 rounded p-2 border focus:ring-green-500 focus:border-green-500")
+
+        div(class="flex justify-end")
+           a(href="/habitaciones" class="text-gray-600 mr-4 py-2 hover:underline") Volver
+           button(type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow") Guardar Evolución
+
+    // Historial
+    if historial.length > 0
+      h3(class="text-xl font-bold text-gray-800 mb-4") Historial de Evoluciones
+      div(class="space-y-4")
+        each evo in historial
+          div(class="bg-white border-l-4 border-green-500 shadow rounded p-4")
+            p(class="text-xs text-gray-500 mb-2") #{new Date(evo.fecha).toLocaleString()}
+            div(class="grid grid-cols-1 md:grid-cols-2 gap-4")
+              div
+                strong(class="text-green-700 block mb-1") Diagnóstico:
+                p(class="text-gray-800") #{evo.diagnostico}
+              div
+                strong(class="text-green-700 block mb-1") Tratamiento:
+                p(class="text-gray-800") #{evo.tratamiento}

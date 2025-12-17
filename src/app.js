@@ -2,8 +2,7 @@ const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
 require('dotenv').config();
-const session = require('express-session'); // Importar solo una vez
-const enfermeriaRoutes = require('./routes/enfermeria');
+const session = require('express-session'); 
 
 // Importar rutas y middlewares
 const authRoutes = require('./routes/auth');
@@ -11,6 +10,8 @@ const authMiddleware = require('./middlewares/auth');
 const admisionRoutes = require('./routes/admision');
 const habitacionesRoutes = require('./routes/habitaciones');
 const internacionesRoutes = require('./routes/internaciones');
+const enfermeriaRoutes = require('./routes/enfermeria');
+const medicoRoutes = require('./routes/medico'); // <--- 1. IMPORTANTE: Importar rutas de médico
 
 const app = express();
 
@@ -25,17 +26,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
-// --- CONFIGURACIÓN DE SESIÓN (Solo una vez) ---
-// Requisito de Seguridad del PDF
+// --- CONFIGURACIÓN DE SESIÓN ---
 app.use(session({
-    secret: 'secreto_super_seguro_his_2025', // En producción esto va en .env
+    secret: 'secreto_super_seguro_his_2025',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // false para localhost (http), true para producción (https)
+    cookie: { secure: false } 
 }));
 
 // --- MIDDLEWARE DE USUARIO GLOBAL ---
-// Debe ir DESPUÉS de la configuración de sesión
 app.use((req, res, next) => {
     res.locals.usuario = req.session.usuario;
     next();
@@ -51,6 +50,7 @@ app.use('/admision', authMiddleware, admisionRoutes);
 app.use('/habitaciones', authMiddleware, habitacionesRoutes);
 app.use('/internacion', authMiddleware, internacionesRoutes);
 app.use('/enfermeria', authMiddleware, enfermeriaRoutes);
+app.use('/medico', authMiddleware, medicoRoutes); // <--- 2. IMPORTANTE: Usar las rutas de médico
 
 // Redirección Raíz Inteligente
 app.get('/', (req, res) => {

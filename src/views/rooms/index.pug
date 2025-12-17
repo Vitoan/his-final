@@ -55,12 +55,16 @@ block content
               
               else if cama.estado === 'Ocupada'
                 div(class="flex flex-col space-y-2 mt-2")
-                  // 1. Botón ENFERMERÍA (Nuevo)
+                  // 1. Botón ENFERMERÍA
                   if cama.internacion_id
-                    a(href="/enfermeria/evaluar/" + cama.internacion_id class="text-xs bg-blue-100 border border-blue-500 text-blue-700 hover:bg-blue-600 hover:text-white px-2 py-1 rounded text-center transition-colors font-bold")
+                    a(href="/enfermeria/evaluar/" + cama.internacion_id class="text-xs bg-blue-100 border border-blue-500 text-blue-700 hover:bg-blue-600 hover:text-white px-2 py-1 rounded text-center transition-colors font-bold mb-1")
                       | 🩺 Enfermería
+                    
+                    // 2. Botón MÉDICO (NUEVO)
+                    a(href="/medico/evolucionar/" + cama.internacion_id class="text-xs bg-green-100 border border-green-500 text-green-700 hover:bg-green-600 hover:text-white px-2 py-1 rounded text-center transition-colors font-bold mb-1")
+                      | 👨‍⚕️ Médico
                   
-                  // 2. Botón DAR ALTA (Existente)
+                  // 3. Botón DAR ALTA (Existente)
                   form(action="/internacion/alta" method="POST" onsubmit="return confirm('¿Confirmar el alta médica?');" class="w-full")
                     input(type="hidden" name="cama_id" value=cama.id)
                     button(type="submit" class="w-full text-xs bg-white border border-red-500 text-red-600 hover:bg-red-500 hover:text-white px-2 py-1 rounded transition-colors uppercase font-bold")
