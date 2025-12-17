@@ -3,41 +3,35 @@ const path = require('path');
 const morgan = require('morgan');
 require('dotenv').config();
 const session = require('express-session');
-const clinicaRoutes = require('./routes/clinica'); 
+
+// --- 1. INICIALIZAR APP (Lo primero) ---
+const app = express();
+
+// --- 2. IMPORTAR MODELOS Y RUTAS ---
 const { sequelize } = require('./models');
-
-// Sincronizar modelos y luego iniciar servidor
-sequelize.sync({ alter: false }).then(() => { // alter: false para no tocar nada si ya está creado
-    app.listen(app.get('port'), () => {
-        console.log(`Servidor corriendo en http://localhost:${app.get('port')}`);
-    });
-}).catch(err => {
-    console.error('No se pudo conectar a la BD:', err);
-});
-
-// Importar rutas y middlewares
 const authRoutes = require('./routes/auth');
 const authMiddleware = require('./middlewares/auth');
 const admisionRoutes = require('./routes/admision');
 const habitacionesRoutes = require('./routes/habitaciones');
 const internacionesRoutes = require('./routes/internaciones');
 const enfermeriaRoutes = require('./routes/enfermeria');
-const medicoRoutes = require('./routes/medico'); // <--- 1. IMPORTANTE: Importar rutas de médico
+const medicoRoutes = require('./routes/medico');
+const clinicaRoutes = require('./routes/clinica');
+const adminRoutes = require('./routes/admin');
+const apiRoutes = require('./routes/api'); // <--- FALTABA ESTO (Para AJAX)
 
-const app = express();
-
-// --- CONFIGURACIONES ---
+// --- 3. CONFIGURACIONES ---
 app.set('port', process.env.PORT || 3000);
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
-// --- MIDDLEWARES GENERALES ---
+// --- 4. MIDDLEWARES GENERALES ---
 app.use(morgan('dev'));
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+app.use(express.urlencoded({ extended: false })); // Para recibir datos de formularios
+app.use(express.json()); // Para recibir JSON (AJAX)
 app.use(express.static(path.join(__dirname, '../public')));
 
-// --- CONFIGURACIÓN DE SESIÓN ---
+// --- 5. CONFIGURACIÓN DE SESIÓN ---
 app.use(session({
     secret: 'secreto_super_seguro_his_2025',
     resave: false,
@@ -45,24 +39,26 @@ app.use(session({
     cookie: { secure: false } 
 }));
 
-// --- MIDDLEWARE DE USUARIO GLOBAL ---
+// --- 6. MIDDLEWARE DE USUARIO GLOBAL ---
 app.use((req, res, next) => {
     res.locals.usuario = req.session.usuario;
     next();
 });
 
-// --- RUTAS ---
+// --- 7. DEFINICIÓN DE RUTAS ---
 
-// Rutas Públicas
+// Públicas
 app.use('/auth', authRoutes);
 
-// Rutas Protegidas (Con el guardián authMiddleware)
+// Protegidas
 app.use('/admision', authMiddleware, admisionRoutes);
 app.use('/habitaciones', authMiddleware, habitacionesRoutes);
 app.use('/internacion', authMiddleware, internacionesRoutes);
 app.use('/enfermeria', authMiddleware, enfermeriaRoutes);
 app.use('/medico', authMiddleware, medicoRoutes); 
 app.use('/clinica', authMiddleware, clinicaRoutes);
+app.use('/admin', authMiddleware, adminRoutes);
+app.use('/api', authMiddleware, apiRoutes); // <--- AGREGADO (AJAX)
 
 // Redirección Raíz Inteligente
 app.get('/', (req, res) => {
@@ -73,7 +69,14 @@ app.get('/', (req, res) => {
     }
 });
 
-// --- INICIAR SERVIDOR ---
-app.listen(app.get('port'), () => {
-    console.log(`Servidor corriendo en http://localhost:${app.get('port')}`);
-});
+// --- 8. SINCRONIZAR BD E INICIAR SERVIDOR ---
+// Solo iniciamos el servidor si la base de datos conecta bien
+sequelize.sync({ alter: false })
+    .then(() => {
+        app.listen(app.get('port'), () => {
+            console.log(`✅ Servidor conectado a BD y corriendo en http://localhost:${app.get('port')}`);
+        });
+    })
+    .catch(err => {
+        console.error('❌ No se pudo conectar a la BD:', err);
+    });

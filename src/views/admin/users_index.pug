@@ -1,0 +1,44 @@
+extends ../layouts/main
+
+block content
+  div(class="flex justify-between items-center mb-6")
+    h1(class="text-2xl font-bold text-slate-800") Gestión de Personal
+    a(href="/admin/usuarios/nuevo" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-colors")
+      | + Nuevo Usuario
+
+  div(class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden")
+    table(class="min-w-full divide-y divide-slate-200")
+      thead(class="bg-slate-50")
+        tr
+          th(class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider") Nombre
+          th(class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider") Rol
+          th(class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider") Email
+          th(class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider") Acciones
+      
+      tbody(class="bg-white divide-y divide-slate-200")
+        each user in usuarios
+          tr
+            td(class="px-6 py-4 whitespace-nowrap")
+              div(class="flex items-center")
+                div(class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold")
+                   | #{user.nombre.charAt(0)}
+                div(class="ml-4")
+                  div(class="text-sm font-medium text-slate-900") #{user.nombre}
+            
+            td(class="px-6 py-4 whitespace-nowrap")
+              // Badges de colores según rol
+              if user.rol === 'Admin'
+                span(class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800") Admin
+              else if user.rol === 'Medico'
+                span(class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800") Médico
+              else if user.rol === 'Enfermeria'
+                span(class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-teal-100 text-teal-800") Enfermería
+              else
+                span(class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800") Admisión
+
+            td(class="px-6 py-4 whitespace-nowrap text-sm text-slate-500") #{user.email}
+            
+            td(class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium")
+              if usuario.id !== user.id
+                form(action=`/admin/usuarios/eliminar/${user.id}` method="POST" onsubmit="return confirm('¿Eliminar a este usuario?');" class="inline")
+                   button(type="submit" class="text-red-600 hover:text-red-900") Eliminar

@@ -1,28 +1,33 @@
-const { Evolucion, Usuario, Auditoria } = require('../models');
+const { Evolucion, Usuario } = require('../models');
 
-exports.crearEvolucion = async (req, res) => {
+// OJO: Usamos 'exports', no 'apiController'
+exports.guardarEvolucionAjax = async (req, res) => {
     try {
-        const { internacion_id, nota, presion } = req.body;
-        
-        // Guardar Evolución
+        const { internacion_id, nota, tipo } = req.body; 
+
+        // 1. Guardar en BD
         const nuevaEvolucion = await Evolucion.create({
             internacion_id,
+            tipo, 
             nota,
-            signos_vitales: presion ? { presion } : null,
-            tipo: req.session.usuario.rol === 'Medico' ? 'Medico' : 'Enfermeria',
             autor_id: req.session.usuario.id
         });
 
-        // --- MINI AUDITORÍA ---
-        await Auditoria.create({
-            accion: 'Nueva Evolución',
-            detalles: `El usuario ${req.session.usuario.nombre} cargó nota en internación ${internacion_id}`,
-            usuario_id: req.session.usuario.id,
-            ip: req.ip
+        // 2. Buscamos el nombre del autor para devolverlo
+        const evolucionConAutor = await Evolucion.findByPk(nuevaEvolucion.id, {
+            include: [{ model: Usuario, as: 'Autor' }]
         });
 
-        res.json(nuevaEvolucion); // Responder JSON para que el JS del frontend lo lea
+        // 3. Responder JSON
+        res.status(200).json({
+            success: true,
+            data: evolucionConAutor
+        });
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
     }
 };
