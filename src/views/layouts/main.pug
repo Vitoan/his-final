@@ -1,87 +1,84 @@
 doctype html
-html(lang="es")
+html(lang="es" class="light")
   head
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title HIS - Sistema Hospitalario
-    // Tailwind CSS
     script(src="https://cdn.tailwindcss.com")
-    // Configuración de colores personalizados para dar con el tono exacto
+    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet")
+    
     script.
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
             colors: {
-              primary: '#0f172a', // Azul oscuro (Slate 900) para textos
-              secondary: '#334155', // Azul grisáceo (Slate 700) para subtextos
-              accent: '#0d9488', // Teal 600 (Verde-Cyan) para botones
-              accentHover: '#0f766e', // Teal 700 para hover
-              softBg: '#f1f5f9', // Slate 100 (Fondo azulado muy claro)
+              primary: { light: '#2563eb', dark: '#f43f5e' }
             }
           }
         }
       }
-    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet")
+    
     style.
       body { font-family: 'Inter', sans-serif; }
-      .no-scrollbar::-webkit-scrollbar { display: none; }
-      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      /* Transiciones suaves */
+      * { transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+      
+      /* Scrollbar moderna */
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+      .dark ::-webkit-scrollbar-thumb { background: #475569; }
 
-  body(class="bg-softBg text-primary h-screen overflow-hidden flex")
-
-    // --- SIDEBAR ESTILO ZEN (Modificada) ---
+  // CAMBIO IMPORTANTE: Texto base slate-900 (negro suave) en light, slate-50 (blanco suave) en dark
+  body(class="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100 flex transition-colors duration-300")
+    
     if usuario
-      aside(class="w-20 lg:w-72 bg-white h-[95vh] my-auto ml-4 rounded-3xl shadow-xl flex flex-col justify-between transition-all duration-300 border border-slate-200 z-50")
+      aside(class="w-72 bg-white dark:bg-slate-800 border-r border-slate-300 dark:border-slate-700 hidden md:flex flex-col fixed h-full z-20 shadow-xl")
+        div(class="p-8 flex items-center gap-3")
+          div(class="w-10 h-10 rounded-xl bg-blue-600 dark:bg-rose-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30") H
+          span(class="text-xl font-bold tracking-tight text-slate-800 dark:text-white") HIS <span class="text-blue-600 dark:text-rose-500">App</span>
         
-        // 1. Logo
-        div(class="p-6 flex items-center justify-center lg:justify-start border-b border-slate-100")
-          div(class="bg-slate-800 text-white p-2 rounded-xl shadow-lg shadow-slate-300")
-            svg(class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24")
-              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z")
-          span(class="hidden lg:block font-bold text-xl ml-3 tracking-tight text-slate-800") HIS System
+        nav(class="flex-1 px-4 space-y-3 overflow-y-auto mt-4")
+          mixin navLink(href, icon, text, activeColor)
+             a(href=href class="group flex items-center p-3.5 rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white transition-all font-medium")
+                span(class=`mr-3 ${activeColor} group-hover:scale-110 transition-transform`) #{icon}
+                span #{text}
 
-        // 2. Navegación
-        nav(class="flex-1 overflow-y-auto no-scrollbar py-6 px-4 space-y-2")
+          +navLink('/admision', '📋', 'Admisión', 'text-blue-500 dark:text-rose-400')
+          +navLink('/clinica/dashboard', '🩺', 'Tablero Clínico', 'text-indigo-500 dark:text-purple-400')
+          +navLink('/habitaciones', '🛏️', 'Mapa de Camas', 'text-teal-500 dark:text-teal-400')
           
-          // Link: ADMISIÓN (Hover en Teal/Cyan)
-          a(href="/admision" class="flex items-center p-3 rounded-2xl hover:bg-teal-50 text-slate-500 hover:text-accent transition-all group")
-            div(class="p-2 bg-slate-50 rounded-xl group-hover:bg-teal-100 group-hover:text-accent transition-colors")
-              svg(class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24")
-                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z")
-            span(class="hidden lg:block ml-3 font-medium") Admisión Pacientes
-
-          // Link: MAPA DE CAMAS
-          a(href="/habitaciones" class="flex items-center p-3 rounded-2xl hover:bg-teal-50 text-slate-500 hover:text-accent transition-all group")
-            div(class="p-2 bg-slate-50 rounded-xl group-hover:bg-teal-100 group-hover:text-accent transition-colors")
-              svg(class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24")
-                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4")
-            span(class="hidden lg:block ml-3 font-medium") Mapa de Camas
-            
-            // Link: GESTIÓN DE USUARIOS (Solo Admin)
           if usuario.rol === 'Admin'
-             a(href="/admin/usuarios" class="flex items-center p-3 rounded-2xl hover:bg-purple-50 text-slate-500 hover:text-purple-600 transition-all group")
-              div(class="p-2 bg-slate-50 rounded-xl group-hover:bg-purple-100 group-hover:text-purple-600 transition-colors")
-                svg(class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24")
-                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z")
-              span(class="hidden lg:block ml-3 font-medium") Gestión Usuarios
+             div(class="border-t border-slate-200 dark:border-slate-700 my-4")
+             +navLink('/admin/usuarios', '👥', 'Usuarios', 'text-purple-500 dark:text-pink-400')
 
+        div(class="p-6 border-t border-slate-200 dark:border-slate-700")
+          div(class="flex items-center gap-3 mb-4")
+            div(class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-600") #{usuario.nombre.charAt(0)}
+            div
+              p(class="text-sm font-bold truncate w-32 dark:text-white") #{usuario.nombre}
+              p(class="text-xs text-slate-500 dark:text-slate-400") #{usuario.rol}
           
+          button(id="themeToggle" class="w-full mb-3 py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-600 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex justify-center items-center gap-2")
+             span 🌙/☀️ Tema
 
-        // 3. Footer
-        div(class="p-4 border-t border-slate-100")
-          div(class="flex items-center p-3 rounded-2xl bg-slate-50 border border-slate-100")
-            // Avatar con gradiente Teal
-            div(class="w-10 h-10 rounded-full bg-gradient-to-tr from-teal-400 to-blue-500 flex items-center justify-center text-white font-bold shadow-md")
-              | #{usuario.nombre.charAt(0)}
-            div(class="hidden lg:block ml-3 overflow-hidden")
-              p(class="text-sm font-bold text-slate-700 truncate") #{usuario.nombre}
-              p(class="text-xs text-slate-500 truncate") #{usuario.rol || 'Personal'}
-            
-            a(href="/auth/logout" class="ml-auto p-2 text-slate-400 hover:text-red-500 transition-colors" title="Cerrar Sesión")
-               svg(class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24")
-                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1")
+          a(href="/auth/logout" class="block w-full text-center text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 py-2.5 rounded-lg transition-colors font-bold") Cerrar Sesión
 
-    // --- CONTENIDO PRINCIPAL ---
-    main(class="flex-1 h-screen overflow-y-auto p-4 lg:p-8 relative")
-      div(class="max-w-7xl mx-auto")
-        block content
+    main(class=`flex-1 ${usuario ? 'md:ml-72' : ''} p-6 md:p-12 lg:p-16 w-full fade-in`)
+      block content
+
+    script.
+      const themeToggle = document.getElementById('themeToggle');
+      const html = document.documentElement;
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        html.classList.add('dark');
+      } else { html.classList.remove('dark'); }
+      
+      if(themeToggle){
+        themeToggle.addEventListener('click', () => {
+          html.classList.toggle('dark');
+          localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
+        });
+      }

@@ -1,77 +1,99 @@
 extends ../layouts/main
 
 block content
-  div(class="flex justify-between items-center mb-6")
-    h1(class="text-3xl font-bold text-slate-800") Mapa de Camas
-    
-    // 1. LEYENDA DE COLORES
-    div(class="text-sm text-slate-500")
-      span(class="inline-block w-3 h-3 bg-green-500 rounded-full mr-1")
-      span(class="mr-3") Disponible
+  // HEADER
+  div(class="max-w-7xl mx-auto mb-10")
+    div(class="flex flex-col lg:flex-row lg:items-end justify-between gap-6")
+      div
+        h2(class="text-xs font-bold text-blue-500 dark:text-rose-500 mb-1 tracking-widest uppercase") Gestión Hospitalaria
+        h1(class="text-4xl font-bold tracking-tight text-slate-900 dark:text-white")
+          | Mapa de <span class="text-blue-600 dark:text-rose-500">Camas</span>
       
-      span(class="inline-block w-3 h-3 bg-red-500 rounded-full mr-1")
-      span(class="mr-3") Ocupada
-      
-      span(class="inline-block w-3 h-3 bg-yellow-500 rounded-full mr-1")
-      span Limpieza
+      div(class="w-full max-w-md")
+        input(type="text" id="searchInput" placeholder="Buscar habitación, cama o paciente..." class="w-full pl-4 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-2xl shadow-sm focus:ring-4 focus:ring-blue-100 dark:focus:ring-rose-900/30 focus:border-blue-500 dark:focus:border-rose-500 outline-none transition-all text-slate-900 dark:text-white")
 
+  // ALERTA
   if error
-    div(class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow" role="alert")
-      p= error
+    div(class="max-w-7xl mx-auto mb-8 animate-bounce")
+      div(class="bg-red-50 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-800 rounded-2xl p-4 flex items-center gap-4 shadow-lg shadow-red-500/10")
+        div(class="text-2xl") ⚠️
+        div
+          h3(class="font-bold text-red-800 dark:text-red-200") Acción No Permitida
+          p(class="text-sm text-red-700 dark:text-red-300") #{error}
 
-  // Iteramos sobre las habitaciones
-  each habitacion in habitaciones
-    div(class="bg-white shadow-sm rounded-2xl p-6 mb-6 border border-slate-100")
-      h2(class="text-xl font-bold text-slate-700 mb-4 border-b border-slate-100 pb-2")
-        | Habitación #{habitacion.numero} 
-        span(class="text-sm font-normal text-slate-500 ml-2") (#{habitacion.tipo})
+  // GRID
+  div(class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8")
 
-      div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4")
-        each cama in habitacion.camas
-          
-          // 2. TARJETA DE CAMA
-          div(class=`border-2 rounded-xl p-4 flex flex-col justify-between transition-all ${cama.estado === 'Disponible' ? 'border-green-200 bg-green-50 hover:shadow-md' : cama.estado === 'Limpieza' ? 'border-yellow-200 bg-yellow-50' : 'border-red-200 bg-red-50'}`)
-            
-            div(class="text-center mb-2")
-              h3(class="font-bold text-slate-700") Cama #{cama.numero}
+    each habitacion in habitaciones
+      // TARJETA PRINCIPAL (Bordes más fuertes)
+      div(class="habitacion-card group bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-[2rem] p-8 shadow-sm hover:shadow-lg transition-all flex flex-col")
+        
+        div(class="flex justify-between items-center mb-6")
+          div
+            h2(class="text-2xl font-bold text-slate-900 dark:text-white") Habitación #{habitacion.numero}
+            p(class="text-sm text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide") #{habitacion.tipo}
+          div(class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xl border border-slate-200 dark:border-slate-600") 🏥
+
+        div(class="space-y-4")
+          each cama in habitacion.camas || []
+            - let estadoClass = ''
+            - let icono = ''
+            - let nombrePaciente = ''
             
             if cama.estado === 'Disponible'
-              // --- ESTADO: DISPONIBLE ---
-              div(class="text-center")
-                span(class="text-3xl block mb-2") 🛏️
-                span(class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-200 rounded-full") Disponible
-              
-              div(class="mt-4")
-                a(href=`/internacion/asignar/${cama.id}` class="block w-full text-center bg-white border border-green-500 text-green-600 hover:bg-green-500 hover:text-white font-bold py-1 px-2 rounded transition-colors text-sm")
-                  | Asignar
-
+               - estadoClass = 'border-green-300 bg-green-50 text-green-800 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300'
+               - icono = '✨'
             else if cama.estado === 'Limpieza'
-              // --- ESTADO: LIMPIEZA ---
-              div(class="text-center")
-                span(class="text-3xl block mb-2") 🧹
-                span(class="inline-block px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-200 rounded-full") En Limpieza
-              
-              div(class="mt-4")
-                a(href=`/habitaciones/limpiar/${cama.id}` class="block w-full text-center bg-white border border-yellow-500 text-yellow-600 hover:bg-yellow-500 hover:text-white font-bold py-1 px-2 rounded transition-colors text-sm")
-                  | ✅ Habilitar
+               - estadoClass = 'border-yellow-300 bg-yellow-50 text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-700 dark:text-yellow-300'
+               - icono = '🧹'
+            else
+               - estadoClass = 'border-slate-300 bg-white dark:bg-slate-700 dark:border-slate-500'
+               - icono = '👤'
+               if cama.Internacions && cama.Internacions.length > 0
+                  - nombrePaciente = cama.Internacions[0].Paciente.nombre + ' ' + cama.Internacions[0].Paciente.apellido
 
-            else if cama.estado === 'Ocupada'
-              // --- ESTADO: OCUPADA ---
-              div(class="text-center")
-                span(class="text-3xl block mb-2") 🛌
-                span(class="inline-block px-2 py-1 text-xs font-semibold text-red-700 bg-red-200 rounded-full") Ocupada
-              
-              div(class="flex flex-col space-y-2 mt-4")
-                // Botones Clínicos
-                if cama.internacion_id
-                  a(href="/enfermeria/evaluar/" + cama.internacion_id class="block w-full text-center text-xs bg-teal-50 border border-teal-500 text-teal-700 hover:bg-teal-500 hover:text-white px-2 py-1 rounded transition-colors font-bold")
-                    | 🩺 Enfermería
-                  
-                  a(href="/medico/evolucionar/" + cama.internacion_id class="block w-full text-center text-xs bg-slate-50 border border-slate-500 text-slate-700 hover:bg-slate-600 hover:text-white px-2 py-1 rounded transition-colors font-bold")
-                    | 👨‍⚕️ Médico
+            // CAMA ITEM (Bordes más fuertes: border-2)
+            div(class=`cama-item relative p-4 rounded-xl border-2 transition-all flex flex-col gap-2 ${estadoClass}`)
+               
+               div(class="flex justify-between items-center")
+                 span(class="font-bold text-xs uppercase tracking-wider opacity-80 dark:text-slate-300") Cama #{cama.numero_cama}
+                 span(class="text-lg") #{icono}
 
-                // Botón Alta
-                form(action="/internacion/alta" method="POST" onsubmit="return confirm('¿Confirmar el alta médica?');" class="w-full")
-                  input(type="hidden" name="cama_id" value=cama.id)
-                  button(type="submit" class="w-full text-xs bg-white border border-red-500 text-red-600 hover:bg-red-500 hover:text-white px-2 py-1 rounded transition-colors uppercase font-bold")
-                    | Dar Alta
+               if cama.estado === 'Ocupada' && nombrePaciente
+                  div
+                     p(class="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold") Paciente
+                     p(class="nombre-paciente font-bold text-slate-900 dark:text-white text-lg leading-tight") #{nombrePaciente}
+                     
+                     div(class="flex gap-2 mt-3")
+                       if cama.internacion_id
+                         a(href=`/enfermeria/evaluar/${cama.internacion_id}` class="flex-1 text-center py-1.5 px-2 rounded-lg bg-teal-100 text-teal-800 border border-teal-200 dark:bg-teal-900/60 dark:text-teal-200 dark:border-teal-700 text-xs font-bold hover:bg-teal-200 transition-colors") Enf.
+                         a(href=`/medico/evolucionar/${cama.internacion_id}` class="flex-1 text-center py-1.5 px-2 rounded-lg bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900/60 dark:text-blue-200 dark:border-blue-700 text-xs font-bold hover:bg-blue-200 transition-colors") Med.
+                       
+                       form(action="/internacion/alta" method="POST" onsubmit="return confirm('¿Alta?');")
+                         input(type="hidden" name="cama_id" value=cama.id)
+                         button(type="submit" class="h-full px-3 rounded-lg bg-red-100 text-red-700 border border-red-200 dark:bg-red-900/60 dark:text-red-200 dark:border-red-700 text-xs font-bold hover:bg-red-200 transition-colors") ✕
+
+               else if cama.estado === 'Limpieza'
+                  div(class="flex justify-between items-end")
+                     span(class="text-sm font-bold dark:text-yellow-200") Limpieza
+                     a(href=`/habitaciones/limpiar/${cama.id}` class="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-lg text-xs font-bold hover:bg-yellow-500 shadow-sm") Habilitar
+
+               else
+                  div(class="flex justify-between items-end")
+                     span(class="text-sm font-bold dark:text-green-200") Libre
+                     a(href=`/internacion/asignar/${cama.id}` class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-green-700 shadow-md transition-transform hover:-translate-y-0.5") + Asignar
+
+  script.
+    const searchInput = document.getElementById('searchInput');
+    const habitaciones = document.querySelectorAll('.habitacion-card');
+    searchInput.addEventListener('keyup', (e) => {
+      const term = e.target.value.toLowerCase();
+      habitaciones.forEach(card => {
+        const content = card.textContent.toLowerCase();
+        if (content.includes(term)) {
+          card.style.display = 'flex';
+          card.classList.add('animate-pulse');
+          setTimeout(() => card.classList.remove('animate-pulse'), 500);
+        } else { card.style.display = 'none'; }
+      });
+    });

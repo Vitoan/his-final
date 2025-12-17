@@ -1,55 +1,50 @@
-const { Habitacion, Cama, Internacion } = require('../models');
+const { Habitacion, Cama, Internacion, Paciente } = require('../models');
 
+// 1. Listar el Mapa de Camas
 exports.listarMapa = async (req, res) => {
     try {
-        // Traemos Habitaciones -> Camas -> Internacion Activa
-        const habitacionesData = await Habitacion.findAll({
+        const habitacionesRaw = await Habitacion.findAll({
             include: [{
                 model: Cama,
                 include: [{
                     model: Internacion,
                     where: { estado: 'Activa' },
-                    required: false // LEFT JOIN (Trae cama aunque no tenga internación)
+                    required: false,
+                    include: [{ model: Paciente }]
                 }]
             }],
             order: [['numero', 'ASC']]
         });
 
-        // Formateamos para que la vista PUG lo entienda fácil
-        // La vista espera: habitacion.camas (array) y dentro cama.internacion_id
-        const habitaciones = habitacionesData.map(hab => {
-            const h = hab.toJSON(); // Convertir a objeto JS limpio
-            
-            // Procesamos las camas para facilitar la vida a la vista PUG
-            h.camas = h.Camas.map(cama => {
-                const internacionActiva = cama.Internacions.length > 0 ? cama.Internacions[0] : null;
-                return {
-                    id: cama.id,
-                    numero: cama.numero_cama,
-                    estado: cama.estado,
-                    internacion_id: internacionActiva ? internacionActiva.id : null
-                };
-            });
-            return h;
+        // --- CORRECCIÓN DE SEGURIDAD ---
+        // Convertimos a JSON plano y aseguramos que 'camas' exista (sea minúscula o mayúscula)
+        const habitacionesData = habitacionesRaw.map(h => {
+            const habitacion = h.toJSON();
+            // Truco: Si Sequelize trajo 'Camas', lo pasamos a 'camas'
+            habitacion.camas = habitacion.camas || habitacion.Camas || [];
+            return habitacion;
         });
 
         res.render('rooms/index', { 
             title: 'Mapa de Camas', 
-            habitaciones 
+            habitaciones: habitacionesData, 
+            error: req.query.error 
         });
 
     } catch (error) {
-        console.error(error);
+        console.error("Error en mapa:", error);
         res.send("Error cargando mapa: " + error.message);
     }
 };
+
+// 2. Finalizar Limpieza
 exports.finalizarLimpieza = async (req, res) => {
     const { idCama } = req.params;
     try {
-        // La cama vuelve a estar lista para usar
         await Cama.update({ estado: 'Disponible' }, { where: { id: idCama } });
         res.redirect('/habitaciones');
     } catch (error) {
-        res.redirect('/habitaciones');
+        console.error(error);
+        res.redirect('/habitaciones?error=' + encodeURIComponent("Error al finalizar limpieza"));
     }
 };

@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const habitacionController = require('../controllers/habitacionController');
 
-// GET /habitaciones -> Muestra el mapa
+// Ruta principal del mapa
 router.get('/', habitacionController.listarMapa);
-router.get('/limpiar/:idCama', habitacionController.finalizarLimpieza); 
+
+// Ruta para limpiar cama (Aquí daba el error si la función de arriba no existía)
+router.get('/limpiar/:idCama', habitacionController.finalizarLimpieza);
+
 module.exports = router;
