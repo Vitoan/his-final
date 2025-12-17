@@ -43,3 +43,13 @@ exports.listarMapa = async (req, res) => {
         res.send("Error cargando mapa: " + error.message);
     }
 };
+exports.finalizarLimpieza = async (req, res) => {
+    const { idCama } = req.params;
+    try {
+        // La cama vuelve a estar lista para usar
+        await Cama.update({ estado: 'Disponible' }, { where: { id: idCama } });
+        res.redirect('/habitaciones');
+    } catch (error) {
+        res.redirect('/habitaciones');
+    }
+};

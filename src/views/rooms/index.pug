@@ -3,11 +3,17 @@ extends ../layouts/main
 block content
   div(class="flex justify-between items-center mb-6")
     h1(class="text-3xl font-bold text-slate-800") Mapa de Camas
+    
+    // 1. LEYENDA DE COLORES
     div(class="text-sm text-slate-500")
       span(class="inline-block w-3 h-3 bg-green-500 rounded-full mr-1")
-      span(class="mr-4") Disponible
+      span(class="mr-3") Disponible
+      
       span(class="inline-block w-3 h-3 bg-red-500 rounded-full mr-1")
-      span Ocupada
+      span(class="mr-3") Ocupada
+      
+      span(class="inline-block w-3 h-3 bg-yellow-500 rounded-full mr-1")
+      span Limpieza
 
   if error
     div(class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow" role="alert")
@@ -22,8 +28,9 @@ block content
 
       div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4")
         each cama in habitacion.camas
-          // Tarjeta de Cama
-          div(class=`border-2 rounded-xl p-4 flex flex-col justify-between transition-all ${cama.estado === 'Disponible' ? 'border-green-200 bg-green-50 hover:shadow-md' : 'border-red-200 bg-red-50'}`)
+          
+          // 2. TARJETA DE CAMA
+          div(class=`border-2 rounded-xl p-4 flex flex-col justify-between transition-all ${cama.estado === 'Disponible' ? 'border-green-200 bg-green-50 hover:shadow-md' : cama.estado === 'Limpieza' ? 'border-yellow-200 bg-yellow-50' : 'border-red-200 bg-red-50'}`)
             
             div(class="text-center mb-2")
               h3(class="font-bold text-slate-700") Cama #{cama.numero}
@@ -37,6 +44,16 @@ block content
               div(class="mt-4")
                 a(href=`/internacion/asignar/${cama.id}` class="block w-full text-center bg-white border border-green-500 text-green-600 hover:bg-green-500 hover:text-white font-bold py-1 px-2 rounded transition-colors text-sm")
                   | Asignar
+
+            else if cama.estado === 'Limpieza'
+              // --- ESTADO: LIMPIEZA ---
+              div(class="text-center")
+                span(class="text-3xl block mb-2") 🧹
+                span(class="inline-block px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-200 rounded-full") En Limpieza
+              
+              div(class="mt-4")
+                a(href=`/habitaciones/limpiar/${cama.id}` class="block w-full text-center bg-white border border-yellow-500 text-yellow-600 hover:bg-yellow-500 hover:text-white font-bold py-1 px-2 rounded transition-colors text-sm")
+                  | ✅ Habilitar
 
             else if cama.estado === 'Ocupada'
               // --- ESTADO: OCUPADA ---

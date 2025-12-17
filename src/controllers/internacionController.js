@@ -84,14 +84,12 @@ exports.procesarAsignacion = async (req, res) => {
 exports.darAlta = async (req, res) => {
     const { cama_id } = req.body;
     try {
-        // Cerrar internación
         await Internacion.update(
             { estado: 'Alta', fecha_egreso: new Date() },
             { where: { cama_id, estado: 'Activa' } }
         );
-
-        // Liberar cama
-        await Cama.update({ estado: 'Disponible' }, { where: { id: cama_id } });
+        // CAMBIO: Pasa a Limpieza, no a Disponible
+        await Cama.update({ estado: 'Limpieza' }, { where: { id: cama_id } }); 
 
         res.redirect('/habitaciones');
     } catch (error) {

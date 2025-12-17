@@ -1,24 +1,24 @@
 const { Internacion, Paciente, Cama, Habitacion, Evolucion, Usuario } = require('../models');
 
+// Dashboard (Tablero General)
 exports.dashboard = async (req, res) => {
     try {
-        // Consultamos TODAS las internaciones activas con TODOS sus datos relacionados
         const internaciones = await Internacion.findAll({
             where: { estado: 'Activa' },
             include: [
-                { model: Paciente }, // Datos personales
+                { model: Paciente },
                 { 
                     model: Cama, 
-                    include: [{ model: Habitacion }] // Dónde está (Cama y Habitación)
+                    include: [{ model: Habitacion }] 
                 },
                 { 
                     model: Evolucion, 
-                    limit: 1, // Solo la última nota para el resumen
+                    limit: 1, 
                     order: [['createdAt', 'DESC']],
-                    include: [{ model: Usuario, as: 'Autor' }] // Quién escribió la nota
+                    include: [{ model: Usuario, as: 'Autor' }] 
                 }
             ],
-            order: [['updatedAt', 'DESC']] // Los modificados recientemente primero
+            order: [['updatedAt', 'DESC']]
         });
 
         res.render('clinical/dashboard', {
@@ -33,21 +33,28 @@ exports.dashboard = async (req, res) => {
     }
 };
 
+// Ver Historial Completo (Aquí aplicamos la lógica de "Vida Real")
 exports.verHistorialCompleto = async (req, res) => {
     const { idInternacion } = req.params;
-    
+    const rolUsuario = req.session.usuario.rol;
+
+    // --- LÓGICA DE VISIBILIDAD ---
+    let filtroEvoluciones = {}; // Por defecto: VER TODO (Para Medicos y Admins)
+
+    // Solo si es Enfermera restringimos la vista (Opcional)
+    if (rolUsuario === 'Enfermeria') {
+        filtroEvoluciones = { tipo: 'Enfermeria' }; 
+    }
+
     try {
         const internacion = await Internacion.findByPk(idInternacion, {
             include: [
                 { model: Paciente },
-                // --- AGREGADO: Cama y Habitación ---
-                { 
-                    model: Cama, 
-                    include: [{ model: Habitacion }] 
-                },
-                // -----------------------------------
+                { model: Cama, include: [{ model: Habitacion }] },
                 { 
                     model: Evolucion, 
+                    where: filtroEvoluciones, // Aplicamos el filtro (o vacío si es médico)
+                    required: false, // Importante: Traer paciente aunque no tenga notas
                     include: [{ model: Usuario, as: 'Autor' }] 
                 }
             ],
