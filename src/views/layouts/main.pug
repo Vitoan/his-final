@@ -3,35 +3,84 @@ html(lang="es")
   head
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title #{title} | Sistema HIS
-    // Tailwind CSS vía CDN
+    title HIS - Sistema Hospitalario
+    // Tailwind CSS
     script(src="https://cdn.tailwindcss.com")
-    // Fuente Google Fonts (Inter)
-    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap", rel="stylesheet")
+    // Configuración de colores personalizados para dar con el tono exacto
+    script.
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#0f172a', // Azul oscuro (Slate 900) para textos
+              secondary: '#334155', // Azul grisáceo (Slate 700) para subtextos
+              accent: '#0d9488', // Teal 600 (Verde-Cyan) para botones
+              accentHover: '#0f766e', // Teal 700 para hover
+              softBg: '#f1f5f9', // Slate 100 (Fondo azulado muy claro)
+            }
+          }
+        }
+      }
+    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet")
     style.
       body { font-family: 'Inter', sans-serif; }
-  body(class="bg-gray-50 text-gray-800")
-    // Navbar Moderno
-    nav(class="bg-white shadow-sm")
-      div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8")
-        div(class="flex justify-between h-16")
-          div(class="flex")
-            div(class="flex-shrink-0 flex items-center")
-              // Logotipo
-              a(href="/" class="text-2xl font-bold text-blue-600") HIS Hospital
-            div(class="hidden sm:ml-6 sm:flex sm:space-x-8")
-              // Enlaces de navegación con class="..." para soportar hover:
-              a(href="/admision" class="border-transparent text-gray-500 hover:border-blue-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium") 
-                | Admisión
-              a(href="/medicos" class="border-transparent text-gray-500 hover:border-blue-500 hover:text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium") 
-                | Médicos
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    // Contenedor principal
-    main(class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8")
-      block content
+  body(class="bg-softBg text-primary h-screen overflow-hidden flex")
 
-    // Footer simple
-    footer(class="bg-white border-t border-gray-200 mt-12")
-      div(class="max-w-7xl mx-auto py-6 px-4 overflow-hidden sm:px-6 lg:px-8")
-        p(class="mt-8 text-center text-base text-gray-400")
-          | &copy; 2025 Taller de Programación Web II. Todos los derechos reservados.
+    // --- SIDEBAR ESTILO ZEN (Modificada) ---
+    if usuario
+      aside(class="w-20 lg:w-72 bg-white h-[95vh] my-auto ml-4 rounded-3xl shadow-xl flex flex-col justify-between transition-all duration-300 border border-slate-200 z-50")
+        
+        // 1. Logo
+        div(class="p-6 flex items-center justify-center lg:justify-start border-b border-slate-100")
+          div(class="bg-slate-800 text-white p-2 rounded-xl shadow-lg shadow-slate-300")
+            svg(class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z")
+          span(class="hidden lg:block font-bold text-xl ml-3 tracking-tight text-slate-800") HIS System
+
+        // 2. Navegación
+        nav(class="flex-1 overflow-y-auto no-scrollbar py-6 px-4 space-y-2")
+          
+          // Link: ADMISIÓN (Hover en Teal/Cyan)
+          a(href="/admision" class="flex items-center p-3 rounded-2xl hover:bg-teal-50 text-slate-500 hover:text-accent transition-all group")
+            div(class="p-2 bg-slate-50 rounded-xl group-hover:bg-teal-100 group-hover:text-accent transition-colors")
+              svg(class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z")
+            span(class="hidden lg:block ml-3 font-medium") Admisión Pacientes
+
+          // Link: MAPA DE CAMAS
+          a(href="/habitaciones" class="flex items-center p-3 rounded-2xl hover:bg-teal-50 text-slate-500 hover:text-accent transition-all group")
+            div(class="p-2 bg-slate-50 rounded-xl group-hover:bg-teal-100 group-hover:text-accent transition-colors")
+              svg(class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4")
+            span(class="hidden lg:block ml-3 font-medium") Mapa de Camas
+
+          // Link: SETUP (Admin)
+          if usuario.email === 'admin@his.com'
+             a(href="/auth/setup" class="flex items-center p-3 rounded-2xl hover:bg-orange-50 text-slate-500 hover:text-orange-600 transition-all group")
+              div(class="p-2 bg-slate-50 rounded-xl group-hover:bg-orange-100 group-hover:text-orange-600 transition-colors")
+                svg(class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z")
+                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z")
+              span(class="hidden lg:block ml-3 font-medium") Reset Admin
+
+        // 3. Footer
+        div(class="p-4 border-t border-slate-100")
+          div(class="flex items-center p-3 rounded-2xl bg-slate-50 border border-slate-100")
+            // Avatar con gradiente Teal
+            div(class="w-10 h-10 rounded-full bg-gradient-to-tr from-teal-400 to-blue-500 flex items-center justify-center text-white font-bold shadow-md")
+              | #{usuario.nombre.charAt(0)}
+            div(class="hidden lg:block ml-3 overflow-hidden")
+              p(class="text-sm font-bold text-slate-700 truncate") #{usuario.nombre}
+              p(class="text-xs text-slate-500 truncate") #{usuario.rol || 'Personal'}
+            
+            a(href="/auth/logout" class="ml-auto p-2 text-slate-400 hover:text-red-500 transition-colors" title="Cerrar Sesión")
+               svg(class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1")
+
+    // --- CONTENIDO PRINCIPAL ---
+    main(class="flex-1 h-screen overflow-y-auto p-4 lg:p-8 relative")
+      div(class="max-w-7xl mx-auto")
+        block content

@@ -1,75 +1,60 @@
 extends ../layouts/main
 
 block content
-  // Encabezado
-  div(class="flex justify-between items-center mb-8")
-    h1(class="text-3xl font-bold text-gray-800") Mapa de Habitaciones
-    // Leyenda de colores
-    div(class="flex items-center text-sm text-gray-600 bg-white px-4 py-2 rounded shadow-sm")
-      span(class="flex items-center mr-4")
-        span(class="w-3 h-3 bg-green-500 rounded-full mr-2")
-        | Disponible
-      span(class="flex items-center mr-4")
-        span(class="w-3 h-3 bg-red-500 rounded-full mr-2")
-        | Ocupada
-      span(class="flex items-center")
-        span(class="w-3 h-3 bg-yellow-400 rounded-full mr-2")
-        | Mantenimiento
+  div(class="flex justify-between items-center mb-6")
+    h1(class="text-3xl font-bold text-slate-800") Mapa de Camas
+    div(class="text-sm text-slate-500")
+      span(class="inline-block w-3 h-3 bg-green-500 rounded-full mr-1")
+      span(class="mr-4") Disponible
+      span(class="inline-block w-3 h-3 bg-red-500 rounded-full mr-1")
+      span Ocupada
 
-  // Grid de Habitaciones
-  div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6")
-    each hab in habitaciones
-      // Tarjeta de Habitación
-      div(class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200")
-        // Cabecera de la tarjeta
-        div(class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center")
-          div
-            h3(class="text-lg font-bold text-gray-700") Habitación #{hab.numero}
-            p(class="text-xs text-gray-500") #{hab.tipo}
-          // Icono de edificio
-          svg(class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24")
-            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4")
-        
-        // Cuerpo: Lista de Camas
-        div(class="p-4 space-y-3")
-          each cama in hab.camas
-            // Condicional para el color del borde y fondo segun estado
-            - var estadoClass = cama.estado === 'Disponible' ? 'border-green-200 bg-green-50' : (cama.estado === 'Ocupada' ? 'border-red-200 bg-red-50' : 'border-yellow-200 bg-yellow-50')
-            - var textoClass = cama.estado === 'Disponible' ? 'text-green-700' : (cama.estado === 'Ocupada' ? 'text-red-700' : 'text-yellow-700')
+  if error
+    div(class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow" role="alert")
+      p= error
+
+  // Iteramos sobre las habitaciones
+  each habitacion in habitaciones
+    div(class="bg-white shadow-sm rounded-2xl p-6 mb-6 border border-slate-100")
+      h2(class="text-xl font-bold text-slate-700 mb-4 border-b border-slate-100 pb-2")
+        | Habitación #{habitacion.numero} 
+        span(class="text-sm font-normal text-slate-500 ml-2") (#{habitacion.tipo})
+
+      div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4")
+        each cama in habitacion.camas
+          // Tarjeta de Cama
+          div(class=`border-2 rounded-xl p-4 flex flex-col justify-between transition-all ${cama.estado === 'Disponible' ? 'border-green-200 bg-green-50 hover:shadow-md' : 'border-red-200 bg-red-50'}`)
             
-            div(class="flex items-center justify-between p-3 rounded-lg border " + estadoClass)
-              div(class="flex items-center")
-                // Icono Cama
-                svg(class="w-6 h-6 mr-3 " + textoClass fill="none" stroke="currentColor" viewBox="0 0 24 24")
-                  path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6h18v4a2 2 0 01-2 2M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7")
-                
-                div
-                  p(class="font-semibold text-sm " + textoClass) Cama #{cama.numero}
-                  p(class="text-xs opacity-75 " + textoClass) #{cama.estado}
-
-              // ACCIONES SEGÚN ESTADO
-              if cama.estado === 'Disponible'
-                // Botón Asignar
-                a(href="/internacion/asignar/" + cama.id class="text-xs bg-white border border-green-600 text-green-600 hover:bg-green-600 hover:text-white px-3 py-1 rounded transition-colors uppercase font-bold tracking-wider")
+            div(class="text-center mb-2")
+              h3(class="font-bold text-slate-700") Cama #{cama.numero}
+            
+            if cama.estado === 'Disponible'
+              // --- ESTADO: DISPONIBLE ---
+              div(class="text-center")
+                span(class="text-3xl block mb-2") 🛏️
+                span(class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-200 rounded-full") Disponible
+              
+              div(class="mt-4")
+                a(href=`/internacion/asignar/${cama.id}` class="block w-full text-center bg-white border border-green-500 text-green-600 hover:bg-green-500 hover:text-white font-bold py-1 px-2 rounded transition-colors text-sm")
                   | Asignar
+
+            else if cama.estado === 'Ocupada'
+              // --- ESTADO: OCUPADA ---
+              div(class="text-center")
+                span(class="text-3xl block mb-2") 🛌
+                span(class="inline-block px-2 py-1 text-xs font-semibold text-red-700 bg-red-200 rounded-full") Ocupada
               
-              else if cama.estado === 'Ocupada'
-                div(class="flex flex-col space-y-2 mt-2")
-                  // 1. Botón ENFERMERÍA
-                  if cama.internacion_id
-                    a(href="/enfermeria/evaluar/" + cama.internacion_id class="text-xs bg-blue-100 border border-blue-500 text-blue-700 hover:bg-blue-600 hover:text-white px-2 py-1 rounded text-center transition-colors font-bold mb-1")
-                      | 🩺 Enfermería
-                    
-                    // 2. Botón MÉDICO (NUEVO)
-                    a(href="/medico/evolucionar/" + cama.internacion_id class="text-xs bg-green-100 border border-green-500 text-green-700 hover:bg-green-600 hover:text-white px-2 py-1 rounded text-center transition-colors font-bold mb-1")
-                      | 👨‍⚕️ Médico
+              div(class="flex flex-col space-y-2 mt-4")
+                // Botones Clínicos
+                if cama.internacion_id
+                  a(href="/enfermeria/evaluar/" + cama.internacion_id class="block w-full text-center text-xs bg-teal-50 border border-teal-500 text-teal-700 hover:bg-teal-500 hover:text-white px-2 py-1 rounded transition-colors font-bold")
+                    | 🩺 Enfermería
                   
-                  // 3. Botón DAR ALTA (Existente)
-                  form(action="/internacion/alta" method="POST" onsubmit="return confirm('¿Confirmar el alta médica?');" class="w-full")
-                    input(type="hidden" name="cama_id" value=cama.id)
-                    button(type="submit" class="w-full text-xs bg-white border border-red-500 text-red-600 hover:bg-red-500 hover:text-white px-2 py-1 rounded transition-colors uppercase font-bold")
-                      | Dar Alta
-              
-              else
-                // Estado Mantenimiento u otro
-                span(class="text-xs font-bold text-yellow-600 uppercase tracking-wider") Mantenimiento
+                  a(href="/medico/evolucionar/" + cama.internacion_id class="block w-full text-center text-xs bg-slate-50 border border-slate-500 text-slate-700 hover:bg-slate-600 hover:text-white px-2 py-1 rounded transition-colors font-bold")
+                    | 👨‍⚕️ Médico
+
+                // Botón Alta
+                form(action="/internacion/alta" method="POST" onsubmit="return confirm('¿Confirmar el alta médica?');" class="w-full")
+                  input(type="hidden" name="cama_id" value=cama.id)
+                  button(type="submit" class="w-full text-xs bg-white border border-red-500 text-red-600 hover:bg-red-500 hover:text-white px-2 py-1 rounded transition-colors uppercase font-bold")
+                    | Dar Alta
