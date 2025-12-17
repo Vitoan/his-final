@@ -6,9 +6,10 @@ const Usuario = sequelize.define('Usuario', {
     email: { type: DataTypes.STRING, unique: true, allowNull: false },
     password: { type: DataTypes.STRING, allowNull: false },
     rol: { 
-        type: DataTypes.ENUM('Admin', 'Medico', 'Enfermera', 'Admision'), 
-        defaultValue: 'Admision' 
+        type: DataTypes.ENUM('Admin', 'Medico', 'Enfermeria', 'Admision'), 
+        defaultValue: 'Admision',
+        allowNull: false
     }
-});
+}, { timestamps: true });
 
 module.exports = Usuario;
