@@ -3,6 +3,7 @@ const path = require('path');
 const morgan = require('morgan');
 require('dotenv').config();
 const session = require('express-session'); // Importar solo una vez
+const enfermeriaRoutes = require('./routes/enfermeria');
 
 // Importar rutas y middlewares
 const authRoutes = require('./routes/auth');
@@ -49,6 +50,7 @@ app.use('/auth', authRoutes);
 app.use('/admision', authMiddleware, admisionRoutes);
 app.use('/habitaciones', authMiddleware, habitacionesRoutes);
 app.use('/internacion', authMiddleware, internacionesRoutes);
+app.use('/enfermeria', authMiddleware, enfermeriaRoutes);
 
 // Redirección Raíz Inteligente
 app.get('/', (req, res) => {

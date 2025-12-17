@@ -1,8 +1,8 @@
 const db = require('../config/db');
 
 exports.listarMapa = async (req, res) => {
-    // CORRECCIÓN: Quitamos el CAST(... AS JSON) para compatibilidad con MariaDB/XAMPP
-    // Usamos IFNULL para que si una habitación no tiene camas, devuelva "[]" en lugar de null
+    // MAGIA AQUÍ: Hacemos LEFT JOIN con internaciones para obtener el ID de la internación activa
+    // Si la cama está ocupada, 'internacion_id' tendrá un número. Si está libre, será NULL.
     const sql = `
         SELECT 
             h.id, 
@@ -11,10 +11,12 @@ exports.listarMapa = async (req, res) => {
             IFNULL(CONCAT('[', GROUP_CONCAT(JSON_OBJECT(
                 'id', c.id,
                 'numero', c.numero_cama,
-                'estado', c.estado
+                'estado', c.estado,
+                'internacion_id', i.id  -- <--- ESTO ES LO NUEVO
             )), ']'), '[]') as camas
         FROM habitaciones h
         LEFT JOIN camas c ON h.id = c.habitacion_id
+        LEFT JOIN internaciones i ON c.id = i.cama_id AND i.estado = 'Activa' -- Solo internaciones activas
         GROUP BY h.id, h.numero, h.tipo
         ORDER BY h.numero ASC
     `;
@@ -22,11 +24,10 @@ exports.listarMapa = async (req, res) => {
     try {
         const resultados = await db.query(sql);
 
-        // PROCESAMIENTO JS: Como MySQL/MariaDB devuelve un string, lo convertimos a JSON aquí
         const habitaciones = resultados.map(hab => {
             return {
                 ...hab,
-                camas: JSON.parse(hab.camas) // Convertimos el texto a Objeto JS real
+                camas: JSON.parse(hab.camas)
             };
         });
 
