@@ -18,7 +18,7 @@ const enfermeriaRoutes = require('./routes/enfermeria');
 const medicoRoutes = require('./routes/medico');
 const clinicaRoutes = require('./routes/clinica');
 const adminRoutes = require('./routes/admin');
-const apiRoutes = require('./routes/api'); // <--- FALTABA ESTO (Para AJAX)
+const apiRoutes = require('./routes/api');
 
 // --- 3. CONFIGURACIONES ---
 app.set('port', process.env.PORT || 3000);
@@ -58,19 +58,20 @@ app.use('/enfermeria', authMiddleware, enfermeriaRoutes);
 app.use('/medico', authMiddleware, medicoRoutes); 
 app.use('/clinica', authMiddleware, clinicaRoutes);
 app.use('/admin', authMiddleware, adminRoutes);
-app.use('/api', authMiddleware, apiRoutes); // <--- AGREGADO (AJAX)
+app.use('/api', authMiddleware, apiRoutes);
 
-// Redirección Raíz Inteligente
+// --- CAMBIO IMPORTANTE AQUÍ ---
+// Ruta Raíz: Si está logueado, muestra el INDEX (Menú Principal), no Admisión.
 app.get('/', (req, res) => {
     if (req.session.usuario) {
-        res.redirect('/admision');
+        // Renderiza la vista 'src/views/index.pug'
+        res.render('index', { title: 'Inicio - HIS Pro' });
     } else {
         res.redirect('/auth/login');
     }
 });
 
 // --- 8. SINCRONIZAR BD E INICIAR SERVIDOR ---
-// Solo iniciamos el servidor si la base de datos conecta bien
 sequelize.sync({ alter: false })
     .then(() => {
         app.listen(app.get('port'), () => {

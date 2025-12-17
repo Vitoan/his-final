@@ -31,14 +31,18 @@ html(lang="es" class="light")
       ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
       .dark ::-webkit-scrollbar-thumb { background: #475569; }
 
-  // CAMBIO IMPORTANTE: Texto base slate-900 (negro suave) en light, slate-50 (blanco suave) en dark
+  // Texto base slate-900 (negro suave) en light, slate-50 (blanco suave) en dark
   body(class="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100 flex transition-colors duration-300")
     
     if usuario
       aside(class="w-72 bg-white dark:bg-slate-800 border-r border-slate-300 dark:border-slate-700 hidden md:flex flex-col fixed h-full z-20 shadow-xl")
-        div(class="p-8 flex items-center gap-3")
+        
+        // --- AQUÍ ESTÁ EL CAMBIO ---
+        // Convertimos el div en un enlace 'a' que apunta a la raíz '/'
+        a(href="/" class="p-8 flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer")
           div(class="w-10 h-10 rounded-xl bg-blue-600 dark:bg-rose-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30") H
           span(class="text-xl font-bold tracking-tight text-slate-800 dark:text-white") HIS <span class="text-blue-600 dark:text-rose-500">App</span>
+        // ---------------------------
         
         nav(class="flex-1 px-4 space-y-3 overflow-y-auto mt-4")
           mixin navLink(href, icon, text, activeColor)

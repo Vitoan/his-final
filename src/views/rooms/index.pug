@@ -47,7 +47,8 @@ block content
                - estadoClass = 'border-yellow-300 bg-yellow-50 text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-700 dark:text-yellow-300'
                - icono = '🧹'
             else
-               - estadoClass = 'border-slate-300 bg-white dark:bg-slate-700 dark:border-slate-500'
+               // --- CORRECCIÓN AQUÍ: Poner clases ROJAS para estado Ocupada ---
+               - estadoClass = 'border-red-300 bg-red-50 text-red-900 dark:bg-red-900/20 dark:border-red-700 dark:text-red-200'
                - icono = '👤'
                if cama.Internacions && cama.Internacions.length > 0
                   - nombrePaciente = cama.Internacions[0].Paciente.nombre + ' ' + cama.Internacions[0].Paciente.apellido
