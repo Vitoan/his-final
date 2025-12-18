@@ -41,7 +41,6 @@ exports.verHistorialCompleto = async (req, res) => {
     // --- LÓGICA DE VISIBILIDAD ---
     let filtroEvoluciones = {}; // Por defecto: VER TODO (Para Medicos y Admins)
 
-    // Solo si es Enfermera restringimos la vista (Opcional)
     if (rolUsuario === 'Enfermeria') {
         filtroEvoluciones = { tipo: 'Enfermeria' }; 
     }

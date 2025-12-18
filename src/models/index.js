@@ -29,6 +29,12 @@ Evolucion.belongsTo(Internacion, { foreignKey: 'internacion_id' });
 Usuario.hasMany(Evolucion, { foreignKey: 'autor_id' });
 Evolucion.belongsTo(Usuario, { as: 'Autor', foreignKey: 'autor_id' });
 
+// Relación: Un Usuario genera muchas Auditorías
+Usuario.hasMany(Auditoria, { foreignKey: 'usuario_id' });
+
+// Relación: Una Auditoría pertenece a un Usuario
+Auditoria.belongsTo(Usuario, { foreignKey: 'usuario_id' });
+
 
 
 module.exports = { 

@@ -29,7 +29,7 @@ exports.mostrarFormulario = async (req, res) => {
             order: [['createdAt', 'DESC']]
         });
 
-        // NOTA: Pasamos 'internacion.Paciente' a la vista porque así lo espera tu PUG
+        
         res.render('clinical/nursing', { 
             title: 'Evaluación de Enfermería',
             paciente: {

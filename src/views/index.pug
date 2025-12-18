@@ -57,6 +57,16 @@ block content
           h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Administración
           p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
             | Gestión de usuarios del sistema, roles y configuración de seguridad.
+            if usuario && usuario.rol === 'Admin'
+      a(href="/admin/auditoria" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
+        div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-amber-50 dark:bg-amber-900/20 rounded-full blur-3xl group-hover:bg-amber-100 dark:group-hover:bg-amber-900/40 transition-colors")
+        
+        div(class="relative z-10")
+          div(class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
+            | 👁️
+          h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Auditoría
+          p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
+            | Registro histórico de movimientos, altas, bajas y accesos al sistema.
 
   // --- FOOTER SIMPLE ---
   div(class="mt-20 text-center border-t border-slate-200 dark:border-slate-800 pt-8")

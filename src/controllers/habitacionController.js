@@ -16,8 +16,7 @@ exports.listarMapa = async (req, res) => {
             order: [['numero', 'ASC']]
         });
 
-        // --- CORRECCIÓN DE SEGURIDAD ---
-        // Convertimos a JSON plano y aseguramos que 'camas' exista (sea minúscula o mayúscula)
+        
         const habitacionesData = habitacionesRaw.map(h => {
             const habitacion = h.toJSON();
             // Truco: Si Sequelize trajo 'Camas', lo pasamos a 'camas'

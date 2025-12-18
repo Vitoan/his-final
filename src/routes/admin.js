@@ -15,5 +15,6 @@ router.get('/usuarios', soloAdmin, adminController.listarUsuarios);
 router.get('/usuarios/nuevo', soloAdmin, adminController.mostrarFormulario);
 router.post('/usuarios/guardar', soloAdmin, adminController.crearUsuario);
 router.post('/usuarios/eliminar/:id', soloAdmin, adminController.eliminarUsuario);
+router.get('/auditoria', adminController.verAuditoria);
 
 module.exports = router;

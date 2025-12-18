@@ -48,7 +48,6 @@ exports.guardarEvolucion = async (req, res) => {
     const { internacion_id, diagnostico, tratamiento } = req.body;
     try {
         // Concatenamos diagnóstico y tratamiento en la nota
-        // O podrías guardarlos en el JSON si prefieres separarlos
         const notaCompleta = `Diagnóstico: ${diagnostico}. Tratamiento: ${tratamiento}`;
 
         await Evolucion.create({

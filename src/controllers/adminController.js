@@ -1,4 +1,4 @@
-const { Usuario } = require('../models');
+const { Usuario, Auditoria } = require('../models');
 const bcrypt = require('bcryptjs');
 
 // 1. Listar todo el personal
@@ -71,5 +71,24 @@ exports.eliminarUsuario = async (req, res) => {
         res.redirect('/admin/usuarios');
     } catch (error) {
         res.send("Error al eliminar.");
+    }
+};
+
+// Ver Auditoría
+exports.verAuditoria = async (req, res) => {
+    try {
+        const registros = await Auditoria.findAll({
+            include: [{ model: Usuario }], // Para saber QUIÉN hizo la acción
+            order: [['createdAt', 'DESC']], // Lo más nuevo primero
+            limit: 100 // Opcional: traer solo los últimos 100 para no saturar
+        });
+
+        res.render('admin/audit', {
+            title: 'Auditoría del Sistema',
+            registros
+        });
+    } catch (error) {
+        console.error(error);
+        res.redirect('/');
     }
 };
