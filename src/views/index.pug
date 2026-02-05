@@ -13,6 +13,16 @@ block content
   // --- GRID DE MÓDULOS (HUB) ---
   div(class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4")
 
+    // --- MÓDULO MESA DE ENTRADA (NUEVO) ---
+    a(href="/mesa-entrada" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
+      div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-indigo-50 dark:bg-indigo-900/20 rounded-full blur-3xl group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/40 transition-colors")
+      
+      div(class="relative z-10")
+        div(class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
+          | 🛎️
+        h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Mesa de Entrada
+        p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
+          | Recepción de pacientes, triaje, guardia y registro de visitas.
     // 1. MÓDULO ADMISIÓN
     a(href="/admision" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
       div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-blue-50 dark:bg-blue-900/20 rounded-full blur-3xl group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 transition-colors")

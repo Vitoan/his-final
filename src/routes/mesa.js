@@ -2,9 +2,15 @@ const express = require('express');
 const router = express.Router();
 const mesaController = require('../controllers/mesaController');
 
-router.get('/', mesaController.dashboard); // Ver sala de espera
-router.get('/nuevo', mesaController.buscarPaciente); // Formulario de búsqueda/ingreso
-router.post('/guardar', mesaController.registrarVisita); // Guardar
-router.get('/atender/:id', mesaController.atender); // Sacar de la lista
+router.get('/', mesaController.dashboard);
+router.get('/nuevo', mesaController.buscarPaciente);
+
+// Ruta para paciente existente
+router.post('/guardar', mesaController.registrarVisita);
+
+// NUEVA RUTA: Para paciente nuevo + visita
+router.post('/guardar-completo', mesaController.registrarCompleto);
+
+router.get('/atender/:id', mesaController.atender);
 
 module.exports = router;

@@ -1,51 +1,24 @@
 extends ../layouts/main
 
 block content
-  div(class="max-w-2xl mx-auto")
-    h1(class="text-2xl font-bold mb-6 dark:text-white") Registrar Nuevo Ingreso
+  div(class="max-w-4xl mx-auto")
+    div(class="mb-8")
+      a(href="/mesa-entrada" class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white flex items-center gap-2 mb-4") 
+        span ← Volver al Tablero
+      h1(class="text-3xl font-bold dark:text-white") Recepción de Paciente
 
-    // 1. BUSCADOR
-    div(class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 mb-6")
-      form(action="/mesa-entrada/nuevo" method="GET" class="flex gap-4")
-        input(type="text" name="dni" placeholder="Ingrese DNI del paciente..." value=dniBuscado class="flex-1 px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white")
-        button(type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700") Buscar
+    // --- 1. BUSCADOR (Siempre visible) ---
+    div(class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8")
+      form(action="/mesa-entrada/nuevo" method="GET" class="flex gap-4 items-end")
+        div(class="flex-1")
+          label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Buscar por DNI
+          input(type="text" name="dni" placeholder="Ingrese DNI..." value=dniBuscado class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white text-lg font-bold tracking-wider" required)
+        button(type="submit" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 h-[52px]") 🔍 Buscar
 
-    if error
-      div(class="bg-red-100 text-red-800 p-4 rounded-xl mb-6 text-sm font-bold border border-red-200") ⚠️ #{error}
-        a(href="/admision/nuevo" class="underline ml-2") Registrar Paciente Nuevo aquí
-
-    // 2. FORMULARIO DE INGRESO (Solo si encontramos al paciente)
+    // --- 2. ESCENARIO A: PACIENTE ENCONTRADO ---
     if paciente
-      div(class="bg-white dark:bg-slate-800 p-8 rounded-[2rem] shadow-lg border-2 border-indigo-100 dark:border-indigo-900/30")
-        div(class="flex items-center gap-4 mb-6 border-b pb-4 dark:border-slate-700")
-          div(class="text-4xl") 👤
-          div
-            h2(class="text-xl font-bold dark:text-white") #{paciente.nombre} #{paciente.apellido}
-            p(class="text-slate-500") DNI: #{paciente.dni} | Obra Social: #{paciente.obra_social || 'Ninguna'}
-
-        form(action="/mesa-entrada/guardar" method="POST" class="space-y-6")
-          input(type="hidden" name="paciente_id" value=paciente.id)
-          
-          div
-            label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Tipo de Ingreso
-            div(class="grid grid-cols-2 gap-4")
-              label(class="cursor-pointer")
-                input(type="radio" name="tipo_ingreso" value="Guardia" class="peer sr-only" checked)
-                div(class="p-3 text-center rounded-xl border-2 border-slate-200 peer-checked:border-red-500 peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 text-sm font-bold transition-all") 🚑 Guardia / Urgencia
-              
-              label(class="cursor-pointer")
-                input(type="radio" name="tipo_ingreso" value="Turno" class="peer sr-only")
-                div(class="p-3 text-center rounded-xl border-2 border-slate-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 text-sm font-bold transition-all") 📅 Turno / Consulta
-
-          div
-            label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Motivo de Visita
-            input(type="text" name="motivo" required placeholder="Ej: Dolor abdominal, Fiebre, Retiro de placas..." class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white")
-
-          div
-            label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Prioridad (Triage)
-            select(name="prioridad" class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white")
-              option(value="Baja") 🟢 Baja (Normal)
-              option(value="Media") 🟡 Media (Urgente)
-              option(value="Alta/Emergencia") 🔴 Alta (Emergencia)
-
-          button(type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 text-lg shadow-lg") ✅ Confirmar Ingreso
+      div(class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-6 rounded-2xl mb-6 flex items-center gap-4 animate-fade-in")
+        div(class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl font-bold") ✓
+        div
+          h2(class="text-lg font-bold text-green-800 dark:text-green-300") Paciente Identificado
+          p(class="text-green-700 dark:text-green-400") #{paciente.nombre} #{paciente.apellido} - DNI: #{paciente.dni}
