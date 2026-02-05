@@ -7,7 +7,8 @@ const Habitacion = require('./Habitacion');
 const Cama = require('./Cama');
 const Internacion = require('./Internacion');
 const Evolucion = require('./Evolucion');
-const Auditoria = require('./Auditoria'); // (Si ya creaste el de auditoría)
+const Auditoria = require('./Auditoria'); 
+const Visita = require('./Visita');
 
 // --- RELACIONES ---
 
@@ -35,8 +36,11 @@ Usuario.hasMany(Auditoria, { foreignKey: 'usuario_id' });
 // Relación: Una Auditoría pertenece a un Usuario
 Auditoria.belongsTo(Usuario, { foreignKey: 'usuario_id' });
 
-
+// Relación: Un Paciente tiene muchas Visitas
+Paciente.hasMany(Visita, { foreignKey: 'paciente_id' });
+// Relación: Una Visita pertenece a un Paciente
+Visita.belongsTo(Paciente, { foreignKey: 'paciente_id' });
 
 module.exports = { 
-    sequelize, Usuario, Paciente, Habitacion, Cama, Internacion, Evolucion, Auditoria 
+    sequelize, Usuario, Paciente, Habitacion, Cama, Internacion, Evolucion, Auditoria, Visita
 };

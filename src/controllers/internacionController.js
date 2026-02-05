@@ -54,9 +54,7 @@ exports.procesarAsignacion = async (req, res) => {
                     const vecino = vecina.Internacions[0].Paciente;
                     
                     if (vecino.sexo !== pacienteNuevo.sexo) {
-                        // --- MEJORA CLAVE ---
-                        // En lugar de res.send, redirigimos con el error en la URL
-                        // para que aparezca la ALERTA ROJA en el mapa.
+                        
                         const errorMsg = `CONFLICTO DE GÉNERO: La habitación ya está ocupada por un paciente (${vecino.sexo}). No se puede ingresar un paciente (${pacienteNuevo.sexo}).`;
                         return res.redirect('/habitaciones?error=' + encodeURIComponent(errorMsg));
                     }

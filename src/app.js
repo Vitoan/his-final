@@ -59,6 +59,7 @@ app.use('/medico', authMiddleware, medicoRoutes);
 app.use('/clinica', authMiddleware, clinicaRoutes);
 app.use('/admin', authMiddleware, adminRoutes);
 app.use('/api', authMiddleware, apiRoutes);
+app.use('/mesa-entrada', authMiddleware, require('./routes/mesa'));
 
 // --- CAMBIO IMPORTANTE AQUÍ ---
 // Ruta Raíz: Si está logueado, muestra el INDEX (Menú Principal), no Admisión.
