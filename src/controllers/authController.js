@@ -31,7 +31,7 @@ exports.login = async (req, res) => {
         if (usuario.rol === 'Medico' || usuario.rol === 'Enfermeria') {
             res.redirect('/clinica/dashboard');
         } else {
-            res.redirect('/admision');
+            res.redirect('/');
         }
 
     } catch (error) {
