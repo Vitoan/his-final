@@ -73,7 +73,7 @@ app.get('/', (req, res) => {
 });
 
 // --- 8. SINCRONIZAR BD E INICIAR SERVIDOR ---
-sequelize.sync({ alter: false })
+sequelize.sync({ alter: true })
     .then(() => {
         app.listen(app.get('port'), () => {
             console.log(`✅ Servidor conectado a BD y corriendo en http://localhost:${app.get('port')}`);

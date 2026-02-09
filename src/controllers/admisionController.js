@@ -1,41 +1,31 @@
-const { Paciente } = require('../models'); // Importamos el Modelo
+const { Paciente, Internacion, Visita, Cama, Habitacion } = require('../models');
+const { Op } = require('sequelize');
 
-// 1. Mostrar formulario
-exports.mostrarFormulario = (req, res) => {
-    res.render('admission/create', { 
-        title: 'Nuevo Paciente',
-        isEditing: false 
-    });
-};
-
-// 2. Guardar Paciente (CREATE)
-exports.registrarPaciente = async (req, res) => {
+// 1. Listar Pacientes (CON ESTADO EN TIEMPO REAL)
+exports.renderIndex = async (req, res) => {
     try {
-        await Paciente.create(req.body); // Sequelize hace el INSERT mágico
-        res.redirect('/admision?success=true');
-    } catch (error) {
-        console.error(error);
-        res.render('admission/create', {
-            title: 'Nuevo Paciente',
-            error: 'Error al guardar (Posible DNI duplicado)',
-            data: req.body,
-            isEditing: false
+        const pacientes = await Paciente.findAll({
+            include: [
+                {
+                    // Buscar si está Internado
+                    model: Internacion,
+                    required: false,
+                    where: { fecha_egreso: null }, // Solo activas
+                    include: [{ model: Cama, include: [Habitacion] }]
+                },
+                {
+                    // Buscar si está en Mesa de Entrada (Guardia)
+                    model: Visita,
+                    required: false,
+                    where: { estado: { [Op.or]: ['Esperando', 'En Atención'] } }
+                }
+            ],
+            order: [['apellido', 'ASC']]
         });
-    }
-};
 
-// 3. Listar Pacientes (READ)
-exports.listarPacientes = async (req, res) => {
-    const { error } = req.query;
-    try {
-        const pacientes = await Paciente.findAll({ 
-            order: [['createdAt', 'DESC']] 
-        });
-        
-        res.render('admission/index', { 
-            title: 'Admisión', 
-            pacientes,
-            error: error === 'constraint' ? 'No se puede borrar: Tiene historial médico.' : null
+        res.render('admission/index', {
+            title: 'Listado de Pacientes',
+            pacientes
         });
     } catch (error) {
         console.error(error);
@@ -43,41 +33,86 @@ exports.listarPacientes = async (req, res) => {
     }
 };
 
-// 4. Formulario Edición
-exports.mostrarFormularioEdicion = async (req, res) => {
+// 2. Mostrar Formulario de Creación
+exports.renderCreate = (req, res) => {
+    res.render('admission/create', { 
+        title: 'Nuevo Paciente',
+        isEditing: false,
+        data: null
+    });
+};
+
+// 3. Guardar Nuevo Paciente
+exports.create = async (req, res) => {
     try {
-        const paciente = await Paciente.findByPk(req.params.id);
+        await Paciente.create(req.body);
+        res.redirect('/admision');
+    } catch (error) {
+        console.error(error);
+        res.render('admission/create', {
+            title: 'Nuevo Paciente',
+            isEditing: false,
+            error: 'Error al guardar. Verifique si el DNI ya existe.',
+            data: req.body
+        });
+    }
+};
+
+// 4. Mostrar Formulario de Edición (CON ALERTAS ACTIVADAS)
+exports.renderEdit = async (req, res) => {
+    try {
+        const paciente = await Paciente.findByPk(req.params.id, {
+            include: [
+                {
+                    model: Internacion,
+                    required: false,
+                    where: { fecha_egreso: null },
+                    include: [{ model: Cama, include: [Habitacion] }]
+                },
+                {
+                    model: Visita,
+                    required: false,
+                    where: { estado: { [Op.or]: ['Esperando', 'En Atención'] } }
+                }
+            ]
+        });
+
         if (!paciente) return res.redirect('/admision');
 
-        res.render('admission/create', { 
-            title: 'Editar Paciente', 
-            data: paciente, 
-            isEditing: true 
+        res.render('admission/create', {
+            title: 'Editar Paciente',
+            isEditing: true,
+            data: paciente
         });
     } catch (error) {
+        console.error(error);
         res.redirect('/admision');
     }
 };
 
-// 5. Actualizar (UPDATE)
-exports.actualizarPaciente = async (req, res) => {
+// 5. Actualizar Paciente
+exports.update = async (req, res) => {
     try {
-        await Paciente.update(req.body, {
-            where: { id: req.params.id }
-        });
+        const { id } = req.params;
+        await Paciente.update(req.body, { where: { id } });
         res.redirect('/admision');
     } catch (error) {
-        res.redirect('/admision');
+        res.render('admission/create', {
+            title: 'Editar Paciente',
+            isEditing: true,
+            error: 'Error al actualizar datos.',
+            data: { ...req.body, id: req.params.id }
+        });
     }
 };
 
-// 6. Borrar (DELETE)
-exports.borrarPaciente = async (req, res) => {
+// 6. Eliminar Paciente
+exports.delete = async (req, res) => {
     try {
         await Paciente.destroy({ where: { id: req.params.id } });
         res.redirect('/admision');
     } catch (error) {
-        // Sequelize lanzará error si hay foreign keys (Internaciones)
-        res.redirect('/admision?error=constraint');
+        console.error(error);
+        res.redirect('/admision');
     }
 };

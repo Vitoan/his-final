@@ -1,4 +1,5 @@
 extends ../layouts/main
+include ../mixins/formPaciente
 
 block content
   div(class="max-w-4xl mx-auto")
@@ -7,6 +8,7 @@ block content
         span ← Volver al Tablero
       h1(class="text-3xl font-bold dark:text-white") Recepción de Paciente
 
+    // --- BUSCADOR ---
     div(class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 mb-8")
       form(action="/mesa-entrada/nuevo" method="GET" class="flex gap-4 items-end")
         div(class="flex-1")
@@ -14,7 +16,21 @@ block content
           input(type="text" name="dni" placeholder="Ingrese DNI..." value=dniBuscado class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white text-lg font-bold tracking-wider" required)
         button(type="submit" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 h-[52px]") 🔍 Buscar
 
+    // --- PACIENTE ENCONTRADO ---
     if paciente
+      if paciente.Internacions && paciente.Internacions.length > 0
+        div(class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-6 rounded-2xl mb-8 flex items-start gap-4 animate-pulse")
+          div(class="text-3xl") 🛌
+          div
+            h2(class="text-xl font-bold text-red-800 dark:text-red-200") Paciente Internado
+            p(class="text-red-700 dark:text-red-300 mt-1") Habitación #{paciente.Internacions[0].Cama.Habitacion.numero}.
+      else if paciente.Visita && paciente.Visita.length > 0
+        div(class="bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800 p-6 rounded-2xl mb-8 flex items-start gap-4")
+          div(class="text-3xl") ⏳
+          div
+            h2(class="text-xl font-bold text-orange-800 dark:text-orange-200") Ya registrado
+            p(class="text-orange-700 dark:text-orange-300 mt-1") Estado: #{paciente.Visita[0].estado}.
+
       div(class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-6 rounded-2xl mb-6 flex items-center gap-4 animate-fade-in")
         div(class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl font-bold") ✓
         div
@@ -23,7 +39,7 @@ block content
             p #[strong Nombre:] #{paciente.nombre} #{paciente.apellido}
             p #[strong DNI:] #{paciente.dni}
             p #[strong Tel:] #{paciente.telefono || '-'}
-            p #[strong Dir:] #{paciente.direccion || '-'}
+            p #[strong Obra Soc:] #{paciente.obra_social || 'Particular'}
 
       div(class="bg-white dark:bg-slate-800 p-8 rounded-[2rem] shadow-lg border border-slate-200 dark:border-slate-700")
         form(action="/mesa-entrada/guardar" method="POST" class="space-y-6")
@@ -31,12 +47,13 @@ block content
           +camposVisita()
           button(type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg text-lg") ✅ Registrar Ingreso
 
+    // --- ALTA RÁPIDA (CON MIXIN) ---
     else if mostrarAlta
       div(class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 p-6 rounded-2xl mb-6 flex items-start gap-4 animate-fade-in")
         div(class="text-2xl") ⚠️
         div
           h2(class="text-lg font-bold text-amber-800 dark:text-amber-300") #{mensaje}
-          p(class="text-sm text-amber-700 dark:text-amber-400") Complete la ficha para registrarlo e ingresarlo en un solo paso.
+          p(class="text-sm text-amber-700 dark:text-amber-400") Complete la ficha para registrarlo e ingresarlo.
 
       div(class="bg-white dark:bg-slate-800 p-8 rounded-[2rem] shadow-lg border border-slate-200 dark:border-slate-700 relative overflow-hidden")
         div(class="absolute top-0 left-0 w-2 h-full bg-amber-400")
@@ -44,40 +61,15 @@ block content
         form(action="/mesa-entrada/guardar-completo" method="POST" class="space-y-8")
           
           div
-            h3(class="text-xl font-bold text-slate-800 dark:text-white mb-4 border-b pb-2 border-slate-100 dark:border-slate-700") 1. Datos del Nuevo Paciente
-            
-            div(class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4")
-              div
-                label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") DNI
-                input(type="text" name="dni" value=dniBuscado readonly class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-700 border-slate-300 text-slate-500 font-bold cursor-not-allowed")
-              div
-                label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Fecha Nacimiento
-                input(type="date" name="fecha_nacimiento" required class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white")
-
-            div(class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4")
-              div
-                label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Nombre
-                input(type="text" name="nombre" required class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white")
-              div
-                label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Apellido
-                input(type="text" name="apellido" required class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white")
-
-            div(class="grid grid-cols-1 md:grid-cols-3 gap-6")
-              div
-                label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Teléfono
-                input(type="tel" name="telefono" required placeholder="Ej: 351..." class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white")
-              div
-                label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Dirección
-                input(type="text" name="direccion" required placeholder="Calle y Nro..." class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white")
-              div
-                label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Email (Opcional)
-                input(type="email" name="email" placeholder="nombre@mail.com" class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white")
+            h3(class="text-xl font-bold text-slate-800 dark:text-white mb-4 border-b pb-2 border-slate-100 dark:border-slate-700") 1. Datos Completos
+            // USAMOS EL MIXIN (DNI readonly porque ya lo buscó)
+            +formPaciente({ dni: dniBuscado }, true)
 
           div
             h3(class="text-xl font-bold text-slate-800 dark:text-white mb-4 border-b pb-2 border-slate-100 dark:border-slate-700") 2. Datos del Ingreso
             +camposVisita()
 
-          button(type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg text-lg") 💾 Guardar Todo e Ingresar
+          button(type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg text-lg") 💾 Crear Paciente e Ingresar
 
 mixin camposVisita()
   div(class="space-y-6")
@@ -89,19 +81,19 @@ mixin camposVisita()
           div(class="p-4 text-center rounded-xl border-2 border-slate-200 peer-checked:border-red-500 peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 text-sm font-bold transition-all hover:bg-slate-50 dark:hover:bg-slate-700") 🚑 Guardia / Urgencia
         label(class="cursor-pointer")
           input(type="radio" name="tipo_ingreso" value="Turno" class="peer sr-only")
-          div(class="p-4 text-center rounded-xl border-2 border-slate-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 text-sm font-bold transition-all hover:bg-slate-50 dark:hover:bg-slate-700") 📅 Turno Programado
+          div(class="p-4 text-center rounded-xl border-2 border-slate-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 text-sm font-bold transition-all hover:bg-slate-50 dark:hover:bg-slate-700") 📅 Turno
     div
       label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Motivo de Visita
-      input(type="text" name="motivo" required placeholder="Ej: Fiebre alta, Dolor..." class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white")
+      input(type="text" name="motivo" required placeholder="Ej: Fiebre alta..." class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white")
     div
       label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Prioridad
       div(class="grid grid-cols-3 gap-3")
         label(class="cursor-pointer block")
           input(type="radio" name="prioridad" value="Baja" class="peer sr-only" checked)
-          div(class="py-2 px-3 text-center rounded-lg border border-slate-200 bg-green-50 text-green-700 peer-checked:ring-2 peer-checked:ring-green-500 peer-checked:bg-green-100 font-bold text-sm") 🟢 Baja
+          div(class="py-2 px-3 text-center rounded-lg border border-slate-200 bg-green-50 text-green-700 peer-checked:ring-2 peer-checked:ring-green-500 font-bold text-sm") 🟢 Baja
         label(class="cursor-pointer block")
           input(type="radio" name="prioridad" value="Media" class="peer sr-only")
-          div(class="py-2 px-3 text-center rounded-lg border border-slate-200 bg-yellow-50 text-yellow-700 peer-checked:ring-2 peer-checked:ring-yellow-500 peer-checked:bg-yellow-100 font-bold text-sm") 🟡 Media
+          div(class="py-2 px-3 text-center rounded-lg border border-slate-200 bg-yellow-50 text-yellow-700 peer-checked:ring-2 peer-checked:ring-yellow-500 font-bold text-sm") 🟡 Media
         label(class="cursor-pointer block")
           input(type="radio" name="prioridad" value="Alta/Emergencia" class="peer sr-only")
-          div(class="py-2 px-3 text-center rounded-lg border border-slate-200 bg-red-50 text-red-700 peer-checked:ring-2 peer-checked:ring-red-500 peer-checked:bg-red-100 font-bold text-sm") 🔴 Alta
+          div(class="py-2 px-3 text-center rounded-lg border border-slate-200 bg-red-50 text-red-700 peer-checked:ring-2 peer-checked:ring-red-500 font-bold text-sm") 🔴 Alta
