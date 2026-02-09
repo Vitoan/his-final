@@ -1,7 +1,7 @@
 const { Paciente, Visita } = require('../models');
 const { Op } = require('sequelize');
 
-// ... (dashboard se mantiene igual)
+// 1. Dashboard de Mesa de Entrada
 exports.dashboard = async (req, res) => {
     try {
         const espera = await Visita.findAll({
@@ -19,18 +19,20 @@ exports.dashboard = async (req, res) => {
     }
 };
 
-// 2. Buscar Paciente (Modificado)
+// 2. Buscar Paciente (AQUÍ ESTÁ EL ARREGLO)
 exports.buscarPaciente = async (req, res) => {
     const { dni } = req.query;
     let paciente = null;
-    let mostrarAlta = false; // Bandera para mostrar el formulario de alta
+    let mostrarAlta = false; // 📍 1. Inicializamos la bandera en falso
     let mensaje = null;
 
     if (dni) {
         paciente = await Paciente.findOne({ where: { dni } });
+        
+        // Si buscó DNI pero NO lo encontró:
         if (!paciente) {
-            mostrarAlta = true;
-            mensaje = "Paciente no encontrado. Complete el formulario para registrarlo e ingresarlo.";
+            mostrarAlta = true; // 📍 2. ¡ENCENDEMOS LA SEÑAL!
+            mensaje = "Paciente no encontrado. Complete los datos para ingresarlo.";
         }
     }
 
@@ -38,12 +40,12 @@ exports.buscarPaciente = async (req, res) => {
         title: 'Registrar Ingreso',
         paciente,
         dniBuscado: dni,
-        mostrarAlta,
+        mostrarAlta, // 📍 3. Enviamos la señal a la vista
         mensaje
     });
 };
 
-// 3. Registrar Visita (Solo visita, paciente ya existía)
+// 3. Registrar Visita (Paciente ya existe)
 exports.registrarVisita = async (req, res) => {
     try {
         await Visita.create({ ...req.body, estado: 'Esperando' });
@@ -54,29 +56,34 @@ exports.registrarVisita = async (req, res) => {
     }
 };
 
-// 4. NUEVO: Registrar Paciente Nuevo + Visita (Todo junto)
 exports.registrarCompleto = async (req, res) => {
-    const t = await require('../models').sequelize.transaction(); // Usamos transacción por seguridad
+    const t = await require('../models').sequelize.transaction();
     
     try {
+        // 1. Recibimos TODOS los datos del formulario (incluyendo telefono, direccion, email)
         const { 
-            dni, nombre, apellido, fecha_nacimiento, // Datos Paciente
-            motivo, prioridad, tipo_ingreso // Datos Visita
+            dni, nombre, apellido, fecha_nacimiento, 
+            telefono, direccion, email, // <--- CAMPOS NUEVOS
+            motivo, prioridad, tipo_ingreso 
         } = req.body;
 
-        // 1. Crear Paciente
+        // 2. Creamos el Paciente con los datos reales
         const nuevoPaciente = await Paciente.create({
-            dni, nombre, apellido, fecha_nacimiento,
-            direccion: 'A completar', // Valores por defecto para agilizar
-            telefono: 'A completar',
-            email: 'sin@email.com'
+            dni, 
+            nombre, 
+            apellido, 
+            fecha_nacimiento,
+            // Si el usuario deja vacío email, guardamos null o un string vacío
+            direccion: direccion || 'Sin especificar', 
+            telefono: telefono || 'Sin especificar',
+            email: email || null 
         }, { transaction: t });
 
-        // 2. Crear Visita vinculada
+        // 3. Creamos la Visita vinculada
         await Visita.create({
             paciente_id: nuevoPaciente.id,
-            motivo,
-            prioridad,
+            motivo, 
+            prioridad, 
             tipo_ingreso,
             estado: 'Esperando'
         }, { transaction: t });
@@ -86,13 +93,13 @@ exports.registrarCompleto = async (req, res) => {
 
     } catch (error) {
         await t.rollback();
-        console.error("Error en registro completo:", error);
-        // Podrías renderizar de nuevo con error, pero por simpleza redirigimos
+        console.error("Error al registrar completo:", error);
+        // En caso de error, volvemos al formulario (idealmente pasando los errores)
         res.redirect(`/mesa-entrada/nuevo?dni=${req.body.dni}&error=true`);
     }
 };
 
-// ... (atender se mantiene igual)
+// 5. Atender
 exports.atender = async (req, res) => {
     const { id } = req.params;
     await Visita.update({ estado: 'En Atención' }, { where: { id } });
