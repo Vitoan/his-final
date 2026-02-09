@@ -2,18 +2,18 @@ const express = require('express');
 const router = express.Router();
 const admisionController = require('../controllers/admisionController');
 
-// Listar (READ)
-router.get('/', admisionController.listarPacientes);
+// 1. Listado de Pacientes
+router.get('/', admisionController.renderIndex);
 
-// Crear (CREATE)
-router.get('/nuevo', admisionController.mostrarFormulario);
-router.post('/nuevo', admisionController.registrarPaciente);
+// 2. Crear Paciente
+router.get('/nuevo', admisionController.renderCreate); // Mostrar formulario
+router.post('/nuevo', admisionController.create);      // Guardar datos
 
-// Editar (UPDATE)
-router.get('/editar/:id', admisionController.mostrarFormularioEdicion); // Muestra el form con datos
-router.post('/editar/:id', admisionController.actualizarPaciente); // Guarda los cambios
+// 3. Editar Paciente
+router.get('/editar/:id', admisionController.renderEdit); // Mostrar formulario con datos
+router.post('/editar/:id', admisionController.update);    // Guardar cambios
 
-// Borrar (DELETE)
-router.post('/borrar/:id', admisionController.borrarPaciente);
+// 4. Borrar Paciente
+router.post('/borrar/:id', admisionController.delete);
 
 module.exports = router;
