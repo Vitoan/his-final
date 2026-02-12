@@ -54,9 +54,71 @@ exports.renderCreate = async (req, res) => {
 exports.mostrarFormularioAsignacion = async (req, res) => {
     try {
         const { idCama } = req.params;
-        const cama = await Cama.findByPk(idCama, { include: [Habitacion] });
-        const pacientes = await Paciente.findAll({ order: [['apellido', 'ASC']] });
-        res.render('internacion/assign', { title: 'Asignar Paciente', cama, pacientes });
+        
+        // 1. Buscamos la cama, SU HABITACIÓN y los COMPAÑEROS de cuarto
+        const cama = await Cama.findByPk(idCama, { 
+            include: [{ 
+                model: Habitacion,
+                include: [{
+                    model: Cama,
+                    as: 'Camas', 
+                    where: { 
+                        estado: 'Ocupada',
+                        id: { [Op.ne]: idCama } // Excluir la cama actual (por si acaso)
+                    },
+                    required: false, // Left Join (queremos la habitación aunque esté vacía)
+                    include: [{
+                        model: Internacion,
+                        where: { fecha_egreso: null, estado: 'Activa' }, // Solo internaciones vigentes
+                        required: false,
+                        include: [Paciente] // Necesitamos el sexo del paciente
+                    }]
+                }] 
+            }] 
+        });
+
+        if (!cama) return res.redirect('/habitaciones');
+
+        // 2. Determinar si hay restricción de sexo
+        let sexoRequerido = null;
+        if (cama.Habitacion.tipo === 'Compartida' && cama.Habitacion.Camas && cama.Habitacion.Camas.length > 0) {
+            // Buscamos el primer paciente activo en la habitación para definir el sexo
+            for (const c of cama.Habitacion.Camas) {
+                if (c.Internacions && c.Internacions.length > 0 && c.Internacions[0].Paciente) {
+                    sexoRequerido = c.Internacions[0].Paciente.sexo;
+                    break; // Con encontrar uno basta
+                }
+            }
+        }
+
+        // 3. Buscar Pacientes Disponibles (NO INTERNADOS) y aplicar filtro de sexo
+        const todosLosPacientes = await Paciente.findAll({ 
+            order: [['apellido', 'ASC']],
+            include: [{
+                model: Internacion,
+                where: { estado: 'Activa' },
+                required: false
+            }]
+        });
+
+        // Filtramos en memoria
+        const pacientesDisponibles = todosLosPacientes.filter(p => {
+            // A. Que no esté internado actualmente
+            const noEstaInternado = p.Internacions.length === 0;
+            
+            // B. Que cumpla con el sexo (si hay restricción)
+            const sexoCompatible = sexoRequerido ? p.sexo === sexoRequerido : true;
+
+            return noEstaInternado && sexoCompatible;
+        });
+
+        res.render('internacion/assign', { 
+            title: 'Asignar Paciente', 
+            cama, 
+            pacientes: pacientesDisponibles,
+            sexoRequerido // Pasamos esto a la vista para mostrar un aviso
+        });
+
     } catch (error) {
         console.error("Error en mostrarFormularioAsignacion:", error);
         res.redirect('/habitaciones');
