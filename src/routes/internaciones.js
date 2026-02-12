@@ -1,15 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const internacionController = require('../controllers/internacionController');
+// Cambiamos 'internacionesController' por 'internacionController'
+const internacionController = require('../controllers/internacionController'); 
 
-// 1. GET: Mostrar formulario de asignación
+// --- RUTAS ---
+// Usamos el nombre de la variable que definimos arriba
+router.get('/nuevo', internacionController.renderCreate);
+router.post('/nuevo', internacionController.create);
 router.get('/asignar/:idCama', internacionController.mostrarFormularioAsignacion);
-
-// 2. POST: Guardar asignación
-router.post('/asignar', internacionController.procesarAsignacion);
-
-// 3. POST: Dar de Alta
+router.post('/asignar', internacionController.create);
 router.post('/alta', internacionController.darAlta);
 
-// ¡ESTA LÍNEA ES CRÍTICA! Sin esto, app.js falla.
 module.exports = router;

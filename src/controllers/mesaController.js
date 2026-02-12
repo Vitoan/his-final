@@ -6,11 +6,11 @@ exports.dashboard = async (req, res) => {
     try {
         const espera = await Visita.findAll({
             where: { 
-                estado: 'Esperando',
+                estado: { [Op.or]: ['Esperando', 'En Atención'] }, 
                 createdAt: { [Op.gte]: new Date(new Date().setHours(0, 0, 0, 0)) }
             },
             include: [Paciente],
-            order: [['prioridad', 'DESC'], ['createdAt', 'ASC']]
+            order: [['estado', 'ASC'], ['prioridad', 'DESC'], ['createdAt', 'ASC']]
         });
         res.render('mesa/index', { title: 'Mesa de Entrada', espera });
     } catch (error) {
@@ -19,7 +19,7 @@ exports.dashboard = async (req, res) => {
     }
 };
 
-// 2. Buscar Paciente (Con Alertas de Internación/Guardia)
+// 2. Buscar Paciente
 exports.buscarPaciente = async (req, res) => {
     const { dni } = req.query;
     let paciente = null;
@@ -59,7 +59,7 @@ exports.buscarPaciente = async (req, res) => {
     });
 };
 
-// 3. Registrar Visita (Paciente ya existe)
+// 3. Registrar Visita
 exports.registrarVisita = async (req, res) => {
     try {
         await Visita.create({ ...req.body, estado: 'Esperando' });
@@ -70,7 +70,7 @@ exports.registrarVisita = async (req, res) => {
     }
 };
 
-// 4. Registrar Completo (Paciente Nuevo + Visita)
+// 4. Registrar Completo
 exports.registrarCompleto = async (req, res) => {
     const t = await sequelize.transaction();
     
@@ -81,7 +81,6 @@ exports.registrarCompleto = async (req, res) => {
             motivo, prioridad, tipo_ingreso 
         } = req.body;
 
-        // Crear Paciente
         const nuevoPaciente = await Paciente.create({
             dni, nombre, apellido, fecha_nacimiento, sexo,
             direccion: direccion || 'No especificada', 
@@ -91,7 +90,6 @@ exports.registrarCompleto = async (req, res) => {
             numero_afiliado
         }, { transaction: t });
 
-        // Crear Visita
         await Visita.create({
             paciente_id: nuevoPaciente.id,
             motivo, prioridad, tipo_ingreso,
@@ -108,9 +106,45 @@ exports.registrarCompleto = async (req, res) => {
     }
 };
 
-// 5. Atender (Sacar de lista)
+// 5. Atender
 exports.atender = async (req, res) => {
     const { id } = req.params;
-    await Visita.update({ estado: 'En Atención' }, { where: { id } });
-    res.redirect('/mesa-entrada');
+    try {
+        await Visita.update({ estado: 'En Atención' }, { where: { id } });
+        res.redirect('/mesa-entrada');
+    } catch (error) {
+        console.error("Error al atender:", error);
+        res.redirect('/mesa-entrada');
+    }
+};
+
+// 6. Finalizar Visita (Alta a Casa)
+exports.finalizar = async (req, res) => {
+    const { id } = req.params;
+    try {
+        await Visita.update({ estado: 'Finalizado' }, { where: { id } });
+        res.redirect('/mesa-entrada');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/mesa-entrada');
+    }
+};
+
+// 7. Derivar a Internación (ESTA ES LA QUE FALTABA)
+exports.internar = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const visita = await Visita.findByPk(id);
+        if (!visita) return res.redirect('/mesa-entrada');
+
+        // Cerramos la guardia como "Internado"
+        await visita.update({ estado: 'Internado' });
+
+        // Redirigimos a la pantalla de asignar cama
+        res.redirect(`/internacion/nuevo?paciente_id=${visita.paciente_id}`);
+
+    } catch (error) {
+        console.error("Error al derivar:", error);
+        res.redirect('/mesa-entrada');
+    }
 };

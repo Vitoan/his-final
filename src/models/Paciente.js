@@ -13,7 +13,7 @@ const Paciente = sequelize.define('Paciente', {
     dni: { 
         type: DataTypes.STRING, 
         unique: true,
-        allowNull: false
+        allowNull: false 
     },
     fecha_nacimiento: { 
         type: DataTypes.DATEONLY 
@@ -25,10 +25,10 @@ const Paciente = sequelize.define('Paciente', {
     obra_social: { 
         type: DataTypes.STRING 
     },
-    numero_afiliado: { // Agregamos este campo que usas en la vista
+    // --- CAMPOS NUEVOS QUE FALTABAN ---
+    numero_afiliado: {
         type: DataTypes.STRING
     },
-    // --- NUEVOS CAMPOS DE CONTACTO ---
     direccion: {
         type: DataTypes.STRING,
         defaultValue: 'No especificada'
@@ -41,7 +41,7 @@ const Paciente = sequelize.define('Paciente', {
         type: DataTypes.STRING,
         allowNull: true,
         validate: {
-            isEmail: true 
+            isEmail: true // Valida que sea un email real
         }
     }
 }, { 

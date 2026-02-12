@@ -1,124 +1,100 @@
-const { Internacion, Cama, Paciente, Habitacion, Usuario, Auditoria } = require('../models');
+const { Internacion, Cama, Paciente, Habitacion, Auditoria } = require('../models');
+const { Op } = require('sequelize');
 
-// 1. Mostrar Formulario de Asignación
-exports.mostrarFormularioAsignacion = async (req, res) => {
-    const { idCama } = req.params;
+// A. Mostrar formulario para el flujo desde GUARDIA (Botón "Internar")
+exports.renderCreate = async (req, res) => {
     try {
-        const cama = await Cama.findByPk(idCama, { include: [Habitacion] });
-        
-        // Traemos los pacientes ordenados alfabéticamente para facilitar la búsqueda
-        const pacientes = await Paciente.findAll({
-            order: [['apellido', 'ASC']]
-        }); 
+        const { paciente_id } = req.query;
+        let paciente = null;
+        if (paciente_id) {
+            paciente = await Paciente.findByPk(paciente_id);
+        }
 
-        res.render('internacion/assign', {
-            title: 'Asignar Paciente',
-            cama,
-            habitacion: cama.Habitacion,
-            pacientes
+        const camas = await Cama.findAll({
+            where: { estado: 'Disponible' },
+            include: [{
+                model: Habitacion,
+                include: [{
+                    model: Cama,
+                    as: 'Camas', 
+                    where: { estado: 'Ocupada' },
+                    required: false,
+                    include: [{
+                        model: Internacion,
+                        where: { fecha_egreso: null },
+                        required: false,
+                        include: [Paciente]
+                    }]
+                }]
+            }],
+            order: [[Habitacion, 'numero', 'ASC'], ['numero_cama', 'ASC']]
         });
+
+        const camasProcesadas = camas.map(cama => {
+            let incompatible = false;
+            let generoPresente = null;
+            if (cama.Habitacion && cama.Habitacion.tipo === 'Compartida' && paciente) {
+                cama.Habitacion.Camas.forEach(c => {
+                    const internacion = c.Internacions ? c.Internacions[0] : null;
+                    if (internacion && internacion.Paciente) generoPresente = internacion.Paciente.sexo;
+                });
+                if (generoPresente && generoPresente !== paciente.sexo) incompatible = true;
+            }
+            return { ...cama.get({ plain: true }), incompatible };
+        });
+
+        res.render('internacion/create', { title: 'Nueva Internación', paciente, camas: camasProcesadas });
     } catch (error) {
-        console.error(error);
+        console.error("Error en renderCreate:", error);
+        res.redirect('/mesa-entrada');
+    }
+};
+
+// B. Mostrar formulario para asignar desde el MAPA DE CAMAS
+exports.mostrarFormularioAsignacion = async (req, res) => {
+    try {
+        const { idCama } = req.params;
+        const cama = await Cama.findByPk(idCama, { include: [Habitacion] });
+        const pacientes = await Paciente.findAll({ order: [['apellido', 'ASC']] });
+        res.render('internacion/assign', { title: 'Asignar Paciente', cama, pacientes });
+    } catch (error) {
+        console.error("Error en mostrarFormularioAsignacion:", error);
         res.redirect('/habitaciones');
     }
 };
 
-// 2. Procesar Internación (Con validación de sexo y Auditoría)
-exports.procesarAsignacion = async (req, res) => {
-    const { cama_id, paciente_id, motivo } = req.body;
-
+// C. Función única para GUARDAR la internación (POST)
+exports.create = async (req, res) => {
     try {
-        // A. Validar Sexo en Habitación Compartida
-        const camaObjetivo = await Cama.findByPk(cama_id, { include: [Habitacion] });
-        const pacienteNuevo = await Paciente.findByPk(paciente_id);
+        const { cama_id, paciente_id, diagnostico, motivo } = req.body;
+        const motivoFinal = diagnostico || motivo;
 
-        if (camaObjetivo.Habitacion.tipo === 'Compartida') {
-            // Buscamos las OTRAS camas de esa habitación que estén OCUPADAS
-            const camasVecinas = await Cama.findAll({
-                where: { 
-                    habitacion_id: camaObjetivo.habitacion_id,
-                    estado: 'Ocupada',
-                    id: { [require('sequelize').Op.ne]: cama_id } // Excluir la cama actual por si acaso
-                },
-                include: [{
-                    model: Internacion,
-                    where: { estado: 'Activa' },
-                    include: [Paciente] // Necesitamos el sexo del vecino
-                }]
-            });
-
-            // Verificamos sexo contra los vecinos
-            for (const vecina of camasVecinas) {
-                // Validación defensiva: asegurar que existe internación y paciente
-                if (vecina.Internacions && vecina.Internacions.length > 0) {
-                    const vecino = vecina.Internacions[0].Paciente;
-                    
-                    if (vecino.sexo !== pacienteNuevo.sexo) {
-                        
-                        const errorMsg = `CONFLICTO DE GÉNERO: La habitación ya está ocupada por un paciente (${vecino.sexo}). No se puede ingresar un paciente (${pacienteNuevo.sexo}).`;
-                        return res.redirect('/habitaciones?error=' + encodeURIComponent(errorMsg));
-                    }
-                }
-            }
-        }
-
-        // B. Crear Internación
         await Internacion.create({
             paciente_id,
             cama_id,
-            motivo,
+            motivo: motivoFinal,
+            fecha_ingreso: new Date(),
             estado: 'Activa'
         });
 
-        // C. Actualizar estado de la Cama a OCUPADA
         await Cama.update({ estado: 'Ocupada' }, { where: { id: cama_id } });
-
-        // D. Auditoría (Registro de seguridad)
-        if (req.session.usuario) {
-            await Auditoria.create({
-                accion: 'Ingreso Paciente',
-                detalles: `Paciente ${pacienteNuevo.apellido} ingresado en cama ${camaObjetivo.numero_cama} por ${req.session.usuario.nombre}`,
-                usuario_id: req.session.usuario.id
-            });
-        }
-
-        // Éxito: volver al mapa
+        
         res.redirect('/habitaciones');
-
     } catch (error) {
-        console.error(error);
-        // Si hay error técnico, también volvemos al mapa con el mensaje
-        res.redirect('/habitaciones?error=' + encodeURIComponent("Error del sistema: " + error.message));
+        console.error("Error en create:", error);
+        res.redirect('/mesa-entrada');
     }
 };
 
-// 3. Dar de Alta
+// D. Función para dar de ALTA
 exports.darAlta = async (req, res) => {
-    const { cama_id } = req.body;
     try {
-        // A. Cerrar la internación (poner fecha de egreso)
-        await Internacion.update(
-            { estado: 'Alta', fecha_egreso: new Date() },
-            { where: { cama_id, estado: 'Activa' } }
-        );
-
-        // B. Ciclo de Limpieza: La cama NO queda disponible, pasa a LIMPIEZA
-        
-        await Cama.update({ estado: 'Limpieza' }, { where: { id: cama_id } }); 
-
-        // C. Auditoría de Alta
-        if (req.session.usuario) {
-             const cama = await Cama.findByPk(cama_id);
-             await Auditoria.create({
-                accion: 'Alta Paciente',
-                detalles: `Se liberó la cama ${cama ? cama.numero_cama : 'N/A'} (Pasa a Limpieza)`,
-                usuario_id: req.session.usuario.id
-            });
-        }
-
+        const { cama_id } = req.body;
+        await Internacion.update({ estado: 'Alta', fecha_egreso: new Date() }, { where: { cama_id, estado: 'Activa' } });
+        await Cama.update({ estado: 'Limpieza' }, { where: { id: cama_id } });
         res.redirect('/habitaciones');
     } catch (error) {
-        console.error(error);
-        res.redirect('/habitaciones?error=' + encodeURIComponent("Error al dar de alta"));
+        console.error("Error en darAlta:", error);
+        res.redirect('/habitaciones');
     }
 };
