@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 12-02-2026 a las 13:08:17
+-- Tiempo de generación: 12-02-2026 a las 20:34:32
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -61,7 +61,7 @@ INSERT INTO `camas` (`id`, `numero_cama`, `estado`, `habitacion_id`) VALUES
 (2, 2012, 'Disponible', 1),
 (3, 2021, 'Ocupada', 2),
 (4, 2022, 'Disponible', 2),
-(5, 3001, 'Limpieza', 3);
+(5, 3011, 'Disponible', 3);
 
 -- --------------------------------------------------------
 
@@ -86,7 +86,7 @@ CREATE TABLE `evolucions` (
 --
 
 INSERT INTO `evolucions` (`id`, `tipo`, `nota`, `signos_vitales`, `fecha`, `createdAt`, `updatedAt`, `internacion_id`, `autor_id`) VALUES
-(1, 'Medico', 'Paciente estable.', NULL, '2026-02-12 09:03:18', '2026-02-12 09:03:18', '2026-02-12 09:03:18', 1, 2);
+(1, 'Medico', 'Paciente evoluciona favorablemente sin signos de infección.', NULL, '2026-02-12 16:33:45', '2026-02-12 16:33:45', '2026-02-12 16:33:45', 1, 2);
 
 -- --------------------------------------------------------
 
@@ -107,7 +107,7 @@ CREATE TABLE `habitacions` (
 INSERT INTO `habitacions` (`id`, `numero`, `tipo`) VALUES
 (1, '201', 'Compartida'),
 (2, '202', 'Compartida'),
-(3, '300', 'Individual');
+(3, '301', 'Individual');
 
 -- --------------------------------------------------------
 
@@ -132,8 +132,8 @@ CREATE TABLE `internacions` (
 --
 
 INSERT INTO `internacions` (`id`, `motivo`, `estado`, `fecha_ingreso`, `fecha_egreso`, `createdAt`, `updatedAt`, `paciente_id`, `cama_id`) VALUES
-(1, 'Neumonía', 'Activa', '2026-02-12 09:03:18', NULL, '2026-02-12 09:03:18', '2026-02-12 09:03:18', 1, 1),
-(2, 'Fractura', 'Activa', '2026-02-12 09:03:18', NULL, '2026-02-12 09:03:18', '2026-02-12 09:03:18', 2, 3);
+(1, 'Control Post-Operatorio', 'Activa', '2026-02-12 16:33:45', NULL, '2026-02-12 16:33:45', '2026-02-12 16:33:45', 1, 1),
+(2, 'Observación por Cuadro Febril', 'Activa', '2026-02-12 16:33:45', NULL, '2026-02-12 16:33:45', '2026-02-12 16:33:45', 2, 3);
 
 -- --------------------------------------------------------
 
@@ -162,10 +162,10 @@ CREATE TABLE `pacientes` (
 --
 
 INSERT INTO `pacientes` (`id`, `nombre`, `apellido`, `dni`, `fecha_nacimiento`, `sexo`, `obra_social`, `numero_afiliado`, `direccion`, `telefono`, `email`, `createdAt`, `updatedAt`) VALUES
-(1, 'Juan', 'Perez', '11111', '1980-01-01', 'M', NULL, NULL, 'No especificada', 'No especificado', NULL, '2026-02-12 09:03:18', '2026-02-12 09:03:18'),
-(2, 'Ana', 'Gomez', '22222', '1985-01-01', 'F', NULL, NULL, 'No especificada', 'No especificado', NULL, '2026-02-12 09:03:18', '2026-02-12 09:03:18'),
-(3, 'Pedro', 'Masculino', '88888', '1990-01-01', 'M', NULL, NULL, 'No especificada', 'No especificado', NULL, '2026-02-12 09:03:18', '2026-02-12 09:03:18'),
-(4, 'Lucia', 'Femenino', '99999', '1992-01-01', 'F', NULL, NULL, 'No especificada', 'No especificado', NULL, '2026-02-12 09:03:18', '2026-02-12 09:03:18');
+(1, 'Juan', 'Perez', '11111', '1980-05-15', 'M', 'OSDE', '1-4455-2', 'No especificada', 'No especificado', NULL, '2026-02-12 16:33:45', '2026-02-12 16:33:45'),
+(2, 'Ana', 'Gomez', '22222', '1992-08-20', 'F', 'Swiss Medical', 'SM-9988', 'No especificada', 'No especificado', NULL, '2026-02-12 16:33:45', '2026-02-12 16:33:45'),
+(3, 'Pedro', 'Ramirez', '33333', '1975-10-10', 'M', NULL, NULL, 'No especificada', '11-4455-6677', NULL, '2026-02-12 16:33:45', '2026-02-12 16:33:45'),
+(4, 'Lucia', 'Fermin', '44444', '1995-03-12', 'F', NULL, NULL, 'Av. Siempre Viva 742', 'No especificado', NULL, '2026-02-12 16:33:45', '2026-02-12 16:33:45');
 
 -- --------------------------------------------------------
 
@@ -188,9 +188,9 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `rol`, `createdAt`, `updatedAt`) VALUES
-(1, 'Director', 'admin@his.com', '$2b$10$/1/B89u2TXlfvg..9A.SPuiaFssmZzL5LKck1PTXLVd0y53Oaez/.', 'Admin', '2026-02-12 09:03:18', '2026-02-12 09:03:18'),
-(2, 'Dr. House', 'medico@his.com', '$2b$10$/1/B89u2TXlfvg..9A.SPuiaFssmZzL5LKck1PTXLVd0y53Oaez/.', 'Medico', '2026-02-12 09:03:18', '2026-02-12 09:03:18'),
-(3, 'Enf. Joy', 'enfermera@his.com', '$2b$10$/1/B89u2TXlfvg..9A.SPuiaFssmZzL5LKck1PTXLVd0y53Oaez/.', 'Enfermeria', '2026-02-12 09:03:18', '2026-02-12 09:03:18');
+(1, 'Admin HIS', 'admin@his.com', '$2b$10$q2Ol5aCYuuSJLU5skuXBtejbzOm3KdnkBYCGSvxur8CBbUTVR7.VC', 'Admin', '2026-02-12 16:33:45', '2026-02-12 16:33:45'),
+(2, 'Dr. Gregory House', 'medico@his.com', '$2b$10$q2Ol5aCYuuSJLU5skuXBtejbzOm3KdnkBYCGSvxur8CBbUTVR7.VC', 'Medico', '2026-02-12 16:33:45', '2026-02-12 16:33:45'),
+(3, 'Enf. Joy', 'enfermera@his.com', '$2b$10$q2Ol5aCYuuSJLU5skuXBtejbzOm3KdnkBYCGSvxur8CBbUTVR7.VC', 'Enfermeria', '2026-02-12 16:33:45', '2026-02-12 16:33:45');
 
 -- --------------------------------------------------------
 
@@ -208,6 +208,14 @@ CREATE TABLE `visitas` (
   `updatedAt` datetime NOT NULL,
   `paciente_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `visitas`
+--
+
+INSERT INTO `visitas` (`id`, `motivo`, `prioridad`, `estado`, `tipo_ingreso`, `createdAt`, `updatedAt`, `paciente_id`) VALUES
+(1, 'Dolor abdominal fuerte', 'Media', 'Esperando', 'Guardia', '2026-02-12 16:33:45', '2026-02-12 16:33:45', 3),
+(2, 'Fractura de muñeca', 'Alta/Emergencia', 'En Atención', 'Guardia', '2026-02-12 16:33:45', '2026-02-12 16:33:45', 4);
 
 --
 -- Índices para tablas volcadas
@@ -254,16 +262,14 @@ ALTER TABLE `internacions`
 --
 ALTER TABLE `pacientes`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `dni` (`dni`),
-  ADD UNIQUE KEY `dni_2` (`dni`);
+  ADD UNIQUE KEY `dni` (`dni`);
 
 --
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`),
-  ADD UNIQUE KEY `email_2` (`email`);
+  ADD UNIQUE KEY `email` (`email`);
 
 --
 -- Indices de la tabla `visitas`
@@ -322,7 +328,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `visitas`
 --
 ALTER TABLE `visitas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restricciones para tablas volcadas
@@ -332,32 +338,27 @@ ALTER TABLE `visitas`
 -- Filtros para la tabla `auditoria`
 --
 ALTER TABLE `auditoria`
-  ADD CONSTRAINT `auditoria_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `auditoria_ibfk_2` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `auditoria_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `camas`
 --
 ALTER TABLE `camas`
-  ADD CONSTRAINT `camas_ibfk_1` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_2` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `camas_ibfk_1` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `evolucions`
 --
 ALTER TABLE `evolucions`
   ADD CONSTRAINT `evolucions_ibfk_1` FOREIGN KEY (`internacion_id`) REFERENCES `internacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_2` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_3` FOREIGN KEY (`internacion_id`) REFERENCES `internacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_4` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `evolucions_ibfk_2` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `internacions`
 --
 ALTER TABLE `internacions`
-  ADD CONSTRAINT `internacions_ibfk_2` FOREIGN KEY (`cama_id`) REFERENCES `camas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `internacions_ibfk_3` FOREIGN KEY (`paciente_id`) REFERENCES `pacientes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `internacions_ibfk_4` FOREIGN KEY (`cama_id`) REFERENCES `camas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `internacions_ibfk_1` FOREIGN KEY (`paciente_id`) REFERENCES `pacientes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `internacions_ibfk_2` FOREIGN KEY (`cama_id`) REFERENCES `camas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `visitas`
