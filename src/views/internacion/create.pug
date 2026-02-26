@@ -14,7 +14,15 @@ block content
       div
         p(class="text-sm text-blue-600 font-bold uppercase tracking-wide") Cama Seleccionada
         p(class="text-xl font-bold text-slate-900") Cama Número #{cama.numero_cama}
-
+if generoRestringido
+      div(class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-8 rounded-r-2xl shadow-sm")
+        div(class="flex items-center gap-3")
+          span(class="text-2xl") ⚠️
+          div
+            p(class="text-sm text-yellow-800 font-bold uppercase tracking-wide") Habitación Segmentada por Sexo
+            p(class="text-xs text-yellow-700 mt-1") Esta habitación compartida ya está ocupada por un paciente de sexo 
+              strong #{generoRestringido === 'M' ? 'Masculino' : 'Femenino'}
+              | . La lista de pacientes se ha filtrado automáticamente para mostrar solo opciones compatibles.
     //- Formulario
     form(action="/internacion/nueva" method="POST" class="bg-white border border-slate-200 shadow-sm rounded-2xl p-8 space-y-6")
       //- Campo oculto para mandar el ID de la cama al backend
