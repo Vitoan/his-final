@@ -1,0 +1,49 @@
+extends ../layouts/main
+
+block content
+  div(class="max-w-3xl mx-auto mt-10 mb-10")
+    div(class="mb-8 flex justify-between items-center")
+      div
+        h2(class="text-xs font-bold text-sky-500 uppercase tracking-widest mb-1") Consultorios Externos
+        h1(class="text-3xl font-black text-slate-900") Agendar Nuevo Turno
+      a(href="/turnos" class="bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl hover:bg-slate-300 transition") Volver a la Agenda
+
+    form(action="/turnos/nuevo" method="POST" class="bg-white border border-slate-200 shadow-sm rounded-3xl p-8 space-y-6")
+      
+      div
+        label(class="block text-sm font-bold text-slate-700 mb-2") Seleccionar Paciente
+        select(name="paciente_id" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-sky-500 outline-none" required)
+          option(value="" disabled selected) -- Buscar en el padrón --
+          each paciente in pacientes
+            option(value=paciente.id) #{paciente.apellido}, #{paciente.nombre} (DNI: #{paciente.dni || 'NN'})
+
+      div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") Fecha del Turno
+          input(type="date" name="fecha" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-sky-500 outline-none" required)
+        
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") Hora
+          input(type="time" name="hora" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-sky-500 outline-none" required)
+
+      div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") Profesional Asignado
+          select(name="medico_id" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-sky-500 outline-none" required)
+            option(value="" disabled selected) -- Seleccionar Médico --
+            if medicos && medicos.length > 0
+              each medico in medicos
+                option(value=medico.id) Dr/a. #{medico.apellido}, #{medico.nombre}
+            else
+              option(value="" disabled) No hay médicos registrados en el sistema
+        
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") Especialidad
+          input(type="text" name="especialidad" placeholder="Ej: Cardiología, Clínica..." class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-sky-500 outline-none" required)
+
+      div
+        label(class="block text-sm font-bold text-slate-700 mb-2") Motivo de la Consulta (Opcional)
+        input(type="text" name="motivo" placeholder="Ej: Control de rutina, dolor abdominal..." class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-sky-500 outline-none")
+
+      div(class="pt-6 border-t border-slate-100")
+        button(type="submit" class="w-full bg-sky-600 text-white font-bold py-4 rounded-xl hover:bg-sky-700 shadow-md transition text-lg") Confirmar Turno

@@ -1,0 +1,45 @@
+extends ../layouts/main
+
+block content
+  div(class="max-w-7xl mx-auto mt-6 mb-10")
+    div(class="flex justify-between items-end mb-8")
+      div
+        h2(class="text-xs font-bold text-fuchsia-500 uppercase tracking-widest mb-1") Diagnóstico
+        h1(class="text-4xl font-black text-slate-900") Estudios Médicos
+      a(href="/estudios/nuevo" class="bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-colors") + Solicitar Estudio
+
+    div(class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm")
+      table(class="w-full text-left border-collapse")
+        thead(class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider")
+          tr
+            th(class="p-5 font-bold") Fecha
+            th(class="p-5 font-bold") Paciente
+            th(class="p-5 font-bold") Tipo de Estudio
+            th(class="p-5 font-bold") Solicitante
+            th(class="p-5 font-bold text-center") Estado
+            th(class="p-5 font-bold text-center") Acción
+        tbody(class="divide-y divide-slate-100")
+          if estudios && estudios.length > 0
+            each estudio in estudios
+              tr(class="hover:bg-slate-50 transition-colors")
+                td(class="p-5 font-bold text-slate-700 text-sm") #{new Date(estudio.fecha_solicitud).toLocaleDateString()}
+                td(class="p-5")
+                  p(class="font-bold text-slate-900") #{estudio.Paciente ? estudio.Paciente.apellido + ', ' + estudio.Paciente.nombre : 'Paciente Eliminado'}
+                td(class="p-5")
+                  p(class="font-bold text-fuchsia-700") #{estudio.tipo_estudio}
+                  p(class="text-xs text-slate-500 mt-1 line-clamp-1") #{estudio.descripcion}
+                td(class="p-5 text-sm font-bold text-slate-600") Dr/a. #{estudio.Medico ? estudio.Medico.apellido : 'N/A'}
+                td(class="p-5 text-center")
+                  if estudio.estado === 'Pendiente'
+                    span(class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-lg animate-pulse") ⏳ Pendiente
+                  else if estudio.estado === 'Realizado'
+                    span(class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-lg") ✅ Realizado
+                td(class="p-5 text-center")
+                  if estudio.estado === 'Pendiente'
+                    a(href=`/estudios/${estudio.id}/resultado` class="bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-200 border border-fuchsia-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors") Cargar Resultado
+                  else
+                    //- Si ya está realizado, podría ser un botón para "Ver Informe" (lo haremos visualizando un alert simple por ahora)
+                    button(onclick=`alert('RESULTADO:\\n${estudio.resultado}')` class="bg-slate-100 text-slate-700 hover:bg-slate-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors") Ver Informe
+          else
+            tr
+              td(colspan="6" class="p-10 text-center text-slate-500 font-bold") No hay estudios solicitados en el sistema.

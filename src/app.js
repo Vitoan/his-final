@@ -60,9 +60,59 @@ app.use('/clinica', authMiddleware, clinicaRoutes);
 app.use('/admin', authMiddleware, adminRoutes);
 app.use('/api', authMiddleware, apiRoutes);
 app.use('/mesa-entrada', authMiddleware, require('./routes/mesa'));
+app.use('/turnos', authMiddleware, require('./routes/turnos'));
+app.use('/estudios', authMiddleware, require('./routes/estudios'));
 
 // --- CAMBIO IMPORTANTE AQUÍ ---
 // Ruta Raíz: Si está logueado, muestra el INDEX (Menú Principal), no Admisión.
+// --- RUTA DE RESCATE (Para crear usuarios de prueba) ---
+app.get('/setup-usuarios', async (req, res) => {
+    try {
+        const { Usuario } = require('./models');
+        
+        // Dependiendo de la librería que uses en tu proyecto para las contraseñas,
+        // puede que necesites cambiar 'bcryptjs' por 'bcrypt'.
+        const bcrypt = require('bcryptjs'); 
+        const passwordHash = await bcrypt.hash('123456', 10);
+
+        // 1. Creamos un Administrador
+        await Usuario.findOrCreate({
+            where: { email: 'admin@his.com' },
+            defaults: {
+                nombre: 'Admin',
+                apellido: 'Sistema',
+                email: 'admin@his.com',
+                password: passwordHash,
+                rol: 'Admin' // o el rol de administrador que manejes
+            }
+        });
+
+        // 2. Creamos un Médico (Fundamental para poder agendar turnos)
+        await Usuario.findOrCreate({
+            where: { email: 'medico@his.com' },
+            defaults: {
+                nombre: 'Gregory',
+                apellido: 'House',
+                email: 'medico@his.com',
+                password: passwordHash,
+                rol: 'Medico'
+            }
+        });
+
+        res.send(`
+            <h1>✅ ¡Usuarios creados con éxito!</h1>
+            <p>Ya puedes iniciar sesión con:</p>
+            <ul>
+                <li><b>Email:</b> admin@his.com o medico@his.com</li>
+                <li><b>Contraseña:</b> 123456</li>
+            </ul>
+            <a href="/auth/login" style="padding: 10px; background: blue; color: white; text-decoration: none; border-radius: 5px;">Ir al Login</a>
+        `);
+    } catch (error) {
+        res.send('Hubo un error (revisa tu consola): ' + error.message);
+        console.error(error);
+    }
+});
 app.get('/', (req, res) => {
     if (req.session.usuario) {
         // Renderiza la vista 'src/views/index.pug'

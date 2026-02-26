@@ -1,0 +1,55 @@
+extends ../layouts/main
+
+block content
+  div(class="max-w-7xl mx-auto mt-6 mb-10")
+    div(class="flex justify-between items-end mb-8")
+      div
+        h2(class="text-xs font-bold text-sky-500 uppercase tracking-widest mb-1") Consultorios Externos
+        h1(class="text-4xl font-black text-slate-900") Agenda de Turnos
+      a(href="/turnos/nuevo" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-colors") + Agendar Turno
+
+    div(class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm")
+      table(class="w-full text-left border-collapse")
+        thead(class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider")
+          tr
+            th(class="p-5 font-bold") Fecha y Hora
+            th(class="p-5 font-bold") Paciente
+            th(class="p-5 font-bold") Especialidad / Médico
+            th(class="p-5 font-bold text-center") Estado
+            th(class="p-5 font-bold text-center") Acciones
+        tbody(class="divide-y divide-slate-100")
+          if turnos && turnos.length > 0
+            each turno in turnos
+              tr(class="hover:bg-slate-50 transition-colors")
+                td(class="p-5")
+                  p(class="font-bold text-slate-800 text-lg") #{new Date(turno.fecha + 'T00:00:00').toLocaleDateString()}
+                  p(class="text-sm font-bold text-sky-600") 🕒 #{turno.hora.substring(0, 5)} hs
+                td(class="p-5")
+                  p(class="font-bold text-slate-900") #{turno.Paciente ? turno.Paciente.apellido + ', ' + turno.Paciente.nombre : 'Paciente Eliminado'}
+                  if turno.motivo
+                    p(class="text-xs text-slate-500 mt-1 line-clamp-1") Motivo: #{turno.motivo}
+                td(class="p-5")
+                  p(class="font-bold text-slate-700") #{turno.especialidad}
+                  p(class="text-xs text-slate-500") Dr/a. #{turno.Medico ? turno.Medico.apellido : 'Sin asignar'}
+                td(class="p-5 text-center")
+                  if turno.estado === 'Programado'
+                    span(class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-lg") Programado
+                  else if turno.estado === 'Asistió'
+                    span(class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-lg") ✔️ Asistió
+                  else
+                    span(class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1.5 rounded-lg") ❌ Cancelado
+                td(class="p-5")
+                  if turno.estado === 'Programado'
+                    div(class="flex justify-center gap-2")
+                      form(action=`/turnos/${turno.id}/estado` method="POST")
+                        input(type="hidden" name="estado" value="Asistió")
+                        button(type="submit" class="bg-green-50 text-green-700 hover:bg-green-200 border border-green-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors" title="Marcar como Asistió") ✔️
+                      
+                      form(action=`/turnos/${turno.id}/estado` method="POST" onsubmit="return confirm('¿Seguro que desea cancelar este turno?');")
+                        input(type="hidden" name="estado" value="Cancelado")
+                        button(type="submit" class="bg-red-50 text-red-700 hover:bg-red-200 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors" title="Cancelar Turno") ❌
+                  else
+                    p(class="text-center text-xs text-slate-400 font-bold") Cerrado
+          else
+            tr
+              td(colspan="5" class="p-10 text-center text-slate-500 font-bold") No hay turnos programados en la agenda.
