@@ -1,99 +1,58 @@
 extends ../layouts/main
 
 block content
-  div(class="max-w-7xl mx-auto")
-    
-    // --- ENCABEZADO ---
-    div(class="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-4 mb-8")
-      div
-        h1(class="text-3xl font-bold text-slate-900 dark:text-white") Mesa de <span class="text-indigo-600 dark:text-indigo-400">Entrada</span>
-        p(class="text-slate-500 dark:text-slate-400 text-sm mt-1") Gestión de flujo de pacientes en tiempo real
-  
-      a(href="/mesa-entrada/nuevo" class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-1 flex items-center gap-2") 
-        span +
-        | Registrar Llegada
+  div(class="max-w-7xl mx-auto mt-6 mb-10")
+    div(class="mb-8")
+      h2(class="text-xs font-bold text-blue-500 uppercase tracking-widest mb-1") Recepción y Triage
+      h1(class="text-4xl font-black text-slate-900") Mesa de Entrada
 
-    // --- TABLERO DE CONTROL ---
-    
-    div(class="bg-white dark:bg-slate-800 rounded-[2rem] p-6 md:p-8 shadow-sm border border-slate-200 dark:border-slate-700")
-      
-      div(class="flex items-center justify-between mb-6")
-        h2(class="text-xl font-bold flex items-center gap-2 dark:text-white") 
-          span 🕒
-          | Pacientes en Espera (Tiempo Real)
-        
-        span(class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1 rounded-full text-xs font-bold") #{espera.length} Activos
+    //- BOTONES DE ACCIÓN RÁPIDA
+    div(class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12")
+      //- Botón 1: Ingreso Normal
+      a(href="/mesa-entrada/nuevo" class="bg-white border-2 border-blue-100 p-6 rounded-[2rem] shadow-sm hover:shadow-md hover:border-blue-300 transition-all flex flex-col items-center text-center group")
+        div(class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform") 📝
+        h3(class="font-bold text-slate-800 text-lg") Registrar Visita / Turno
+        p(class="text-sm text-slate-500 mt-2") Buscar paciente e ingresarlo a la sala de espera.
 
-      if espera.length > 0
-        div(class="grid gap-4")
-          each visita in espera
-            //- Lógica de Estilo: Resaltar si está En Atención
-            - const isAtencion = visita.estado === 'En Atención'
-            - const cardClass = isAtencion ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800' : 'bg-slate-50 dark:bg-slate-700/30 border-slate-200 dark:border-slate-700'
-            
-            div(class=`flex flex-col md:flex-row md:items-center justify-between p-5 rounded-2xl border transition-all ${cardClass}`)
-              
-              // 1. DATOS DEL PACIENTE
-              div(class="flex items-start gap-4 mb-4 md:mb-0")
-                // Avatar
-                div(class=`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-lg shadow-sm ${isAtencion ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300' : 'bg-white text-slate-600 dark:bg-slate-600 dark:text-slate-200'}`)
-                   | #{visita.Paciente.nombre.charAt(0)}#{visita.Paciente.apellido.charAt(0)}
-                
-                div
-                  h3(class="font-bold text-lg dark:text-white flex items-center gap-2") 
-                    | #{visita.Paciente.nombre} #{visita.Paciente.apellido}
-                    if isAtencion
-                       span(class="text-[10px] uppercase tracking-wider bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200 font-bold") En Consultorio
-                  
-                  p(class="text-sm text-slate-500 dark:text-slate-400 mt-0.5") 
-                    span(class="font-medium text-slate-700 dark:text-slate-300") Motivo: 
-                    | #{visita.motivo}
-              
-              // 2. ESTADO Y PRIORIDAD
-              div(class="flex flex-wrap items-center gap-3 md:gap-6")
-                
-                // Prioridad
-                div
-                  if visita.prioridad === 'Alta/Emergencia'
-                    span(class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-100 text-red-700 text-xs font-bold border border-red-200 animate-pulse") 
-                       span 🚨 Alta
-                  else if visita.prioridad === 'Media'
-                    span(class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-yellow-100 text-yellow-700 text-xs font-bold border border-yellow-200") 
-                       span ⚠️ Media
-                  else
-                    span(class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-100 text-green-700 text-xs font-bold border border-green-200") 
-                       span 🟢 Baja
+      //- Botón 2: Padrón
+      a(href="/admision" class="bg-white border-2 border-indigo-100 p-6 rounded-[2rem] shadow-sm hover:shadow-md hover:border-indigo-300 transition-all flex flex-col items-center text-center group")
+        div(class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform") 🗂️
+        h3(class="font-bold text-slate-800 text-lg") Padrón de Pacientes
+        p(class="text-sm text-slate-500 mt-2") Ver, editar o actualizar historias clínicas.
 
-                // Hora
-                div(class="text-xs font-mono text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-100 dark:border-slate-700")
-                   | #{new Date(visita.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                
-                // 3. BOTONES DE ACCIÓN
-                div
-                  if visita.estado == 'Esperando'
-                    // OPCIÓN A: LLAMAR
-                    a(href=`/mesa-entrada/atender/${visita.id}` class="inline-flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors shadow-lg shadow-slate-900/10") 
-                       span 📢 Llamar
-                  
-                  else if visita.estado == 'En Atención'
-                    // OPCIÓN B: FINALIZAR O INTERNAR
-                    div(class="flex gap-2")
-                      // Botón Alta (Verde)
-                      a(href=`/mesa-entrada/finalizar/${visita.id}` class="inline-flex items-center gap-1 bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-700 transition-colors shadow-lg shadow-green-600/20") 
-                         span ✅ Alta
-                      
-                      // Botón Internar (Violeta)
-                      a(href=`/mesa-entrada/internar/${visita.id}` class="inline-flex items-center gap-1 bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-purple-700 transition-colors shadow-lg shadow-purple-600/20") 
-                         span 🛏️ Internar
-    
+      //- Botón 3: INGRESO NN (Formulario directo)
+      form(action="/mesa-entrada/ingreso-nn" method="POST" onsubmit="return confirm('¿Registrar ingreso de emergencia NN en Shockroom/Individual?');" class="h-full")
+        button(type="submit" class="w-full h-full bg-gradient-to-br from-red-500 to-red-700 p-6 rounded-[2rem] shadow-md hover:shadow-lg transition-all flex flex-col items-center text-center group")
+          div(class="w-16 h-16 bg-white/20 text-white rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform") 🚨
+          h3(class="font-bold text-white text-lg") INGRESO RÁPIDO NN
+          p(class="text-sm text-red-100 mt-2") Asigna cama y paciente aleatorio al instante.
 
-      else
-        div(class="text-center py-16")
-          div(class="w-20 h-20 bg-slate-50 dark:bg-slate-700/50 rounded-full flex items-center justify-center text-4xl mx-auto mb-4") ☕
-          h3(class="text-slate-900 dark:text-white font-bold text-lg") Todo tranquilo
-          p(class="text-slate-500 dark:text-slate-400") No hay pacientes en espera ni en atención.
-      
-      form(action="/mesa-entrada/ingreso-nn" method="POST" onsubmit="return confirm('¿Registrar ingreso de emergencia NN de forma automática?');")
-  button(type="submit" class="bg-red-600 hover:bg-red-700 text-white font-black py-3 px-6 rounded-xl shadow-lg flex items-center gap-3 transition-transform hover:scale-105")
-    span(class="text-2xl") 🚨
-    span INGRESO RÁPIDO NN
+    //- SALA DE ESPERA
+    h3(class="text-xl font-black text-slate-800 mb-6 flex items-center gap-2") 
+      span ⏳ 
+      | Pacientes en Sala de Espera
+
+    if espera && espera.length > 0
+      div(class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm")
+        table(class="w-full text-left border-collapse")
+          thead(class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider")
+            tr
+              th(class="p-4 font-bold") Hora
+              th(class="p-4 font-bold") Paciente
+              th(class="p-4 font-bold") Motivo
+              th(class="p-4 font-bold text-center") Acciones
+          tbody(class="divide-y divide-slate-100")
+            each visita in espera
+              tr(class="hover:bg-slate-50 transition-colors")
+                td(class="p-4 text-sm font-bold text-slate-700") #{new Date(visita.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                td(class="p-4")
+                  p(class="font-bold text-slate-900") #{visita.Paciente.apellido}, #{visita.Paciente.nombre}
+                  if visita.Paciente.es_nn
+                    span(class="inline-block mt-1 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase") Sin Identificar
+                td(class="p-4 text-sm text-slate-600") #{visita.motivo}
+                td(class="p-4 flex justify-center gap-2")
+                  a(href=`/mesa-entrada/internar/${visita.id}` class="bg-violet-100 text-violet-700 hover:bg-violet-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors") Internar
+                  a(href=`/mesa-entrada/finalizar/${visita.id}` class="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors") Alta
+    else
+      div(class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-10 text-center")
+        p(class="text-slate-500 font-bold") No hay pacientes esperando en este momento.

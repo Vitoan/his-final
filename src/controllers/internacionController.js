@@ -1,21 +1,23 @@
-const { Internacion, Paciente, Cama } = require('../models');
-
-// 1. GET: Mostrar formulario para internar (recibe ?cama_id=X)
+const { Internacion, Paciente, Cama, Habitacion } = require('../models');
+// 1. GET: Mostrar formulario para internar
 const renderCreate = async (req, res) => {
     try {
-        const { cama_id } = req.query;
+        const { cama_id, error } = req.query; // Capturamos si viene un error del POST
         
-        // Buscamos la cama y los datos de su habitación
         const cama = await Cama.findByPk(cama_id, {
             include: [{ model: Habitacion }]
         });
 
         let generoRestringido = null;
 
-        // LÓGICA DE GÉNERO: Si es compartida, vemos quién más está internado ahí
-        if (cama.Habitacion.tipo === 'Compartida') {
+        // FIX 1: Convertimos a minúscula para evitar errores tipográficos
+        const tipoHab = cama.Habitacion && cama.Habitacion.tipo ? cama.Habitacion.tipo.toLowerCase() : '';
+
+        // Si la palabra contiene "compartida"...
+        if (tipoHab.includes('compartida')) {
+            // FIX 2: Usamos cama.Habitacion.id que es 100% seguro que existe
             const camasEnHabitacion = await Cama.findAll({
-                where: { habitacion_id: cama.habitacion_id },
+                where: { habitacion_id: cama.Habitacion.id },
                 include: [{
                     model: Internacion,
                     where: { estado: 'Activa' },
@@ -24,22 +26,29 @@ const renderCreate = async (req, res) => {
                 }]
             });
 
-            // Recorremos las camas de la habitación a ver si hay alguien internado
             for (let c of camasEnHabitacion) {
-                if (c.Internacions && c.Internacions.length > 0) {
+                if (c.Internacions && c.Internacions.length > 0 && c.Internacions[0].Paciente) {
                     const sexoOcupante = c.Internacions[0].Paciente.sexo;
-                    if (sexoOcupante === 'M' || sexoOcupante === 'F') {
-                        generoRestringido = sexoOcupante; // Guardamos el género del ocupante
+                    if (sexoOcupante && sexoOcupante !== 'X') {
+                        generoRestringido = sexoOcupante; 
+                        console.log("🔒 [CANDADO FRONT] Habitación restringida a sexo:", generoRestringido);
                         break; 
                     }
                 }
             }
         }
 
-        // Filtramos los pacientes: si la habitación es de Hombres, solo traemos Hombres
+        // Filtramos la lista
         let condicionBusqueda = {};
         if (generoRestringido) {
-            condicionBusqueda.sexo = generoRestringido;
+            const genStr = String(generoRestringido).toUpperCase();
+            if (genStr === 'M' || genStr === 'MASCULINO') {
+                condicionBusqueda.sexo = ['M', 'Masculino', 'MASCULINO', 'm', 'masculino'];
+            } else if (genStr === 'F' || genStr === 'FEMENINO') {
+                condicionBusqueda.sexo = ['F', 'Femenino', 'FEMENINO', 'f', 'femenino'];
+            } else {
+                condicionBusqueda.sexo = generoRestringido;
+            }
         }
 
         const pacientes = await Paciente.findAll({ 
@@ -50,29 +59,57 @@ const renderCreate = async (req, res) => {
         res.render('internacion/create', { 
             pacientes, 
             cama, 
-            generoRestringido 
+            generoRestringido,
+            error // Le pasamos el error a la vista por si falló el POST
         });
-    } catch (error) {
-        console.error("Error al cargar formulario:", error);
+    } catch (err) {
+        console.error("Error al cargar formulario:", err);
         res.redirect('/habitaciones');
     }
 };
 
-// 2. POST: Guardar la nueva internación
+// 2. POST: Guardar la nueva internación (CON VALIDACIÓN ESTRICTA)
 const create = async (req, res) => {
     try {
         const { cama_id, paciente_id, origen, motivo, prioridad_triage } = req.body;
 
-        // Creamos la internación
-        // ¡MAGIA! Gracias a nuestro Hook en el modelo Internacion, al crear esto, 
-        // la cama pasará automáticamente a estado "Ocupada".
+        // Traemos la cama destino y al paciente que queremos internar
+        const camaDestino = await Cama.findByPk(cama_id, { include: [Habitacion] });
+        const pacienteNuevo = await Paciente.findByPk(paciente_id);
+
+        const tipoHab = camaDestino.Habitacion && camaDestino.Habitacion.tipo ? camaDestino.Habitacion.tipo.toLowerCase() : '';
+
+        // CANDADO BACKEND: Verificamos justo antes de guardar en la Base de Datos
+        if (tipoHab.includes('compartida')) {
+            const camasMismaHab = await Cama.findAll({
+                where: { habitacion_id: camaDestino.Habitacion.id },
+                include: [{
+                    model: Internacion, where: { estado: 'Activa' }, required: false,
+                    include: [{ model: Paciente }]
+                }]
+            });
+
+            for (let c of camasMismaHab) {
+                if (c.Internacions && c.Internacions.length > 0 && c.Internacions[0].Paciente) {
+                    const sexoOcupante = c.Internacions[0].Paciente.sexo;
+                    // Si ya hay alguien, verificamos que las primeras letras coincidan (M con M, F con F)
+                    if (sexoOcupante && sexoOcupante !== 'X' && pacienteNuevo.sexo !== 'X') {
+                        const letOcupante = String(sexoOcupante).toUpperCase().charAt(0);
+                        const letNuevo = String(pacienteNuevo.sexo).toUpperCase().charAt(0);
+                        
+                        if (letOcupante !== letNuevo) {
+                            console.log(`🚨 [ALERTA SEGURIDAD] Intento de internar ${letNuevo} en habitación de ${letOcupante}`);
+                            // RECHAZADO: Lo devolvemos al formulario con un mensaje de error
+                            return res.redirect(`/internacion/nuevo?cama_id=${cama_id}&error=Genero_Incompatible`);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Si pasó las pruebas de seguridad, lo internamos
         await Internacion.create({
-            cama_id,
-            paciente_id,
-            origen,
-            motivo,
-            prioridad_triage,
-            estado: 'Activa'
+            cama_id, paciente_id, origen, motivo, prioridad_triage, estado: 'Activa'
         });
 
         res.redirect('/habitaciones');

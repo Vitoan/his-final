@@ -2,15 +2,16 @@ const express = require('express');
 const router = express.Router();
 const internacionController = require('../controllers/internacionController'); 
 
-// --- RUTAS DE INTERNACIÓN ---
-// Mostrar el formulario de nueva internación (ahora recibe la cama por query: ?cama_id=X)
-router.get('/nueva', internacionController.renderCreate);
+// 1. Mostrar el formulario
+router.get('/nuevo', internacionController.renderCreate);
 
-// Guardar la nueva internación en la BD
-router.post('/nueva', internacionController.create);
+// 2. Guardar los datos en la base de datos (¡ESTA ES LA RUTA QUE TE DABA 404!)
+router.post('/nuevo', internacionController.create);
 
-// Dar de alta a un paciente (Lo hacemos por GET para mostrar una pantalla de confirmación/resumen, o POST si es directo)
+// 3. Mostrar formulario de Alta
 router.get('/:id/alta', internacionController.mostrarFormularioAlta);
+
+// 4. Procesar el Alta Médica
 router.post('/:id/alta', internacionController.darAlta);
 
 module.exports = router;

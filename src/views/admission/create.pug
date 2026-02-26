@@ -1,56 +1,70 @@
 extends ../layouts/main
-include ../mixins/formPaciente
 
 block content
-  div(class="max-w-4xl mx-auto mb-10")
-    div(class="flex flex-col md:flex-row md:items-end justify-between gap-6")
+  div(class="max-w-4xl mx-auto mt-10 mb-10")
+    div(class="mb-8 flex justify-between items-center")
       div
-        h2(class="text-xs font-bold text-blue-500 dark:text-rose-500 mb-1 tracking-widest uppercase") Admisión
-        h1(class="text-4xl font-bold tracking-tight text-slate-900 dark:text-white")
-          | #{isEditing ? 'Editar' : 'Registrar'} <span class="text-blue-600 dark:text-rose-500">Paciente</span>
-      
-      a(href="/admision" class="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white font-bold text-sm flex items-center gap-2 transition-colors")
-        span &larr;
-        | Volver al Listado
-
-  div(class="max-w-4xl mx-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2rem] shadow-sm overflow-hidden p-8 md:p-10")
-
-    // --- ALERTAS DE ESTADO (Internado/Guardia) ---
-    if data
-      if data.Internacions && data.Internacions.length > 0
-        div(class="mb-8 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-6 rounded-2xl flex items-start gap-4 animate-pulse")
-           div(class="text-3xl") 🛌
-           div
-             h3(class="text-lg font-bold text-red-800 dark:text-red-200") Paciente Actualmente Internado
-             p(class="text-red-700 dark:text-red-300 text-sm mt-1")
-               | Se encuentra en la 
-               strong Habitación #{data.Internacions[0].Cama.Habitacion.numero}
-               | .
-
-      else if data.Visita && data.Visita.length > 0
-        div(class="mb-8 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-6 rounded-2xl flex items-start gap-4")
-           div(class="text-3xl") 🚑
-           div
-             h3(class="text-lg font-bold text-amber-800 dark:text-amber-200") En Sala de Espera / Guardia
-             p(class="text-amber-700 dark:text-amber-300 text-sm mt-1")
-               | Turno activo: 
-               strong #{data.Visita[0].estado}
+        h2(class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1") Ficha Médica
+        h1(class="text-3xl font-black text-slate-900") #{title}
+      a(href="/admision" class="bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl hover:bg-slate-300 transition") Cancelar
 
     if error
-      div(class="mb-8 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 px-4 py-3 rounded-xl text-sm font-medium flex items-center shadow-sm animate-pulse")
-         span(class="mr-2 text-lg") ⚠️
-         | #{error}
+      div(class="bg-red-50 text-red-700 border border-red-200 p-4 rounded-xl mb-6 font-bold") #{error}
 
-    // --- FORMULARIO CON MIXIN ---
-    form(action=isEditing ? '/admision/editar/' + data.id : '/admision/nuevo' method="POST" class="space-y-10")
+    //- Alerta si estamos identificando a un NN
+    if isEditing && data && data.es_nn
+      div(class="bg-rose-50 border-2 border-rose-200 rounded-2xl p-6 mb-8 flex items-center gap-4")
+        div(class="text-4xl") 🚨
+        div
+          p(class="text-sm text-rose-700 font-bold uppercase tracking-wide") Proceso de Identificación
+          p(class="text-slate-700 mt-1") Este paciente ingresó como Emergencia (NN). Por favor, complete su DNI y Nombre real para integrarlo al padrón.
+
+    //- El formulario apunta dinámicamente según si creamos o editamos
+    - const actionUrl = isEditing ? `/admision/editar/${data.id}` : '/admision/nuevo'
+
+    form(action=actionUrl method="POST" class="bg-white border border-slate-200 shadow-sm rounded-3xl p-8 space-y-6")
       
-      div(class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-700 pb-4")
-        div(class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 flex items-center justify-center text-xl") 👤
-        h3(class="text-xl font-bold text-slate-800 dark:text-white") Ficha de Paciente
+      div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") Nombre(s)
+          input(type="text" name="nombre" value=(data ? data.nombre : '') class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none" required)
+        
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") Apellido(s)
+          input(type="text" name="apellido" value=(data ? data.apellido : '') class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none" required)
 
-      // AQUÍ USAMOS EL MIXIN MÁGICO ✨
-      +formPaciente(data, false)
+      div(class="grid grid-cols-1 md:grid-cols-3 gap-6")
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") DNI
+          input(type="number" name="dni" value=(data ? data.dni : '') placeholder="Sin puntos" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none")
+        
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") Sexo Biológico
+          select(name="sexo" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none" required)
+            - const selSexo = data ? data.sexo : ''
+            option(value="Masculino" selected=(selSexo==='Masculino' || selSexo==='M')) Masculino
+            option(value="Femenino" selected=(selSexo==='Femenino' || selSexo==='F')) Femenino
+            option(value="X" selected=(selSexo==='X')) Sin Especificar (X)
 
-      div(class="pt-8 flex items-center justify-end gap-4 border-t border-slate-100 dark:border-slate-700 mt-6")
-        button(type="button" onclick="window.history.back()" class="px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold transition-colors text-sm") Cancelar
-        button(type="submit" class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3 rounded-xl hover:bg-slate-800 dark:hover:bg-slate-200 font-bold shadow-lg shadow-slate-500/20 transition-all transform active:scale-95 text-sm") #{isEditing ? 'Actualizar Paciente' : 'Guardar Paciente'}
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") F. Nacimiento
+          - let fechaNac = data && data.fecha_nacimiento ? (typeof data.fecha_nacimiento === 'string' ? data.fecha_nacimiento.split('T')[0] : data.fecha_nacimiento.toISOString().split('T')[0]) : ''
+          input(type="date" name="fecha_nacimiento" value=fechaNac class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none")
+
+      div(class="grid grid-cols-1 md:grid-cols-3 gap-6")
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") Teléfono
+          input(type="text" name="telefono" value=(data ? data.telefono : '') class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50")
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") Correo Electrónico
+          input(type="email" name="email" value=(data ? data.email : '') class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50")
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") Obra Social
+          input(type="text" name="obra_social" value=(data ? data.obra_social : '') class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50")
+
+      div
+        label(class="block text-sm font-bold text-slate-700 mb-2") Dirección Postal
+        input(type="text" name="direccion" value=(data ? data.direccion : '') class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50")
+
+      div(class="pt-6 border-t border-slate-100")
+        button(type="submit" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl hover:bg-indigo-700 shadow-md transition text-lg") #{isEditing ? 'Guardar Cambios' : 'Registrar Paciente'}

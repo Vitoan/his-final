@@ -96,7 +96,10 @@ exports.update = async (req, res) => {
         // Si el usuario borra el email y lo deja vacío, Sequelize falla la validación 'isEmail'.
         // Aquí forzamos que si es string vacío, se guarde como NULL.
         if (req.body.email === '') req.body.email = null;
-
+        
+        if (req.body.dni && req.body.dni.trim() !== '') {
+            req.body.es_nn = false; 
+        }
         await Paciente.update(req.body, { where: { id } });
         res.redirect('/admision');
     } catch (error) {
