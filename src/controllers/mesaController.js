@@ -148,3 +148,45 @@ exports.internar = async (req, res) => {
         res.redirect('/mesa-entrada');
     }
 };
+
+exports.ingresoRapidoNN = async (req, res) => {
+    try {
+        // 1. Buscamos una cama libre que sea Individual o Shockroom
+        const camaLibre = await Cama.findOne({
+            where: { estado: 'Disponible' },
+            include: [{
+                model: Habitacion,
+                where: { tipo: ['Individual', 'Shockroom'] } // Solo en estas habitaciones
+            }]
+        });
+
+        if (!camaLibre) {
+            return res.redirect('/mesa-entrada?error=' + encodeURIComponent('No hay camas individuales o de Shockroom disponibles.'));
+        }
+
+        // 2. Creamos al paciente NN con un código aleatorio para no chocar DNIs
+        const pacienteNN = await Paciente.create({
+            es_nn: true,
+            nombre: 'Emergencia',
+            apellido: `NN-${Math.floor(Math.random() * 10000)}`,
+            sexo: 'X',
+            dni: null // Importante para que no choque el campo único
+        });
+
+        // 3. Lo internamos directamente (esto dispara el hook y pone la cama en rojo)
+        await Internacion.create({
+            cama_id: camaLibre.id,
+            paciente_id: pacienteNN.id,
+            origen: 'Guardia',
+            motivo: 'Ingreso rápido de paciente no identificado (Emergencia)',
+            prioridad_triage: 'Rojo',
+            estado: 'Activa'
+        });
+
+        // 4. Lo llevamos al mapa para que vea a dónde lo asignó el sistema
+        res.redirect('/habitaciones');
+    } catch (error) {
+        console.error("Error en Ingreso NN:", error);
+        res.redirect('/mesa-entrada?error=Error_Critico');
+    }
+};

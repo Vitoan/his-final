@@ -1,64 +1,52 @@
 extends ../layouts/main
 
 block content
-  div(class="max-w-4xl mx-auto")
-    
+  div(class="max-w-3xl mx-auto mt-10")
+    //- Cabecera
     div(class="mb-8")
-      a(href="/mesa-entrada" class="text-slate-500 hover:text-slate-800 mb-4 inline-block") ← Volver a Guardia
-      h1(class="text-3xl font-bold text-slate-900 dark:text-white") Nueva Internación
-      p(class="text-slate-500 dark:text-slate-400") Asignación de cama para paciente de Guardia.
+      h2(class="text-sm font-bold text-blue-600 uppercase tracking-widest mb-1") Gestión de Admisión
+      h1(class="text-3xl font-black text-slate-900") Nueva Internación
+      p(class="text-slate-500 mt-2") Asignando paciente a la cama seleccionada.
 
-    form(action="/internacion/nuevo" method="POST" class="space-y-8")
-      
-      // 1. INFO PACIENTE
-      div(class="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-2xl border border-blue-100 dark:border-blue-800 flex items-center justify-between")
-        div(class="flex items-center gap-4")
-          div(class="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold shadow-lg") #{paciente.sexo}
-          div
-            h2(class="text-xl font-bold text-slate-900 dark:text-white") #{paciente.nombre} #{paciente.apellido}
-            p(class="text-blue-600 dark:text-blue-300 text-sm") DNI: #{paciente.dni} • Sexo: #{paciente.sexo === 'M' ? 'Masculino' : 'Femenino'}
-        input(type="hidden" name="paciente_id" value=paciente.id)
-
-      // 2. SELECTOR DE CAMAS
+    //- Tarjeta informativa de la cama
+    div(class="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-8 flex items-center gap-4")
+      div(class="text-4xl") 🛏️
       div
-        h3(class="text-lg font-bold text-slate-900 dark:text-white mb-4") Seleccione una Cama Disponible
+        p(class="text-sm text-blue-600 font-bold uppercase tracking-wide") Cama Seleccionada
+        p(class="text-xl font-bold text-slate-900") Cama Número #{cama.numero_cama}
+
+    //- Formulario
+    form(action="/internacion/nueva" method="POST" class="bg-white border border-slate-200 shadow-sm rounded-2xl p-8 space-y-6")
+      //- Campo oculto para mandar el ID de la cama al backend
+      input(type="hidden" name="cama_id" value=cama.id)
+
+      div
+        label(class="block text-sm font-bold text-slate-700 mb-2") Seleccionar Paciente
+        select(name="paciente_id" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none" required)
+          option(value="" disabled selected) -- Elija un paciente del padrón --
+          each paciente in pacientes
+            option(value=paciente.id) #{paciente.apellido}, #{paciente.nombre} - DNI: #{paciente.dni || 'NN'}
+
+      div(class="grid grid-cols-2 gap-6")
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") Origen del Ingreso
+          select(name="origen" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none" required)
+            option(value="Guardia") Guardia / Urgencias
+            option(value="Consultorio Externo") Consultorio Externo
+            option(value="Derivacion") Derivación de otro centro
         
-        if camas.length > 0
-          div(class="grid grid-cols-2 md:grid-cols-3 gap-4")
-            each cama in camas
-              label(class=`relative group ${cama.incompatible ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`)
-                input(
-                  type="radio" 
-                  name="cama_id" 
-                  value=cama.id 
-                  required 
-                  disabled=cama.incompatible 
-                  class="peer sr-only"
-                )
-                
-                div(class=`p-4 rounded-xl border-2 transition-all ${cama.incompatible ? 'bg-slate-100 border-slate-200' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 dark:peer-checked:bg-indigo-900/20'}`)
-                  div(class="flex justify-between items-start mb-2")
-                    span(class="text-[10px] font-bold uppercase text-slate-400") Hab. #{cama.Habitacion.numero}
-                    if cama.incompatible
-                      span(class="bg-red-100 text-red-600 text-[9px] px-1.5 py-0.5 rounded font-bold border border-red-200") 🚻 Sexo
-                    else
-                      span(class="text-green-500 text-[10px] font-bold") ● Disponible
-                  
-                  div(class=`text-lg font-bold ${cama.incompatible ? 'text-slate-400' : 'text-slate-900 dark:text-white'}`) Cama #{cama.numero_cama}
-                  
-                  if cama.incompatible
-                    p(class="text-[9px] text-red-500 mt-1 font-medium") Habitación ocupada por sexo opuesto.
-                  else
-                    p(class="text-[10px] text-slate-500") #{cama.Habitacion.tipo}
+        div
+          label(class="block text-sm font-bold text-slate-700 mb-2") Prioridad (Triage)
+          select(name="prioridad_triage" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none" required)
+            option(value="Verde") 🟢 Verde (Normal)
+            option(value="Amarillo") 🟡 Amarillo (Urgencia)
+            option(value="Rojo") 🔴 Rojo (Emergencia)
 
-        else
-          div(class="p-10 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 text-center")
-            p(class="text-slate-500 font-medium") No hay camas disponibles actualmente.
+      div
+        label(class="block text-sm font-bold text-slate-700 mb-2") Motivo de Internación / Diagnóstico Presuntivo
+        textarea(name="motivo" rows="4" class="w-full border border-slate-300 rounded-xl px-4 py-3 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Describa brevemente la razón del ingreso..." required)
 
-      // 3. DATOS MÉDICOS
-      div(class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm")
-        label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Diagnóstico / Motivo de Internación
-        textarea(name="diagnostico" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Describa el motivo del ingreso..." required)
-
-      button(type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 disabled:bg-slate-300 disabled:shadow-none" disabled=camas.every(c => c.incompatible)) 
-        | 🛏️ Confirmar Internación
+      //- Botones
+      div(class="flex gap-4 pt-4 border-t border-slate-100")
+        a(href="/clinica/dashboard" class="w-1/3 text-center bg-white border-2 border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition") Cancelar
+        button(type="submit" class="w-2/3 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-md transition") Confirmar Internación

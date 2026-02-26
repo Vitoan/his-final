@@ -8,12 +8,13 @@ block content
       div
         h1(class="text-3xl font-bold text-slate-900 dark:text-white") Mesa de <span class="text-indigo-600 dark:text-indigo-400">Entrada</span>
         p(class="text-slate-500 dark:text-slate-400 text-sm mt-1") Gestión de flujo de pacientes en tiempo real
-      
+  
       a(href="/mesa-entrada/nuevo" class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-1 flex items-center gap-2") 
         span +
         | Registrar Llegada
 
     // --- TABLERO DE CONTROL ---
+    
     div(class="bg-white dark:bg-slate-800 rounded-[2rem] p-6 md:p-8 shadow-sm border border-slate-200 dark:border-slate-700")
       
       div(class="flex items-center justify-between mb-6")
@@ -84,9 +85,15 @@ block content
                       // Botón Internar (Violeta)
                       a(href=`/mesa-entrada/internar/${visita.id}` class="inline-flex items-center gap-1 bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-purple-700 transition-colors shadow-lg shadow-purple-600/20") 
                          span 🛏️ Internar
+    
 
       else
         div(class="text-center py-16")
           div(class="w-20 h-20 bg-slate-50 dark:bg-slate-700/50 rounded-full flex items-center justify-center text-4xl mx-auto mb-4") ☕
           h3(class="text-slate-900 dark:text-white font-bold text-lg") Todo tranquilo
           p(class="text-slate-500 dark:text-slate-400") No hay pacientes en espera ni en atención.
+      
+      form(action="/mesa-entrada/ingreso-nn" method="POST" onsubmit="return confirm('¿Registrar ingreso de emergencia NN de forma automática?');")
+  button(type="submit" class="bg-red-600 hover:bg-red-700 text-white font-black py-3 px-6 rounded-xl shadow-lg flex items-center gap-3 transition-transform hover:scale-105")
+    span(class="text-2xl") 🚨
+    span INGRESO RÁPIDO NN

@@ -1,32 +1,31 @@
-const { Habitacion, Cama, Internacion, Paciente } = require('../models');
+const { Ala, Habitacion, Cama, Internacion, Paciente } = require('../models');
 
-// 1. Listar el Mapa de Camas
 exports.listarMapa = async (req, res) => {
     try {
-        const habitacionesRaw = await Habitacion.findAll({
+        const alas = await Ala.findAll({
             include: [{
-                model: Cama,
+                model: Habitacion,
                 include: [{
-                    model: Internacion,
-                    where: { estado: 'Activa' },
-                    required: false,
-                    include: [{ model: Paciente }]
+                    model: Cama,
+                    include: [{
+                        model: Internacion,
+                        where: { estado: 'Activa' },
+                        required: false,
+                        include: [{ model: Paciente }]
+                    }]
                 }]
             }],
-            order: [['numero', 'ASC']]
+            order: [
+                ['nombre', 'ASC'],
+                [Habitacion, 'numero', 'ASC'],
+                [Habitacion, Cama, 'numero_cama', 'ASC']
+            ]
         });
 
-        
-        const habitacionesData = habitacionesRaw.map(h => {
-            const habitacion = h.toJSON();
-            // Truco: Si Sequelize trajo 'Camas', lo pasamos a 'camas'
-            habitacion.camas = habitacion.camas || habitacion.Camas || [];
-            return habitacion;
-        });
-
+        // AQUÍ ESTÁ EL CAMBIO CLAVE: Apuntamos a la carpeta rooms
         res.render('rooms/index', { 
             title: 'Mapa de Camas', 
-            habitaciones: habitacionesData, 
+            alas: alas, 
             error: req.query.error 
         });
 
@@ -36,7 +35,6 @@ exports.listarMapa = async (req, res) => {
     }
 };
 
-// 2. Finalizar Limpieza
 exports.finalizarLimpieza = async (req, res) => {
     const { idCama } = req.params;
     try {

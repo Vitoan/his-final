@@ -26,6 +26,15 @@ exports.mostrarEvolucion = async (req, res) => {
             order: [['createdAt', 'DESC']]
         });
 
+        const historialLimpio = historial.map(h => {
+            let data = h.toJSON();
+            // Si la base de datos lo devolvió como texto, lo forzamos a objeto
+            if (typeof data.signos_vitales === 'string') {
+                try { data.signos_vitales = JSON.parse(data.signos_vitales); } catch(e){}
+            }
+            return data;
+        });
+
         res.render('clinical/medical', { 
             title: 'Evolución Médica',
             paciente: {
@@ -34,7 +43,7 @@ exports.mostrarEvolucion = async (req, res) => {
                 hab_numero: internacion.Cama.Habitacion.numero,
                 numero_cama: internacion.Cama.numero_cama
             },
-            historial: historial 
+            historial: historialLimpio 
         });
 
     } catch (error) {

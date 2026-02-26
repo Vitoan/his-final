@@ -1,0 +1,49 @@
+extends ../layouts/main
+
+block content
+  div(class="max-w-5xl mx-auto mt-10")
+    div(class="mb-8 flex justify-between items-center")
+      div
+        h2(class="text-sm font-bold text-indigo-600 uppercase tracking-widest mb-1") Historial Clínico
+        h1(class="text-3xl font-black text-slate-900") Episodios del Paciente
+      a(href="/habitaciones" class="bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-xl hover:bg-slate-300 transition") Volver al Mapa
+
+    //- Tarjeta Cabecera Paciente
+    div(class="bg-white border-2 border-indigo-100 rounded-2xl p-6 mb-8 flex items-center justify-between shadow-sm")
+      div
+        p(class="text-sm text-slate-500 font-bold uppercase") Paciente
+        p(class="text-2xl font-bold text-slate-900") #{paciente.nombre} #{paciente.apellido}
+      div(class="text-right")
+        p(class="text-sm text-slate-500 font-bold uppercase") DNI / Identificación
+        p(class="text-lg font-bold text-indigo-700") #{paciente.dni || 'NN'}
+
+    h3(class="text-xl font-black text-slate-800 mb-6") Lista de Internaciones
+    
+    if paciente.Internacions && paciente.Internacions.length > 0
+      div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
+        
+        each episodio in paciente.Internacions
+          //- Tarjeta de Episodio
+          div(class=`bg-white border-2 rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition ${episodio.estado === 'Activa' ? 'border-green-400' : 'border-slate-200'}`)
+            div
+              div(class="flex justify-between items-start mb-4")
+                if episodio.estado === 'Activa'
+                  span(class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-lg uppercase tracking-wide") 🟢 Activa
+                else
+                  span(class="bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1 rounded-lg uppercase tracking-wide") ⚪ Cerrada (#{episodio.estado})
+                
+                span(class="text-xs text-slate-400 font-bold") #{new Date(episodio.fecha_ingreso).toLocaleDateString()}
+              
+              h4(class="text-lg font-bold text-slate-800 mb-2 line-clamp-2") Motivo: #{episodio.motivo}
+              
+              div(class="text-sm text-slate-600 space-y-1 mb-6")
+                p 📍 Origen: #{episodio.origen}
+                p 🛏️ Cama asignada: #{episodio.Cama ? episodio.Cama.numero_cama : 'N/A'}
+                if episodio.fecha_egreso
+                  p 📅 Alta: #{new Date(episodio.fecha_egreso).toLocaleDateString()}
+            
+            //- Botón que lleva a la línea de tiempo de ESTE episodio
+            a(href=`/clinica/paciente/${episodio.id}` class="block w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-3 rounded-xl transition-colors") Ver Línea de Tiempo
+    else
+      div(class="text-center py-10 bg-white border border-slate-200 rounded-2xl")
+        p(class="text-slate-500 font-bold") No se encontraron episodios para este paciente.

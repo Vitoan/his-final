@@ -20,5 +20,8 @@ router.get('/finalizar/:id', mesaController.finalizar); // Botón Verde "Alta"
 
 // --- ESTA ES LA LÍNEA QUE TE FALTA ---
 router.get('/internar/:id', mesaController.internar);   // Botón Violeta "Internar"
+// Ingreso rápido de Emergencia NN
+router.post('/ingreso-nn', mesaController.ingresoRapidoNN);
+
 
 module.exports = router;

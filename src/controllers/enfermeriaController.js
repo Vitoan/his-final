@@ -29,6 +29,14 @@ exports.mostrarFormulario = async (req, res) => {
             order: [['createdAt', 'DESC']]
         });
 
+        const historialLimpio = historial.map(h => {
+            let data = h.toJSON();
+            if (data.signos_vitales && typeof data.signos_vitales === 'string') {
+                try { data.signos_vitales = JSON.parse(data.signos_vitales); } catch(e){}
+            }
+            return data;
+        });
+
         
         res.render('clinical/nursing', { 
             title: 'Evaluación de Enfermería',
@@ -38,7 +46,7 @@ exports.mostrarFormulario = async (req, res) => {
                 hab_numero: internacion.Cama.Habitacion.numero,
                 numero_cama: internacion.Cama.numero_cama
             },
-            historial: historial
+            historial: historialLimpio
         });
 
     } catch (error) {

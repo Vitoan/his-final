@@ -3,14 +3,28 @@ const sequelize = require('../config/database');
 // Importar Modelos
 const Usuario = require('./Usuario');
 const Paciente = require('./Paciente');
+const Ala = require('./Ala');
 const Habitacion = require('./Habitacion');
 const Cama = require('./Cama');
 const Internacion = require('./Internacion');
 const Evolucion = require('./Evolucion');
 const Auditoria = require('./Auditoria'); 
 const Visita = require('./Visita');
+const SignosVitales = require('./SignosVitales');
 
 // --- RELACIONES ---
+Ala.hasMany(Habitacion, { foreignKey: 'ala_id' });
+Habitacion.belongsTo(Ala, { foreignKey: 'ala_id' });
+
+// Relación con Internación (Un episodio tiene muchos signos vitales)
+Internacion.hasMany(SignosVitales, { foreignKey: 'internacion_id' });
+SignosVitales.belongsTo(Internacion, { foreignKey: 'internacion_id' });
+
+// Relación con Usuario (Sabemos qué enfermero/a tomó los signos)
+Usuario.hasMany(SignosVitales, { foreignKey: 'enfermero_id' });
+SignosVitales.belongsTo(Usuario, { as: 'Enfermero', foreignKey: 'enfermero_id' });
+
+
 
 // 1. Ubicación (Habitación -> Cama)
 Habitacion.hasMany(Cama, { foreignKey: 'habitacion_id' });
@@ -42,5 +56,5 @@ Paciente.hasMany(Visita, { foreignKey: 'paciente_id' });
 Visita.belongsTo(Paciente, { foreignKey: 'paciente_id' });
 
 module.exports = { 
-    sequelize, Usuario, Paciente, Habitacion, Cama, Internacion, Evolucion, Auditoria, Visita
+    sequelize, Usuario, Paciente, Ala, Habitacion, Cama, Internacion, Evolucion, Auditoria, Visita, SignosVitales
 };
