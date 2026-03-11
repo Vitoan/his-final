@@ -11,6 +11,7 @@ const app = express();
 const { sequelize } = require('./models');
 const authRoutes = require('./routes/auth');
 const authMiddleware = require('./middlewares/auth');
+const checkRole = require('./middlewares/roles');
 const admisionRoutes = require('./routes/admision');
 const habitacionesRoutes = require('./routes/habitaciones');
 const internacionesRoutes = require('./routes/internaciones');
@@ -19,6 +20,7 @@ const medicoRoutes = require('./routes/medico');
 const clinicaRoutes = require('./routes/clinica');
 const adminRoutes = require('./routes/admin');
 const apiRoutes = require('./routes/api');
+
 
 // --- 3. CONFIGURACIONES ---
 app.set('port', process.env.PORT || 3000);
@@ -30,6 +32,7 @@ app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false })); // Para recibir datos de formularios
 app.use(express.json()); // Para recibir JSON (AJAX)
 app.use(express.static(path.join(__dirname, '../public')));
+
 
 // --- 5. CONFIGURACIÓN DE SESIÓN ---
 app.use(session({
@@ -62,12 +65,24 @@ app.use('/api', authMiddleware, apiRoutes);
 app.use('/mesa-entrada', authMiddleware, require('./routes/mesa'));
 app.use('/turnos', authMiddleware, require('./routes/turnos'));
 app.use('/estudios', authMiddleware, require('./routes/estudios'));
+app.use('/portal', authMiddleware, require('./routes/portal'));
 
 // --- CAMBIO IMPORTANTE AQUÍ ---
 // Ruta Raíz: Si está logueado, muestra el INDEX (Menú Principal), no Admisión.
 // --- RUTA DE RESCATE (Para crear usuarios de prueba) ---
 app.get('/setup-usuarios', async (req, res) => {
     try {
+        await Usuario.findOrCreate({
+    where: { email: 'paciente@test.com' },
+    defaults: {
+        nombre: 'Victor',
+        apellido: 'Prueba',
+        email: 'paciente@test.com',
+        password: passwordHash, // '123456'
+        rol: 'Paciente',
+        paciente_id: 1 // IMPORTANTE: Debe coincidir con el ID de un paciente real en tu DB
+    }
+});
         const { Usuario } = require('./models');
         
         // Dependiendo de la librería que uses en tu proyecto para las contraseñas,

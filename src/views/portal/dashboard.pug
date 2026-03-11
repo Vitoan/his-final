@@ -1,0 +1,65 @@
+extends ../layouts/main
+
+block content
+  div(class="max-w-6xl mx-auto mt-10 mb-20 px-4")
+    //- Bienvenida
+    div(class="mb-10 text-center md:text-left")
+      h1(class="text-4xl font-black text-slate-900") Hola, #{paciente.nombre} 👋
+      p(class="text-slate-500 mt-2 text-lg") Bienvenida/o a tu portal personal de salud.
+
+    div(class="grid grid-cols-1 lg:grid-cols-3 gap-8")
+      
+      //- COLUMNA IZQUIERDA: Turnos y Estudios
+      div(class="lg:col-span-2 space-y-8")
+        
+        //- PRÓXIMOS TURNOS
+        section(class="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm")
+          h3(class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2") 📅 Mis Próximos Turnos
+          if paciente.Turnos && paciente.Turnos.length > 0
+            div(class="space-y-4")
+              each turno in paciente.Turnos
+                div(class="flex items-center justify-between p-4 bg-sky-50 rounded-2xl border border-sky-100")
+                  div
+                    p(class="font-bold text-sky-900") #{turno.especialidad}
+                    p(class="text-sm text-sky-700") Dr/a. #{turno.Medico.apellido}
+                  div(class="text-right")
+                    p(class="font-black text-slate-800") #{new Date(turno.fecha + 'T00:00:00').toLocaleDateString()}
+                    p(class="text-xs font-bold text-sky-600 uppercase") #{turno.hora.substring(0,5)} hs
+          else
+            p(class="text-slate-400 italic") No tienes turnos programados.
+
+        //- ESTUDIOS RECIENTES
+        section(class="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm")
+          h3(class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2") 🔬 Mis Estudios y Resultados
+          if paciente.Estudios && paciente.Estudios.length > 0
+            div(class="grid grid-cols-1 md:grid-cols-2 gap-4")
+              each est in paciente.Estudios
+                div(class="p-4 border border-slate-100 rounded-2xl hover:bg-slate-50 transition-colors")
+                  div(class="flex justify-between items-start mb-2")
+                    span(class="text-xs font-bold uppercase tracking-widest text-fuchsia-600") #{est.tipo_estudio}
+                    if est.estado === 'Realizado'
+                      span(class="text-emerald-600 text-xs font-bold") ✅ Listo
+                    else
+                      span(class="text-amber-600 text-xs font-bold") ⏳ En proceso
+                  p(class="font-bold text-slate-900") #{est.descripcion}
+                  if est.estado === 'Realizado'
+                    button(onclick=`alert('Resultado del informe:\\n\\n${est.resultado}')` class="mt-3 text-xs font-bold text-blue-600 hover:underline") Ver mi resultado →
+
+      //- COLUMNA DERECHA: Datos y Estado Actual
+      div(class="space-y-8")
+        //- FICHA PERSONAL
+        div(class="bg-indigo-600 text-white rounded-[2rem] p-8 shadow-lg shadow-indigo-200")
+          h3(class="font-bold text-lg mb-4 opacity-80") Mi Ficha
+          div(class="space-y-2")
+            p(class="text-2xl font-black") #{paciente.apellido}, #{paciente.nombre}
+            p(class="text-sm") DNI: #{paciente.dni}
+            p(class="text-sm") Obra Social: #{paciente.obra_social || 'Particular'}
+        
+        //- ESTADO DE INTERNACIÓN (Si aplica)
+        if paciente.Internacions && paciente.Internacions.some(i => i.estado === 'Activa')
+          - const inter = paciente.Internacions.find(i => i.estado === 'Activa')
+          div(class="bg-rose-50 border-2 border-rose-200 rounded-[2rem] p-8")
+            h3(class="text-rose-700 font-bold mb-2") 🏥 Actualmente Internado
+            p(class="text-sm text-slate-600") Te encuentras en:
+            p(class="text-lg font-black text-slate-900") Habitación #{inter.Cama.Habitacion.numero} - Cama #{inter.Cama.numero_cama}
+            p(class="text-xs text-rose-500 mt-2 font-bold uppercase") #{inter.Cama.Habitacion.tipo}

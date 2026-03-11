@@ -70,7 +70,7 @@ exports.registrarVisita = async (req, res) => {
     }
 };
 
-// 4. Registrar Completo
+// 4. Registrar Completo (Paciente Nuevo + Visita + Usuario)
 exports.registrarCompleto = async (req, res) => {
     const t = await sequelize.transaction();
     
@@ -81,6 +81,7 @@ exports.registrarCompleto = async (req, res) => {
             motivo, prioridad, tipo_ingreso 
         } = req.body;
 
+        // 1. Crear Paciente
         const nuevoPaciente = await Paciente.create({
             dni, nombre, apellido, fecha_nacimiento, sexo,
             direccion: direccion || 'No especificada', 
@@ -90,6 +91,23 @@ exports.registrarCompleto = async (req, res) => {
             numero_afiliado
         }, { transaction: t });
 
+        // 2. Crear Cuenta de Usuario para el Paciente
+        const bcrypt = require('bcryptjs');
+        const primerNombre = nombre.trim().split(' ')[0].toLowerCase();
+        const passwordPlana = `${primerNombre}${dni}`;
+        const passwordHash = await bcrypt.hash(passwordPlana, 10);
+        const emailLogin = email ? email : `${dni}@paciente.his`;
+
+        await Usuario.create({
+            nombre,
+            apellido,
+            email: emailLogin,
+            password: passwordHash,
+            rol: 'Paciente',
+            paciente_id: nuevoPaciente.id
+        }, { transaction: t });
+
+        // 3. Crear la Visita (Sala de espera)
         await Visita.create({
             paciente_id: nuevoPaciente.id,
             motivo, prioridad, tipo_ingreso,

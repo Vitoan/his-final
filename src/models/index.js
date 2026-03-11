@@ -74,6 +74,9 @@ Estudio.belongsTo(Usuario, { as: 'Medico', foreignKey: 'medico_id' });
 // Un estudio puede estar asociado a una internación específica (Opcional)
 Internacion.hasMany(Estudio, { foreignKey: 'internacion_id' });
 Estudio.belongsTo(Internacion, { foreignKey: 'internacion_id' });
+// Relación: Un Usuario puede ser un Paciente (Portal del Paciente)
+Paciente.hasOne(Usuario, { foreignKey: 'paciente_id' });
+Usuario.belongsTo(Paciente, { foreignKey: 'paciente_id' });
 
 // 3. EXPORTAMOS TODO (Agregamos Turno al final)
 module.exports = { 

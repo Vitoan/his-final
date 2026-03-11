@@ -1,5 +1,6 @@
-const { Paciente, Internacion, Visita, Cama, Habitacion } = require('../models');
+const { Paciente, Internacion, Visita, Cama, Habitacion, Usuario } = require('../models');
 const { Op } = require('sequelize');
+const bcrypt = require('bcryptjs');
 
 // 1. Listar Pacientes
 exports.renderIndex = async (req, res) => {
@@ -36,16 +37,37 @@ exports.renderCreate = (req, res) => {
     });
 };
 
-// 3. Guardar Nuevo Paciente (CREATE)
+// 3. Guardar Nuevo Paciente (CREATE) + Auto-Crear Usuario
 exports.create = async (req, res) => {
     try {
-        // LIMPIEZA DE DATOS: Si el email viene vacío, lo convertimos a NULL
         if (req.body.email === '') req.body.email = null;
 
-        await Paciente.create(req.body);
+        // 1. Creamos al Paciente
+        const nuevoPaciente = await Paciente.create(req.body);
+
+        // 2. Si NO es NN, le creamos su cuenta para el Portal
+        if (!nuevoPaciente.es_nn && nuevoPaciente.dni && nuevoPaciente.nombre) {
+            
+            const primerNombre = nuevoPaciente.nombre.trim().split(' ')[0].toLowerCase();
+            const passwordPlana = `${primerNombre}${nuevoPaciente.dni}`; // Ej: juan35123456
+            const passwordHash = await bcrypt.hash(passwordPlana, 10);
+            
+            // Si no puso email, le inventamos uno para el login usando su DNI
+            const emailLogin = nuevoPaciente.email ? nuevoPaciente.email : `${nuevoPaciente.dni}@paciente.his`;
+
+            await Usuario.create({
+                nombre: nuevoPaciente.nombre,
+                apellido: nuevoPaciente.apellido,
+                email: emailLogin,
+                password: passwordHash,
+                rol: 'Paciente',
+                paciente_id: nuevoPaciente.id 
+            });
+        }
+
         res.redirect('/admision');
     } catch (error) {
-        console.error("Error al crear:", error);
+        console.error("Error al crear paciente y usuario:", error);
         res.render('admission/create', {
             title: 'Nuevo Paciente',
             isEditing: false,
