@@ -1,4 +1,4 @@
-const { Internacion, Paciente, Cama, Habitacion, Evolucion, Usuario } = require('../models');
+const { Internacion, Paciente, Cama, Habitacion, Evolucion, Usuario, Indicacion } = require('../models');
 
 // 1. Mostrar formulario de evolución médica
 exports.mostrarEvolucion = async (req, res) => {
@@ -26,6 +26,13 @@ exports.mostrarEvolucion = async (req, res) => {
             order: [['createdAt', 'DESC']]
         });
 
+        // Indicaciones Médicas
+        const indicaciones = await Indicacion.findAll({
+            where: { internacion_id: idInternacion },
+            include: [{ model: Usuario, as: 'Medico' }],
+            order: [['createdAt', 'DESC']]
+        });
+
         const historialLimpio = historial.map(h => {
             let data = h.toJSON();
             // Si la base de datos lo devolvió como texto, lo forzamos a objeto
@@ -43,7 +50,8 @@ exports.mostrarEvolucion = async (req, res) => {
                 hab_numero: internacion.Cama.Habitacion.numero,
                 numero_cama: internacion.Cama.numero_cama
             },
-            historial: historialLimpio 
+            historial: historialLimpio,
+            indicaciones
         });
 
     } catch (error) {
@@ -52,24 +60,52 @@ exports.mostrarEvolucion = async (req, res) => {
     }
 };
 
-// 2. Guardar evolución
+// 2. Guardar evolución e indicaciones
 exports.guardarEvolucion = async (req, res) => {
-    const { internacion_id, diagnostico, tratamiento } = req.body;
+    const { internacion_id, diagnostico, tratamiento, descripcion_indicacion, dosis, frecuencia } = req.body;
     try {
-        // Concatenamos diagnóstico y tratamiento en la nota
         const notaCompleta = `Diagnóstico: ${diagnostico}. Tratamiento: ${tratamiento}`;
 
         await Evolucion.create({
             internacion_id,
             tipo: 'Medico',
             nota: notaCompleta,
-            // Guardamos detalle estructurado también por si acaso
             signos_vitales: { diagnostico, tratamiento }, 
             autor_id: req.session.usuario.id
         });
+
+        // Crear indicación médica si se ingresó alguna
+        if (descripcion_indicacion && descripcion_indicacion.trim() !== '') {
+            await Indicacion.create({
+                internacion_id,
+                descripcion: descripcion_indicacion,
+                dosis,
+                frecuencia,
+                estado: 'Activa',
+                medico_id: req.session.usuario.id
+            });
+        }
         
         res.redirect('/medico/evolucionar/' + internacion_id);
     } catch (error) {
         res.send("Error: " + error.message);
+    }
+};
+
+// 3. Cambiar estado de indicación
+exports.cambiarEstadoIndicacion = async (req, res) => {
+    const { idIndicacion } = req.params;
+    const { estado } = req.body; // 'Suspendida' o 'Finalizada'
+    try {
+        const ind = await Indicacion.findByPk(idIndicacion);
+        if (ind) {
+            await ind.update({ estado });
+            res.redirect('/medico/evolucionar/' + ind.internacion_id);
+        } else {
+            res.redirect('/habitaciones');
+        }
+    } catch (error) {
+        console.error(error);
+        res.redirect('/habitaciones');
     }
 };

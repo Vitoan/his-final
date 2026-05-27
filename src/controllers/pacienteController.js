@@ -1,4 +1,4 @@
-const { Paciente, Turno, Estudio, Internacion, Cama, Habitacion } = require('../models');
+const { Paciente, Turno, Estudio, Internacion, Cama, Habitacion, Usuario, SignosVitales } = require('../models');
 
 exports.renderDashboard = async (req, res) => {
     try {
@@ -30,7 +30,21 @@ exports.renderDashboard = async (req, res) => {
             ]
         });
 
-        res.render('portal/dashboard', { title: 'Mi Portal de Salud', paciente });
+        // Obtener últimos signos vitales si está internado activamente
+        const activeInternacion = paciente.Internacions ? paciente.Internacions.find(i => i.estado === 'Activa') : null;
+        let ultimosSignos = null;
+        if (activeInternacion) {
+            ultimosSignos = await SignosVitales.findOne({
+                where: { internacion_id: activeInternacion.id },
+                order: [['createdAt', 'DESC']]
+            });
+        }
+
+        res.render('portal/dashboard', { 
+            title: 'Mi Portal de Salud', 
+            paciente, 
+            ultimosSignos 
+        });
     } catch (error) {
         console.error("Error en el portal:", error);
         res.redirect('/');

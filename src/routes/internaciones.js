@@ -14,4 +14,11 @@ router.get('/:id/alta', internacionController.mostrarFormularioAlta);
 // 4. Procesar el Alta Médica
 router.post('/:id/alta', internacionController.darAlta);
 
+// 5. Transferencia de Cama
+router.get('/:id/transferir', internacionController.mostrarFormularioTransferencia);
+router.post('/:id/transferir', internacionController.procesarTransferencia);
+
+// 6. Cancelar Internación
+router.post('/:id/cancelar', internacionController.cancelarInternacion);
+
 module.exports = router;

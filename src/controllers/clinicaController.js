@@ -51,18 +51,50 @@ const verHistorialCompleto = async (req, res) => {
                 { model: Cama, include: [{ model: Habitacion }] },
                 { model: Evolucion, include: ['Autor'] },
                 { model: SignosVitales, include: ['Enfermero'] }
-            ],
-            order: [
-                [Evolucion, 'createdAt', 'DESC'],
-                [SignosVitales, 'createdAt', 'DESC']
             ]
         });
 
         if (!internacion) {
-            return res.redirect('/clinica/dashboard'); // Si no existe, lo devolvemos al mapa
+            return res.redirect('/clinica/dashboard'); 
         }
 
-        res.render('clinical/detalle', { internacion });
+        // Construir un timeline cronológico combinado
+        const timeline = [];
+
+        if (internacion.Evolucions) {
+            internacion.Evolucions.forEach(e => {
+                timeline.push({
+                    id: e.id,
+                    tipoItem: 'Evolucion',
+                    tipo: e.tipo, // 'Medico' o 'Enfermeria'
+                    nota: e.nota,
+                    signos_vitales: e.signos_vitales,
+                    createdAt: e.createdAt,
+                    Autor: e.Autor
+                });
+            });
+        }
+
+        if (internacion.SignosVitales) {
+            internacion.SignosVitales.forEach(sv => {
+                timeline.push({
+                    id: sv.id,
+                    tipoItem: 'SignosVitales',
+                    tipo: 'Enfermeria',
+                    nota: sv.observaciones,
+                    presion_arterial: sv.presion_arterial,
+                    frecuencia_cardiaca: sv.frecuencia_cardiaca,
+                    temperatura: sv.temperatura,
+                    createdAt: sv.createdAt,
+                    Autor: sv.Enfermero
+                });
+            });
+        }
+
+        // Ordenar por fecha de creación descendente (los más recientes primero)
+        timeline.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        res.render('clinical/detalle', { internacion, timeline });
     } catch (error) {
         console.error("Error al cargar el historial:", error);
         res.redirect('/clinica/dashboard');

@@ -1,6 +1,6 @@
-const { Internacion, Paciente, Cama, Habitacion, Evolucion, Usuario } = require('../models');
+const { Internacion, Paciente, Cama, Habitacion, Evolucion, Usuario, SignosVitales, Indicacion, AdministracionMedicamento } = require('../models');
 
-// 1. Mostrar formulario de evaluación
+// 1. Mostrar formulario de evaluación e indicaciones
 exports.mostrarFormulario = async (req, res) => {
     const { idInternacion } = req.params;
     try {
@@ -19,34 +19,50 @@ exports.mostrarFormulario = async (req, res) => {
             return res.redirect('/habitaciones');
         }
 
-        // Buscamos el historial de enfermería previo
-        const historial = await Evolucion.findAll({
-            where: { 
-                internacion_id: idInternacion,
-                tipo: 'Enfermeria' // Filtramos solo notas de enfermería
-            },
-            include: [{ model: Usuario, as: 'Autor' }],
+        // Buscamos el historial de signos vitales previo
+        const historial = await SignosVitales.findAll({
+            where: { internacion_id: idInternacion },
+            include: [{ model: Usuario, as: 'Enfermero' }],
             order: [['createdAt', 'DESC']]
         });
 
         const historialLimpio = historial.map(h => {
             let data = h.toJSON();
-            if (data.signos_vitales && typeof data.signos_vitales === 'string') {
-                try { data.signos_vitales = JSON.parse(data.signos_vitales); } catch(e){}
-            }
+            data.Autor = data.Enfermero; 
+            data.nota = data.observaciones;
             return data;
         });
 
-        
+        // Buscamos indicaciones médicas activas para que enfermería administre
+        const indicaciones = await Indicacion.findAll({
+            where: { internacion_id: idInternacion, estado: 'Activa' },
+            include: [{ model: Usuario, as: 'Medico' }],
+            order: [['createdAt', 'DESC']]
+        });
+
+        // Buscamos historial de administraciones recientes
+        const administraciones = await AdministracionMedicamento.findAll({
+            include: [
+                { 
+                    model: Indicacion, 
+                    where: { internacion_id: idInternacion } 
+                },
+                { model: Usuario, as: 'Enfermero' }
+            ],
+            order: [['createdAt', 'DESC']]
+        });
+
         res.render('clinical/nursing', { 
             title: 'Evaluación de Enfermería',
             paciente: {
                 ...internacion.Paciente.toJSON(),
-                id: internacion.id, // ID de la internación para el form
+                id: internacion.id, // ID de la internación
                 hab_numero: internacion.Cama.Habitacion.numero,
                 numero_cama: internacion.Cama.numero_cama
             },
-            historial: historialLimpio
+            historial: historialLimpio,
+            indicaciones,
+            administraciones
         });
 
     } catch (error) {
@@ -55,30 +71,59 @@ exports.mostrarFormulario = async (req, res) => {
     }
 };
 
-// 2. Guardar la evaluación
+// 2. Guardar la evaluación de signos vitales
 exports.guardarEvaluacion = async (req, res) => {
-    const { internacion_id, presion, pulso, temperatura, antecedentes, observaciones } = req.body;
+    const { internacion_id, presion, pulso, temperatura, observaciones } = req.body;
     
     try {
-        // Guardamos en la tabla unificada Evolucions
+        await SignosVitales.create({
+            internacion_id,
+            presion_arterial: presion,
+            frecuencia_cardiaca: pulso,
+            temperatura: temperatura,
+            observaciones: observaciones,
+            enfermero_id: req.session.usuario.id
+        });
+        
         await Evolucion.create({
             internacion_id,
             tipo: 'Enfermeria',
-            nota: observaciones,
-            // Guardamos los signos vitales en el campo JSON
-            signos_vitales: {
-                presion,
-                frecuencia_cardiaca: pulso,
-                temperatura,
-                antecedentes // Si es relevante guardarlo aquí
-            },
+            nota: observaciones || 'Control de signos vitales realizado.',
             autor_id: req.session.usuario.id
         });
-        
+
         res.redirect('/enfermeria/evaluar/' + internacion_id);
 
     } catch (error) {
         console.error(error);
         res.send("Error al guardar: " + error.message);
+    }
+};
+
+// 3. POST: Registrar la administración de un medicamento
+exports.registrarAdministracion = async (req, res) => {
+    const { indicacion_id, dosis_aplicada, observaciones, internacion_id } = req.body;
+    try {
+        await AdministracionMedicamento.create({
+            indicacion_id,
+            dosis_aplicada: dosis_aplicada || null,
+            observaciones: observaciones || null,
+            enfermero_id: req.session.usuario.id
+        });
+
+        const ind = await Indicacion.findByPk(indicacion_id);
+        
+        // Creamos una evolución de tipo 'Enfermeria' para la línea de tiempo unificada
+        await Evolucion.create({
+            internacion_id,
+            tipo: 'Enfermeria',
+            nota: `MEDICACIÓN ADMINISTRADA: Se aplicó ${ind.descripcion} (Dosis: ${dosis_aplicada || ind.dosis || 'N/A'}). Observaciones: ${observaciones || 'Sin novedades.'}`,
+            autor_id: req.session.usuario.id
+        });
+
+        res.redirect('/enfermeria/evaluar/' + internacion_id);
+    } catch (error) {
+        console.error(error);
+        res.send("Error al registrar la administración: " + error.message);
     }
 };

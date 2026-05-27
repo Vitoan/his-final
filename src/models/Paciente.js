@@ -13,7 +13,12 @@ const Paciente = sequelize.define('Paciente', {
     dni: { 
         type: DataTypes.STRING, 
         unique: true,
-        allowNull: false 
+        allowNull: true 
+    },
+    es_nn: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
     },
     fecha_nacimiento: { 
         type: DataTypes.DATEONLY 
@@ -43,6 +48,27 @@ const Paciente = sequelize.define('Paciente', {
         validate: {
             isEmail: true // Valida que sea un email real
         }
+    },
+    // --- NUEVOS CAMPOS CLÍNICOS Y DE AUDITORÍA ---
+    alergias: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    antecedentes: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    medicamentos_actuales: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    contacto_emergencia_nombre: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    contacto_emergencia_telefono: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, { 
     tableName: 'pacientes', 

@@ -50,10 +50,16 @@ html(lang="es" class="light")
                 span(class=`mr-3 ${activeColor} group-hover:scale-110 transition-transform`) #{icon}
                 span #{text}
 
-          +navLink('/admision', '📋', 'Admisión', 'text-blue-500 dark:text-rose-400')
-          +navLink('/clinica/dashboard', '🩺', 'Tablero Clínico', 'text-indigo-500 dark:text-purple-400')
-          +navLink('/habitaciones', '🛏️', 'Mapa de Camas', 'text-teal-500 dark:text-teal-400')
-          +navLink('/mesa-entrada', '🛎️', 'Mesa de Entrada', 'text-indigo-500 dark:text-indigo-400')
+          if ['Admin', 'Admision', 'Enfermeria'].includes(usuario.rol)
+            +navLink('/admision', '📋', 'Admisión', 'text-blue-500 dark:text-rose-400')
+          if ['Admin', 'Medico', 'Enfermeria'].includes(usuario.rol)
+            +navLink('/clinica/dashboard', '🩺', 'Tablero Clínico', 'text-indigo-500 dark:text-purple-400')
+          if ['Admin', 'Admision', 'Enfermeria', 'Medico'].includes(usuario.rol)
+            +navLink('/habitaciones', '🛏️', 'Mapa de Camas', 'text-teal-500 dark:text-teal-400')
+          if ['Admin', 'Admision', 'Enfermeria'].includes(usuario.rol)
+            +navLink('/mesa-entrada', '🛎️', 'Mesa de Entrada', 'text-indigo-500 dark:text-indigo-400')
+          if ['Paciente', 'Admin'].includes(usuario.rol)
+            +navLink('/portal/inicio', '🏥', 'Mi Portal de Salud', 'text-emerald-500 dark:text-emerald-400')
           
           if usuario.rol === 'Admin'
              div(class="border-t border-slate-200 dark:border-slate-700 my-4")

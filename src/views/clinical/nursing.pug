@@ -78,6 +78,39 @@ block content
               span 💾
               | Registrar Control
 
+      // ADMINISTRACIÓN DE MEDICAMENTOS
+      div(class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2rem] shadow-lg shadow-teal-500/5 p-8 mt-8")
+        div(class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-700 pb-4")
+          div(class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center text-xl shadow-md shadow-teal-500/30") 💊
+          h3(class="text-xl font-bold text-slate-800 dark:text-white") Medicamentos Prescritos / Aplicaciones
+        
+        if indicaciones && indicaciones.length > 0
+          div(class="space-y-6")
+            each ind in indicaciones
+              div(class="p-4 border border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50/50 dark:bg-slate-900/30 flex flex-col md:flex-row md:items-center justify-between gap-4")
+                div
+                  h4(class="font-bold text-slate-950 dark:text-white text-base") #{ind.descripcion}
+                  p(class="text-xs text-slate-500 mt-1") Prescripción: #{ind.dosis || 'Sin dosis'} • #{ind.frecuencia || 'Sin frecuencia'}
+                  p(class="text-[10px] text-slate-400 mt-0.5") Ordenado por: Dr/a. #{ind.Medico ? ind.Medico.nombre : 'Médico'}
+
+                // Formulario inline para aplicar
+                form(action="/enfermeria/administrar" method="POST" class="flex flex-wrap items-end gap-3")
+                  input(type="hidden" name="indicacion_id" value=ind.id)
+                  input(type="hidden" name="internacion_id" value=paciente.id)
+                  
+                  div(class="w-28")
+                    label(class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1") Dosis Aplicada
+                    input(type="text" name="dosis_aplicada" value=ind.dosis placeholder=ind.dosis class="w-full px-2 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-xs dark:text-white" required)
+                  
+                  div(class="w-36")
+                    label(class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1") Observaciones
+                    input(type="text" name="observaciones" placeholder="Sin novedades" class="w-full px-2 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-xs dark:text-white")
+                  
+                  button(type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition shadow-sm") Registrar Aplicación
+        else
+          div(class="text-center py-6 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl")
+            p(class="text-sm text-slate-400") No hay indicaciones médicas de medicación activas para administrar.
+
     // COLUMNA DERECHA: HISTORIAL COMPACTO
     div(class="lg:col-span-1")
       div(class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-[2rem] p-6 h-full")
@@ -119,3 +152,23 @@ block content
           div(class="text-center py-10 opacity-50")
             div(class="text-4xl mb-2") ☁️
             p(class="text-sm") Sin registros previos.
+
+        // MEDICAMENTOS APLICADOS
+        div(class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700")
+          h3(class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2")
+             span 📋
+             | Medicamentos Aplicados
+          
+          if administraciones && administraciones.length > 0
+            div(class="space-y-3")
+              each adm in administraciones
+                div(class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 shadow-sm")
+                  div(class="flex justify-between items-center mb-1")
+                    span(class="text-[9px] font-bold text-slate-400") #{new Date(adm.createdAt).toLocaleDateString()} • #{new Date(adm.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    span(class="text-[9px] font-bold text-teal-600 uppercase") #{adm.dosis_aplicada}
+                  p(class="text-xs font-bold text-slate-850 dark:text-slate-200") #{adm.Indicacion ? adm.Indicacion.descripcion : 'Medicamento'}
+                  p(class="text-[10px] text-slate-400 mt-1") Aplicó: Enf. #{adm.Enfermero ? adm.Enfermero.nombre : 'Enfermería'}
+                  if adm.observaciones
+                    p(class="text-[10px] text-slate-500 dark:text-slate-400 italic mt-0.5") Obs: "#{adm.observaciones}"
+          else
+            p(class="text-xs text-slate-400 italic text-center py-4") Sin registros de aplicación.

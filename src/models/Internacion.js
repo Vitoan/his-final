@@ -18,6 +18,15 @@ const Internacion = sequelize.define('Internacion', {
     resumen_epicrisis: { 
         type: DataTypes.TEXT 
     },
+    recetas: { 
+        type: DataTypes.TEXT 
+    },
+    recomendaciones: { 
+        type: DataTypes.TEXT 
+    },
+    seguimiento: { 
+        type: DataTypes.TEXT 
+    },
     fecha_ingreso: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     fecha_egreso: { type: DataTypes.DATE }
 }, { 

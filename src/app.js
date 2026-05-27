@@ -53,44 +53,43 @@ app.use((req, res, next) => {
 // Públicas
 app.use('/auth', authRoutes);
 
-// Protegidas
-app.use('/admision', authMiddleware, admisionRoutes);
-app.use('/habitaciones', authMiddleware, habitacionesRoutes);
-app.use('/internacion', authMiddleware, internacionesRoutes);
-app.use('/enfermeria', authMiddleware, enfermeriaRoutes);
-app.use('/medico', authMiddleware, medicoRoutes); 
-app.use('/clinica', authMiddleware, clinicaRoutes);
-app.use('/admin', authMiddleware, adminRoutes);
-app.use('/api', authMiddleware, apiRoutes);
-app.use('/mesa-entrada', authMiddleware, require('./routes/mesa'));
-app.use('/turnos', authMiddleware, require('./routes/turnos'));
-app.use('/estudios', authMiddleware, require('./routes/estudios'));
-app.use('/portal', authMiddleware, require('./routes/portal'));
+// Protegidas con Autenticación y Autorización por Rol
+app.use('/admision', authMiddleware, checkRole(['Admin', 'Admision', 'Enfermeria']), admisionRoutes);
+app.use('/habitaciones', authMiddleware, checkRole(['Admin', 'Admision', 'Enfermeria', 'Medico']), habitacionesRoutes);
+app.use('/internacion', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), internacionesRoutes);
+app.use('/enfermeria', authMiddleware, checkRole(['Admin', 'Enfermeria']), enfermeriaRoutes);
+app.use('/medico', authMiddleware, checkRole(['Admin', 'Medico']), medicoRoutes); 
+app.use('/clinica', authMiddleware, checkRole(['Admin', 'Medico', 'Enfermeria']), clinicaRoutes);
+app.use('/admin', authMiddleware, checkRole(['Admin']), adminRoutes);
+app.use('/api', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), apiRoutes);
+app.use('/mesa-entrada', authMiddleware, checkRole(['Admin', 'Admision', 'Enfermeria']), require('./routes/mesa'));
+app.use('/turnos', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), require('./routes/turnos'));
+app.use('/estudios', authMiddleware, checkRole(['Admin', 'Medico', 'Enfermeria']), require('./routes/estudios'));
+app.use('/portal', authMiddleware, checkRole(['Paciente', 'Admin']), require('./routes/portal'));
 
 // --- CAMBIO IMPORTANTE AQUÍ ---
 // Ruta Raíz: Si está logueado, muestra el INDEX (Menú Principal), no Admisión.
 // --- RUTA DE RESCATE (Para crear usuarios de prueba) ---
 app.get('/setup-usuarios', async (req, res) => {
     try {
-        await Usuario.findOrCreate({
-    where: { email: 'paciente@test.com' },
-    defaults: {
-        nombre: 'Victor',
-        apellido: 'Prueba',
-        email: 'paciente@test.com',
-        password: passwordHash, // '123456'
-        rol: 'Paciente',
-        paciente_id: 1 // IMPORTANTE: Debe coincidir con el ID de un paciente real en tu DB
-    }
-});
         const { Usuario } = require('./models');
-        
-        // Dependiendo de la librería que uses en tu proyecto para las contraseñas,
-        // puede que necesites cambiar 'bcryptjs' por 'bcrypt'.
         const bcrypt = require('bcryptjs'); 
         const passwordHash = await bcrypt.hash('123456', 10);
 
-        // 1. Creamos un Administrador
+        // 1. Creamos un Paciente de prueba
+        await Usuario.findOrCreate({
+            where: { email: 'paciente@test.com' },
+            defaults: {
+                nombre: 'Victor',
+                apellido: 'Prueba',
+                email: 'paciente@test.com',
+                password: passwordHash,
+                rol: 'Paciente',
+                paciente_id: 1 // Debe existir en la DB
+            }
+        });
+        
+        // 2. Creamos un Administrador
         await Usuario.findOrCreate({
             where: { email: 'admin@his.com' },
             defaults: {
@@ -98,11 +97,11 @@ app.get('/setup-usuarios', async (req, res) => {
                 apellido: 'Sistema',
                 email: 'admin@his.com',
                 password: passwordHash,
-                rol: 'Admin' // o el rol de administrador que manejes
+                rol: 'Admin'
             }
         });
 
-        // 2. Creamos un Médico (Fundamental para poder agendar turnos)
+        // 3. Creamos un Médico
         await Usuario.findOrCreate({
             where: { email: 'medico@his.com' },
             defaults: {
@@ -114,12 +113,26 @@ app.get('/setup-usuarios', async (req, res) => {
             }
         });
 
+        // 4. Creamos una Enfermera
+        await Usuario.findOrCreate({
+            where: { email: 'enfermera@his.com' },
+            defaults: {
+                nombre: 'Joy',
+                apellido: 'Enfermera',
+                email: 'enfermera@his.com',
+                password: passwordHash,
+                rol: 'Enfermeria'
+            }
+        });
+
         res.send(`
             <h1>✅ ¡Usuarios creados con éxito!</h1>
             <p>Ya puedes iniciar sesión con:</p>
             <ul>
-                <li><b>Email:</b> admin@his.com o medico@his.com</li>
-                <li><b>Contraseña:</b> 123456</li>
+                <li><b>Paciente:</b> paciente@test.com (Clave: 123456)</li>
+                <li><b>Admin:</b> admin@his.com (Clave: 123456)</li>
+                <li><b>Médico:</b> medico@his.com (Clave: 123456)</li>
+                <li><b>Enfermería:</b> enfermera@his.com (Clave: 123456)</li>
             </ul>
             <a href="/auth/login" style="padding: 10px; background: blue; color: white; text-decoration: none; border-radius: 5px;">Ir al Login</a>
         `);

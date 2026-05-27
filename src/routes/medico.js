@@ -8,4 +8,7 @@ router.get('/evolucionar/:idInternacion', medicoController.mostrarEvolucion);
 // POST: Guardar la evolución
 router.post('/guardar', medicoController.guardarEvolucion);
 
+// POST: Cambiar estado de una indicación médica (Finalizar/Suspender)
+router.post('/indicacion/estado/:idIndicacion', medicoController.cambiarEstadoIndicacion);
+
 module.exports = router;

@@ -53,11 +53,54 @@ block content
             label(class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2") Tratamiento / Indicaciones
             textarea(name="tratamiento" rows="3" required placeholder="Indique medicación o procedimientos..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent outline-none transition-all dark:text-white resize-none shadow-inner")
 
+          // Sección Opcional: Nueva Indicación de Medicación
+          div(class="border-t border-slate-100 dark:border-slate-700 pt-4 mt-4")
+            h4(class="text-sm font-bold text-slate-800 dark:text-white mb-3 flex items-center gap-2") 💊 Prescribir Medicación (Opcional)
+            div(class="grid grid-cols-1 md:grid-cols-3 gap-4")
+              div
+                label(class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1") Medicamento
+                input(type="text" name="descripcion_indicacion" placeholder="Ej: Paracetamol" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm dark:text-white")
+              div
+                label(class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1") Dosis
+                input(type="text" name="dosis" placeholder="Ej: 500mg" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm dark:text-white")
+              div
+                label(class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1") Frecuencia
+                input(type="text" name="frecuencia" placeholder="Ej: Cada 8 hs" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm dark:text-white")
+
           // Botón Guardar
           div(class="pt-2")
             button(type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transition-all transform active:scale-95 flex items-center justify-center gap-2")
               span 💾
               | Guardar Evolución
+
+      // LISTADO DE INDICACIONES MÉDICAS
+      div(class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2rem] shadow-lg shadow-blue-500/5 p-8 mt-8")
+        div(class="flex items-center gap-3 mb-6 border-b border-slate-100 dark:border-slate-700 pb-4")
+          div(class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center text-xl shadow-md shadow-teal-500/30") 💊
+          h3(class="text-xl font-bold text-slate-800 dark:text-white") Indicaciones de Medicación Activas
+        
+        if indicaciones && indicaciones.length > 0
+          div(class="space-y-4")
+            each ind in indicaciones
+              div(class=`p-4 border rounded-2xl flex items-center justify-between gap-4 transition-all ${ind.estado === 'Activa' ? 'border-emerald-200 bg-emerald-50/10' : 'border-slate-200 bg-slate-50/50 opacity-60'}`)
+                div
+                  div(class="flex items-center gap-2")
+                    span(class="font-bold text-slate-900 dark:text-white text-base") #{ind.descripcion}
+                    span(class=`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${ind.estado === 'Activa' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`) #{ind.estado}
+                  p(class="text-xs text-slate-500 mt-1") Dosis: #{ind.dosis || '-'} • Frecuencia: #{ind.frecuencia || '-'}
+                  p(class="text-[10px] text-slate-400 mt-0.5") Prescrito por: Dr/a. #{ind.Medico ? ind.Medico.nombre : 'Médico'} el #{new Date(ind.fecha_indicacion).toLocaleDateString()}
+                
+                if ind.estado === 'Activa'
+                  div(class="flex gap-2")
+                    form(action=`/medico/indicacion/estado/${ind.id}` method="POST")
+                      input(type="hidden" name="estado" value="Finalizada")
+                      button(type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition") Finalizar
+                    form(action=`/medico/indicacion/estado/${ind.id}` method="POST")
+                      input(type="hidden" name="estado" value="Suspendida")
+                      button(type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition") Suspender
+        else
+          div(class="text-center py-6 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl")
+            p(class="text-sm text-slate-400") No hay indicaciones de medicamentos activas cargadas.
 
     // COLUMNA DERECHA: HISTORIAL RECIENTE
     div(class="lg:col-span-1")

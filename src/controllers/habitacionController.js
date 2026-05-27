@@ -22,10 +22,17 @@ exports.listarMapa = async (req, res) => {
             ]
         });
 
+        // Obtener paciente si estamos en flujo de asignación
+        let asignandoPaciente = null;
+        if (req.query.paciente_id) {
+            asignandoPaciente = await Paciente.findByPk(req.query.paciente_id);
+        }
+
         // AQUÍ ESTÁ EL CAMBIO CLAVE: Apuntamos a la carpeta rooms
         res.render('rooms/index', { 
             title: 'Mapa de Camas', 
             alas: alas, 
+            asignandoPaciente,
             error: req.query.error 
         });
 

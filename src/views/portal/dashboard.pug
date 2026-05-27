@@ -63,3 +63,19 @@ block content
             p(class="text-sm text-slate-600") Te encuentras en:
             p(class="text-lg font-black text-slate-900") Habitación #{inter.Cama.Habitacion.numero} - Cama #{inter.Cama.numero_cama}
             p(class="text-xs text-rose-500 mt-2 font-bold uppercase") #{inter.Cama.Habitacion.tipo}
+
+            if ultimosSignos
+              div(class="mt-6 pt-6 border-t border-rose-200")
+                h4(class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3") 📊 Últimos Signos Vitales
+                div(class="grid grid-cols-3 gap-2 text-center bg-white dark:bg-slate-950 rounded-xl p-3 border border-rose-100 dark:border-slate-800")
+                  div
+                    span(class="block text-[9px] text-slate-400 uppercase") Presión
+                    span(class="font-mono font-bold text-slate-800 dark:text-slate-100 text-xs") #{ultimosSignos.presion_arterial || '-'}
+                  div(class="border-l border-slate-100 dark:border-slate-800")
+                    span(class="block text-[9px] text-slate-400 uppercase") Pulso
+                    span(class="font-mono font-bold text-slate-800 dark:text-slate-100 text-xs") #{ultimosSignos.frecuencia_cardiaca || '-'}
+                  div(class="border-l border-slate-100 dark:border-slate-800")
+                    span(class="block text-[9px] text-slate-400 uppercase") Temp
+                    span(class="font-mono font-bold text-slate-800 dark:text-slate-100 text-xs") #{ultimosSignos.temperatura || '-'}°
+                if ultimosSignos.observaciones
+                  p(class="text-xs text-slate-500 dark:text-slate-400 italic mt-3 line-clamp-2") "#{ultimosSignos.observaciones}"

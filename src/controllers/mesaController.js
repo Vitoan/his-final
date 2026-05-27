@@ -1,4 +1,4 @@
-const { Paciente, Visita, Internacion, Cama, Habitacion, sequelize } = require('../models');
+const { Paciente, Visita, Internacion, Cama, Habitacion, Usuario, sequelize } = require('../models');
 const { Op } = require('sequelize');
 
 // 1. Dashboard de Mesa de Entrada (Sala de Espera)
@@ -155,11 +155,11 @@ exports.internar = async (req, res) => {
         const visita = await Visita.findByPk(id);
         if (!visita) return res.redirect('/mesa-entrada');
 
-        // Cerramos la guardia como "Internado"
-        await visita.update({ estado: 'Internado' });
+        // Cerramos la guardia como "Derivado a Internación"
+        await visita.update({ estado: 'Derivado a Internación' });
 
-        // Redirigimos a la pantalla de asignar cama
-        res.redirect(`/internacion/nuevo?paciente_id=${visita.paciente_id}`);
+        // Redirigimos al mapa de habitaciones en modo asignación
+        res.redirect(`/habitaciones?paciente_id=${visita.paciente_id}`);
 
     } catch (error) {
         console.error("Error al derivar:", error);
