@@ -1,4 +1,4 @@
-const { Paciente, Internacion, Visita, Cama, Habitacion, Usuario } = require('../models');
+const { Paciente, Internacion, Visita, Cama, Habitacion, Usuario, ObraSocial } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
@@ -29,20 +29,37 @@ exports.renderIndex = async (req, res) => {
 };
 
 // 2. Mostrar Formulario Crear
-exports.renderCreate = (req, res) => {
-    res.render('admission/create', { 
-        title: 'Nuevo Paciente',
-        isEditing: false,
-        data: null
-    });
+exports.renderCreate = async (req, res) => {   // ← Cambia a async
+    try {
+        const obrasSociales = await ObraSocial.findAll({
+            where: { activo: true },
+            order: [['nombre', 'ASC']]
+        });
+
+        res.render('admission/create', { 
+            title: 'Nuevo Paciente',
+            isEditing: false,
+            data: null,
+            obrasSociales   // ← Nuevo
+        });
+    } catch (error) {
+        console.error(error);
+        res.render('admission/create', { 
+            title: 'Nuevo Paciente',
+            isEditing: false,
+            data: null,
+            obrasSociales: [],
+            error: 'Error al cargar obras sociales'
+        });
+    }
 };
 
 // 3. Guardar Nuevo Paciente (CREATE) + Auto-Crear Usuario
 exports.create = async (req, res) => {
     try {
         if (req.body.email === '') req.body.email = null;
+        if (req.body.obra_social_id === '') req.body.obra_social_id = null;
 
-        // 1. Creamos al Paciente
         const nuevoPaciente = await Paciente.create(req.body);
 
         // 2. Si NO es NN, le creamos su cuenta para el Portal
@@ -82,26 +99,23 @@ exports.renderEdit = async (req, res) => {
     try {
         const paciente = await Paciente.findByPk(req.params.id, {
             include: [
-                {
-                    model: Internacion,
-                    required: false,
-                    where: { fecha_egreso: null },
-                    include: [{ model: Cama, include: [Habitacion] }]
-                },
-                {
-                    model: Visita,
-                    required: false,
-                    where: { estado: { [Op.or]: ['Esperando', 'En Atención'] } }
-                }
+                { model: ObraSocial, as: 'ObraSocial' },   // ← Nuevo
+                // ... el resto de includes que ya tenías
             ]
         });
 
         if (!paciente) return res.redirect('/admision');
 
+        const obrasSociales = await ObraSocial.findAll({
+            where: { activo: true },
+            order: [['nombre', 'ASC']]
+        });
+
         res.render('admission/create', {
             title: 'Editar Paciente',
             isEditing: true,
-            data: paciente
+            data: paciente,
+            obrasSociales   // ← Nuevo
         });
     } catch (error) {
         console.error(error);
@@ -118,6 +132,7 @@ exports.update = async (req, res) => {
         // Si el usuario borra el email y lo deja vacío, Sequelize falla la validación 'isEmail'.
         // Aquí forzamos que si es string vacío, se guarde como NULL.
         if (req.body.email === '') req.body.email = null;
+        if (req.body.obra_social_id === '') req.body.obra_social_id = null;
         
         if (req.body.dni && req.body.dni.trim() !== '') {
             req.body.es_nn = false; 

@@ -11,10 +11,11 @@ const Evolucion = require('./Evolucion');
 const Auditoria = require('./Auditoria'); 
 const Visita = require('./Visita');
 const SignosVitales = require('./SignosVitales');
-const Turno = require('./turno');
 const Estudio = require('./estudio');
 const Indicacion = require('./Indicacion');
+const Turno = require('./Turno');
 const AdministracionMedicamento = require('./AdministracionMedicamento');
+const ObraSocial = require('./ObraSocial');
 
 // --- RELACIONES ---
 Ala.hasMany(Habitacion, { foreignKey: 'ala_id' });
@@ -94,7 +95,11 @@ AdministracionMedicamento.belongsTo(Indicacion, { foreignKey: 'indicacion_id' })
 Usuario.hasMany(AdministracionMedicamento, { foreignKey: 'enfermero_id' });
 AdministracionMedicamento.belongsTo(Usuario, { as: 'Enfermero', foreignKey: 'enfermero_id' });
 
+// === NUEVA RELACIÓN ===
+ObraSocial.hasMany(Paciente, { foreignKey: 'obra_social_id' });
+Paciente.belongsTo(ObraSocial, { foreignKey: 'obra_social_id', as: 'ObraSocial' });
+
 // 3. EXPORTAMOS TODO
 module.exports = { 
-    sequelize, Usuario, Paciente, Ala, Habitacion, Cama, Internacion, Evolucion, Auditoria, Visita, SignosVitales, Turno, Estudio, Indicacion, AdministracionMedicamento
+    sequelize, Usuario, Paciente, Ala, Habitacion, Cama, Internacion, Evolucion, Auditoria, Visita, SignosVitales, Turno, Estudio, Indicacion, AdministracionMedicamento, ObraSocial
 };

@@ -28,7 +28,7 @@ block content
           div
             h2(class="text-xl font-bold text-orange-800 dark:text-orange-200") Ya registrado
             p(class="text-orange-700 dark:text-orange-300 mt-1") Estado: #{paciente.Visita[0].estado}.
-
+      
       div(class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-6 rounded-2xl mb-6 flex items-center gap-4 animate-fade-in")
         div(class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl font-bold") ✓
         div
@@ -37,7 +37,7 @@ block content
             p #[strong Nombre:] #{paciente.nombre} #{paciente.apellido}
             p #[strong DNI:] #{paciente.dni}
             p #[strong Tel:] #{paciente.telefono || '-'}
-            p #[strong Obra Soc:] #{paciente.obra_social || 'Particular'}
+            p #[strong Obra Soc:] #{paciente.ObraSocial ? paciente.ObraSocial.nombre : (paciente.obra_social || 'Particular')}
 
       div(class="bg-white dark:bg-slate-800 p-8 rounded-[2rem] shadow-lg border border-slate-200 dark:border-slate-700")
         form(action="/mesa-entrada/guardar" method="POST" class="space-y-6")
@@ -59,8 +59,15 @@ block content
           
           div
             h3(class="text-xl font-bold text-slate-800 dark:text-white mb-4 border-b pb-2 border-slate-100 dark:border-slate-700") 1. Datos Completos
-            // USAMOS EL MIXIN (DNI readonly porque ya lo buscó)
             +formPaciente({ dni: dniBuscado }, true)
+
+          // === NUEVO CAMPO OBRA SOCIAL ===
+          div
+            label(class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2") Obra Social
+            select(name="obra_social_id" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none")
+              option(value="" selected) -- Sin obra social / Particular --
+              each obra in obrasSociales || []
+                option(value=obra.id) #{obra.nombre}
 
           div
             h3(class="text-xl font-bold text-slate-800 dark:text-white mb-4 border-b pb-2 border-slate-100 dark:border-slate-700") 2. Datos del Ingreso

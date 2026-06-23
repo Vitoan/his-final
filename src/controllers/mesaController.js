@@ -1,4 +1,4 @@
-const { Paciente, Visita, Internacion, Cama, Habitacion, Usuario, sequelize } = require('../models');
+const { Paciente, Visita, Internacion, Cama, Habitacion, Usuario, ObraSocial, sequelize } = require('../models');
 const { Op } = require('sequelize');
 
 // 1. Dashboard de Mesa de Entrada (Sala de Espera)
@@ -30,6 +30,7 @@ exports.buscarPaciente = async (req, res) => {
         paciente = await Paciente.findOne({ 
             where: { dni },
             include: [
+                { model: ObraSocial, as: 'ObraSocial' },
                 {
                     model: Internacion,
                     required: false,
@@ -49,12 +50,18 @@ exports.buscarPaciente = async (req, res) => {
             mensaje = "Paciente no encontrado. Complete los datos para ingresarlo.";
         }
     }
+    // Cargar obras sociales para el formulario
+    const obrasSociales = await ObraSocial.findAll({
+        where: { activo: true },
+        order: [['nombre', 'ASC']]
+    });
 
     res.render('mesa/checkin', {
         title: 'Registrar Ingreso',
         paciente,
         dniBuscado: dni,
         mostrarAlta,
+        obrasSociales,
         mensaje
     });
 };
@@ -77,7 +84,7 @@ exports.registrarCompleto = async (req, res) => {
     try {
         const { 
             dni, nombre, apellido, fecha_nacimiento, sexo, 
-            direccion, telefono, email, obra_social, numero_afiliado,
+            direccion, telefono, email, obra_social_id, numero_afiliado,
             motivo, prioridad, tipo_ingreso 
         } = req.body;
 
@@ -87,7 +94,7 @@ exports.registrarCompleto = async (req, res) => {
             direccion: direccion || 'No especificada', 
             telefono: telefono || 'No especificado',
             email: email || null,
-            obra_social,
+            obra_social_id: obra_social_id || null,   
             numero_afiliado
         }, { transaction: t });
 
