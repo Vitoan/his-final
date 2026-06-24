@@ -91,4 +91,36 @@ exports.verAuditoria = async (req, res) => {
         console.error(error);
         res.redirect('/');
     }
+}
+exports.reportes = async (req, res) => {
+    try {
+        const totalPacientes = await Paciente.count();
+        const internacionesActivas = await Internacion.count({ where: { estado: 'Activa' } });
+        const camasOcupadas = await Cama.count({ where: { estado: 'Ocupada' } });
+        const camasTotales = await Cama.count();
+
+        const obrasMasUsadas = await Paciente.findAll({
+            attributes: [
+                [sequelize.fn('COUNT', sequelize.col('obra_social_id')), 'total'],
+                [sequelize.col('ObraSocial.nombre'), 'nombre']
+            ],
+            include: [{ model: ObraSocial, as: 'ObraSocial' }],
+            where: { obra_social_id: { [Op.ne]: null } },
+            group: ['obra_social_id', 'ObraSocial.nombre'],
+            order: [[sequelize.literal('total'), 'DESC']],
+            limit: 5
+        });
+
+        res.render('admin/reportes', { 
+            title: 'Reportes del Sistema',
+            totalPacientes,
+            internacionesActivas,
+            camasOcupadas,
+            camasTotales,
+            obrasMasUsadas
+        });
+    } catch (error) {
+        console.error(error);
+        res.redirect('/admin');
+    }
 };

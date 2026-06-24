@@ -49,6 +49,11 @@ block content
                   p(class="font-bold text-slate-900") #{visita.Paciente.apellido}, #{visita.Paciente.nombre}
                   if visita.Paciente.es_nn
                     span(class="inline-block mt-1 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase") Sin Identificar
+                td(class="p-4")
+                  if paciente.ObraSocial
+                     span(class="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full") #{paciente.ObraSocial.nombre}
+                  else
+                span(class="text-slate-400") #{paciente.obra_social || 'Particular'}
                 td(class="p-4 text-sm text-slate-600") #{visita.motivo}
                 td(class="p-4 flex justify-center gap-2")
                   a(href=`/mesa-entrada/internar/${visita.id}` class="bg-violet-100 text-violet-700 hover:bg-violet-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors") Internar

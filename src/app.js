@@ -67,6 +67,7 @@ app.use('/mesa-entrada', authMiddleware, checkRole(['Admin', 'Admision', 'Enferm
 app.use('/turnos', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), require('./routes/turnos'));
 app.use('/estudios', authMiddleware, checkRole(['Admin', 'Medico', 'Enfermeria']), require('./routes/estudios'));
 app.use('/portal', authMiddleware, checkRole(['Paciente', 'Admin']), require('./routes/portal'));
+app.use('/admin/reportes', authMiddleware, checkRole(['Admin']), require('./routes/reportes'));
 
 // --- CAMBIO IMPORTANTE AQUÍ ---
 // Ruta Raíz: Si está logueado, muestra el INDEX (Menú Principal), no Admisión.

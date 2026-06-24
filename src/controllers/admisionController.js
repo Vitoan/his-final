@@ -7,6 +7,10 @@ exports.renderIndex = async (req, res) => {
     try {
         const pacientes = await Paciente.findAll({
             include: [
+                { 
+                    model: ObraSocial, 
+                    as: 'ObraSocial' 
+                },
                 {
                     model: Internacion,
                     required: false,
@@ -19,9 +23,13 @@ exports.renderIndex = async (req, res) => {
                     where: { estado: { [Op.or]: ['Esperando', 'En Atención'] } }
                 }
             ],
-            order: [['apellido', 'ASC']]
+            order: [['apellido', 'ASC'], ['nombre', 'ASC']]
         });
-        res.render('admission/index', { title: 'Listado de Pacientes', pacientes });
+
+        res.render('admission/index', { 
+            title: 'Listado de Pacientes', 
+            pacientes 
+        });
     } catch (error) {
         console.error(error);
         res.redirect('/');

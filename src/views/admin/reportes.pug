@@ -1,0 +1,36 @@
+extends ../../layouts/main
+
+block content
+  div(class="max-w-6xl mx-auto")
+    h1(class="text-3xl font-black mb-8") Reportes del Sistema
+
+    div(class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12")
+      div(class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100")
+        p(class="text-sm text-slate-500") Total Pacientes
+        p(class="text-4xl font-black text-slate-900") #{totalPacientes}
+      div(class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100")
+        p(class="text-sm text-slate-500") Internaciones Activas
+        p(class="text-4xl font-black text-emerald-600") #{internacionesActivas}
+      div(class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100")
+        p(class="text-sm text-slate-500") Camas Ocupadas
+        p(class="text-4xl font-black text-rose-600") #{camasOcupadas} / #{camasTotales}
+      div(class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100")
+        p(class="text-sm text-slate-500") Ocupación
+        p(class="text-4xl font-black text-amber-600") #{Math.round((camasOcupadas / camasTotales) * 100)}%
+
+    h2(class="text-2xl font-bold mb-6") Obras Sociales más utilizadas
+    if obrasMasUsadas && obrasMasUsadas.length > 0
+      table(class="w-full bg-white rounded-2xl")
+        thead
+          tr(class="bg-slate-50")
+            th(class="p-4 text-left") Obra Social
+            th(class="p-4 text-center") Cantidad de Pacientes
+        tbody
+          each obra in obrasMasUsadas
+            tr(class="border-t")
+              td(class="p-4 font-medium") #{obra.ObraSocial.nombre}
+              td(class="p-4 text-center font-bold") #{obra.dataValues.total}
+    else
+      p No hay datos aún.
+
+    a(href="/admin" class="mt-8 inline-block text-blue-600 hover:underline") ← Volver al Panel
