@@ -1,0 +1,29 @@
+extends ../../layouts/main
+
+block content
+  div(class="max-w-6xl mx-auto")
+    div(class="flex justify-between items-center mb-8")
+      h1(class="text-3xl font-black") Obras Sociales
+      a(href="/admin/obras-sociales/nuevo" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700") + Nueva Obra Social
+
+    table(class="w-full bg-white rounded-2xl shadow-sm overflow-hidden")
+      thead(class="bg-slate-50")
+        tr
+          th(class="p-4 text-left") Nombre
+          th(class="p-4 text-left") Descripción
+          th(class="p-4 text-center") Estado
+          th(class="p-4 text-center") Acciones
+      tbody
+        each obra in obras
+          tr(class="border-t hover:bg-slate-50")
+            td(class="p-4 font-bold") #{obra.nombre}
+            td(class="p-4 text-slate-600") #{obra.descripcion || '-'}
+            td(class="p-4 text-center")
+              if obra.activo
+                span(class="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-xs font-bold") Activa
+              else
+                span(class="bg-red-100 text-red-700 px-3 py-1 rounded-lg text-xs font-bold") Inactiva
+            td(class="p-4 text-center")
+              a(href=`/admin/obras-sociales/editar/${obra.id}` class="text-blue-600 hover:underline mr-4") Editar
+              form(action=`/admin/obras-sociales/eliminar/${obra.id}` method="POST" class="inline" onsubmit="return confirm('¿Eliminar esta obra social?')")
+                button(type="submit" class="text-red-600 hover:underline") Eliminar
