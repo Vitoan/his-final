@@ -10,6 +10,7 @@ const {
 
 const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
+const { registrarAuditoria } = require('../helpers/auditoria');
 
 // ======================================================
 // 1. GESTIÓN DE USUARIOS (Personal del hospital)
@@ -54,6 +55,12 @@ exports.crearUsuario = async (req, res) => {
             password: passwordHash,
             rol
         });
+        await registrarAuditoria(
+    'Creó usuario',
+    `Usuario: ${nombre} ${email} | Rol: ${rol}`,
+    req.session.usuario.id,
+    req.ip
+);
 
         res.redirect('/admin/usuarios');
     } catch (error) {
@@ -132,5 +139,46 @@ exports.reportes = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.redirect('/admin');
+    }
+}
+// Mostrar formulario de edición de usuario
+exports.mostrarFormularioEditar = async (req, res) => {
+    try {
+        const usuario = await Usuario.findByPk(req.params.id);
+        if (!usuario) return res.redirect('/admin/usuarios');
+
+        res.render('admin/users_edit', { 
+            title: 'Editar Usuario',
+            usuario 
+        });
+    } catch (error) {
+        console.error(error);
+        res.redirect('/admin/usuarios');
+    }
+};
+
+// Actualizar usuario
+exports.actualizarUsuario = async (req, res) => {
+    try {
+        const { nombre, email, rol } = req.body;
+        const { id } = req.params;
+
+        await Usuario.update(
+            { nombre, email, rol },
+            { where: { id } }
+        );
+
+        // Opcional: registrar en auditoría
+        await registrarAuditoria(
+            'Modificó usuario',
+            `Usuario ID: ${id} | Nombre: ${nombre} | Rol: ${rol}`,
+            req.session.usuario.id,
+            req.ip
+        );
+
+        res.redirect('/admin/usuarios');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/admin/usuarios');
     }
 };
