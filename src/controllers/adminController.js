@@ -13,7 +13,7 @@ const bcrypt = require('bcryptjs');
 const { registrarAuditoria } = require('../helpers/auditoria');
 
 // ======================================================
-// 1. GESTIÓN DE USUARIOS (Personal del hospital)
+// 1. GESTIÓN DE USUARIOS
 // ======================================================
 exports.listarUsuarios = async (req, res) => {
     try {
@@ -55,12 +55,13 @@ exports.crearUsuario = async (req, res) => {
             password: passwordHash,
             rol
         });
+
         await registrarAuditoria(
-    'Creó usuario',
-    `Usuario: ${nombre} ${email} | Rol: ${rol}`,
-    req.session.usuario.id,
-    req.ip
-);
+            'Creó usuario',
+            `Usuario: ${nombre} (${email}) | Rol: ${rol}`,
+            req.session.usuario.id,
+            req.ip
+        );
 
         res.redirect('/admin/usuarios');
     } catch (error) {
@@ -72,16 +73,87 @@ exports.crearUsuario = async (req, res) => {
     }
 };
 
-exports.eliminarUsuario = async (req, res) => {
+// Mostrar formulario de edición
+exports.mostrarFormularioEditar = async (req, res) => {
     try {
-        if (req.params.id == req.session.usuario.id) {
-            return res.send("No puedes borrar tu propia cuenta.");
-        }
+        const usuario = await Usuario.findByPk(req.params.id);
+        if (!usuario) return res.redirect('/admin/usuarios');
 
-        await Usuario.destroy({ where: { id: req.params.id } });
+        res.render('admin/users_edit', { 
+            title: 'Editar Usuario',
+            usuario 
+        });
+    } catch (error) {
+        console.error(error);
+        res.redirect('/admin/usuarios');
+    }
+};
+
+// Actualizar usuario
+exports.actualizarUsuario = async (req, res) => {
+    try {
+        const { nombre, email, rol } = req.body;
+        const { id } = req.params;
+
+        await Usuario.update({ nombre, email, rol }, { where: { id } });
+
+        await registrarAuditoria(
+            'Modificó usuario',
+            `Usuario ID: ${id} | Nombre: ${nombre} | Rol: ${rol}`,
+            req.session.usuario.id,
+            req.ip
+        );
+
         res.redirect('/admin/usuarios');
     } catch (error) {
-        res.send("Error al eliminar.");
+        console.error(error);
+        res.redirect('/admin/usuarios');
+    }
+};
+
+// Desactivar usuario
+exports.desactivarUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (id == req.session.usuario.id) {
+            return res.send("No puedes desactivar tu propia cuenta.");
+        }
+
+        await Usuario.update({ activo: false }, { where: { id } });
+
+        await registrarAuditoria(
+            'Desactivó usuario',
+            `Usuario ID: ${id}`,
+            req.session.usuario.id,
+            req.ip
+        );
+
+        res.redirect('/admin/usuarios');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/admin/usuarios');
+    }
+};
+
+// Reactivar usuario
+exports.reactivarUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        await Usuario.update({ activo: true }, { where: { id } });
+
+        await registrarAuditoria(
+            'Reactivó usuario',
+            `Usuario ID: ${id}`,
+            req.session.usuario.id,
+            req.ip
+        );
+
+        res.redirect('/admin/usuarios');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/admin/usuarios');
     }
 };
 
@@ -140,45 +212,18 @@ exports.reportes = async (req, res) => {
         console.error(error);
         res.redirect('/admin');
     }
-}
-// Mostrar formulario de edición de usuario
-exports.mostrarFormularioEditar = async (req, res) => {
-    try {
-        const usuario = await Usuario.findByPk(req.params.id);
-        if (!usuario) return res.redirect('/admin/usuarios');
-
-        res.render('admin/users_edit', { 
-            title: 'Editar Usuario',
-            usuario 
-        });
-    } catch (error) {
-        console.error(error);
-        res.redirect('/admin/usuarios');
-    }
+    // ======================================================
+// EXPORTAR TODAS LAS FUNCIONES
+// ======================================================
+module.exports = {
+    listarUsuarios: exports.listarUsuarios,
+    mostrarFormulario: exports.mostrarFormulario,
+    crearUsuario: exports.crearUsuario,
+    mostrarFormularioEditar: exports.mostrarFormularioEditar,
+    actualizarUsuario: exports.actualizarUsuario,
+    desactivarUsuario: exports.desactivarUsuario,
+    reactivarUsuario: exports.reactivarUsuario,
+    verAuditoria: exports.verAuditoria,
+    reportes: exports.reportes
 };
-
-// Actualizar usuario
-exports.actualizarUsuario = async (req, res) => {
-    try {
-        const { nombre, email, rol } = req.body;
-        const { id } = req.params;
-
-        await Usuario.update(
-            { nombre, email, rol },
-            { where: { id } }
-        );
-
-        // Opcional: registrar en auditoría
-        await registrarAuditoria(
-            'Modificó usuario',
-            `Usuario ID: ${id} | Nombre: ${nombre} | Rol: ${rol}`,
-            req.session.usuario.id,
-            req.ip
-        );
-
-        res.redirect('/admin/usuarios');
-    } catch (error) {
-        console.error(error);
-        res.redirect('/admin/usuarios');
-    }
 };

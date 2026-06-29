@@ -18,25 +18,37 @@ block content
             th(class="p-5 font-bold") Teléfono
             th(class="p-5 font-bold text-center") Estado
             th(class="p-5 font-bold text-center") Acciones
+
         tbody(class="divide-y divide-slate-100")
           each paciente in pacientes
             tr(class="hover:bg-slate-50 transition-colors")
+              
               td(class="p-5 font-bold") #{paciente.apellido}, #{paciente.nombre}
+              
               td(class="p-5") #{paciente.dni || 'NN'}
+              
               td(class="p-5")
                 if paciente.ObraSocial && paciente.ObraSocial.nombre
                   span(class="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full") #{paciente.ObraSocial.nombre}
                 else
                   span(class="text-slate-400") #{paciente.obra_social || 'Particular'}
+              
               td(class="p-5 text-slate-600") #{paciente.telefono || '-'}
+              
+              // Estado del paciente
               td(class="p-5 text-center")
-                if paciente.Internacions && paciente.Internacions.length > 0
-                  span(class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-lg") Internado
-                else if paciente.Visita && paciente.Visita.length > 0
-                  span(class="bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1 rounded-lg") En Espera
+                if paciente.activo
+                  span(class="px-3 py-1 inline-flex text-xs font-bold rounded-full bg-emerald-100 text-emerald-700") Activo
                 else
-                  span(class="bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1 rounded-lg") Activo
+                  span(class="px-3 py-1 inline-flex text-xs font-bold rounded-full bg-red-100 text-red-700") Inactivo
+              
+              // Acciones
               td(class="p-5 text-center flex justify-center gap-3")
                 a(href=`/admision/editar/${paciente.id}` class="text-blue-600 hover:underline") Editar
-                form(action=`/admision/borrar/${paciente.id}` method="POST" class="inline" onsubmit="return confirm('¿Eliminar paciente?')")
-                  button(type="submit" class="text-red-600 hover:underline") Eliminar
+                
+                if paciente.activo
+                  form(action=`/admision/desactivar/${paciente.id}` method="POST" class="inline" onsubmit="return confirm('¿Desactivar este paciente?')")
+                    button(type="submit" class="text-amber-600 hover:underline") Desactivar
+                else
+                  form(action=`/admision/reactivar/${paciente.id}` method="POST" class="inline" onsubmit="return confirm('¿Reactivar este paciente?')")
+                    button(type="submit" class="text-emerald-600 hover:underline") Reactivar

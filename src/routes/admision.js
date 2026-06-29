@@ -2,18 +2,26 @@ const express = require('express');
 const router = express.Router();
 const admisionController = require('../controllers/admisionController');
 
+// === IMPORTAR MIDDLEWARES ===
+const authMiddleware = require('../middlewares/auth');
+const checkRole = require('../middlewares/roles');
+
 // 1. Listado de Pacientes
 router.get('/', admisionController.renderIndex);
 
 // 2. Crear Paciente
-router.get('/nuevo', admisionController.renderCreate); // Mostrar formulario
-router.post('/nuevo', admisionController.create);      // Guardar datos
+router.get('/nuevo', admisionController.renderCreate);
+router.post('/nuevo', admisionController.create);
 
 // 3. Editar Paciente
-router.get('/editar/:id', admisionController.renderEdit); // Mostrar formulario con datos
-router.post('/editar/:id', admisionController.update);    // Guardar cambios
+router.get('/editar/:id', admisionController.renderEdit);
+router.post('/editar/:id', admisionController.update);
 
 // 4. Borrar Paciente
 router.post('/borrar/:id', admisionController.delete);
+
+// 5. Desactivar / Reactivar Paciente
+router.post('/desactivar/:id', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.desactivarPaciente);
+router.post('/reactivar/:id', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.reactivarPaciente);
 
 module.exports = router;

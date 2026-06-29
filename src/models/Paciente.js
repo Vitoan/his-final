@@ -19,7 +19,7 @@ const Paciente = sequelize.define('Paciente', {
         type: DataTypes.ENUM('M', 'F', 'X'),
         defaultValue: 'X'
     },
-    obra_social: { type: DataTypes.STRING },           // Mantengo el campo viejo por compatibilidad
+    obra_social: { type: DataTypes.STRING },           
     numero_afiliado: { type: DataTypes.STRING },
     direccion: { type: DataTypes.STRING, defaultValue: 'No especificada' },
     telefono: { type: DataTypes.STRING, defaultValue: 'No especificado' },
@@ -38,6 +38,10 @@ const Paciente = sequelize.define('Paciente', {
     obra_social_id: { 
         type: DataTypes.INTEGER,
         allowNull: true 
+    },
+    activo: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
     }
 }, { 
     tableName: 'pacientes', 

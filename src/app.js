@@ -95,7 +95,7 @@ app.get('/setup-usuarios', async (req, res) => {
 });
 
 // --- 8. INICIAR SERVIDOR ---
-sequelize.sync()
+sequelize.sync() 
     .then(() => {
         app.listen(app.get('port'), () => {
             console.log(`✅ Servidor corriendo en http://localhost:${app.get('port')}`);
