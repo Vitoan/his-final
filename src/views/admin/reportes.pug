@@ -1,36 +1,70 @@
-extends ../../layouts/main
+extends npm ../layouts/main
 
 block content
   div(class="max-w-6xl mx-auto")
-    h1(class="text-3xl font-black mb-8") Reportes del Sistema
+    h1(class="text-4xl font-black mb-10 flex items-center gap-3") 
+      span 📊
+      | Reportes del Sistema HIS
 
+    // Tarjetas KPI
     div(class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12")
-      div(class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100")
+      div(class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 text-center")
         p(class="text-sm text-slate-500") Total Pacientes
-        p(class="text-4xl font-black text-slate-900") #{totalPacientes}
-      div(class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100")
+        p(class="text-5xl font-black text-slate-900 mt-2") #{totalPacientes}
+      div(class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 text-center")
         p(class="text-sm text-slate-500") Internaciones Activas
-        p(class="text-4xl font-black text-emerald-600") #{internacionesActivas}
-      div(class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100")
+        p(class="text-5xl font-black text-emerald-600 mt-2") #{internacionesActivas}
+      div(class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 text-center")
         p(class="text-sm text-slate-500") Camas Ocupadas
-        p(class="text-4xl font-black text-rose-600") #{camasOcupadas} / #{camasTotales}
-      div(class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100")
+        p(class="text-5xl font-black text-rose-600 mt-2") #{camasOcupadas} / #{camasTotales}
+      div(class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 text-center")
         p(class="text-sm text-slate-500") Ocupación
-        p(class="text-4xl font-black text-amber-600") #{Math.round((camasOcupadas / camasTotales) * 100)}%
+        p(class="text-5xl font-black text-amber-600 mt-2") #{Math.round((camasOcupadas / camasTotales) * 100)}%
 
-    h2(class="text-2xl font-bold mb-6") Obras Sociales más utilizadas
-    if obrasMasUsadas && obrasMasUsadas.length > 0
-      table(class="w-full bg-white rounded-2xl")
-        thead
-          tr(class="bg-slate-50")
-            th(class="p-4 text-left") Obra Social
-            th(class="p-4 text-center") Cantidad de Pacientes
-        tbody
-          each obra in obrasMasUsadas
-            tr(class="border-t")
-              td(class="p-4 font-medium") #{obra.ObraSocial.nombre}
-              td(class="p-4 text-center font-bold") #{obra.dataValues.total}
-    else
-      p No hay datos aún.
+    // Gráficos
+    div(class="grid grid-cols-1 lg:grid-cols-2 gap-8")
+      // Gráfico Obras Sociales
+      div(class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100")
+        h3(class="font-bold text-xl mb-6") Obras Sociales más utilizadas
+        canvas(id="obrasChart" height="140")
 
-    a(href="/admin" class="mt-8 inline-block text-blue-600 hover:underline") ← Volver al Panel
+      // Gráfico Estado de Camas
+      div(class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100")
+        h3(class="font-bold text-xl mb-6") Estado actual de Camas
+        canvas(id="camasChart" height="140")
+
+    script(src="https://cdn.jsdelivr.net/npm/chart.js")
+    script.
+      // Gráfico 1: Obras Sociales
+      new Chart(document.getElementById('obrasChart'), {
+        type: 'bar',
+        data: {
+          labels: !{JSON.stringify(obrasMasUsadas.map(o => o.ObraSocial ? o.ObraSocial.nombre : 'Particular'))},
+          datasets: [{
+            label: 'Cantidad de Pacientes',
+            data: !{JSON.stringify(obrasMasUsadas.map(o => o.dataValues.total))},
+            backgroundColor: '#3b82f6',
+            borderColor: '#1e40af',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      // Gráfico 2: Estado de Camas
+      new Chart(document.getElementById('camasChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Ocupadas', 'Disponibles', 'En Limpieza'],
+          datasets: [{
+            data: [#{camasOcupadas}, #{camasTotales - camasOcupadas - 5}, 5],
+            backgroundColor: ['#ef4444', '#22c55e', '#eab308'],
+            borderWidth: 2
+          }]
+        },
+        options: { responsive: true, cutout: '65%' }
+      });

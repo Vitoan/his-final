@@ -1,7 +1,10 @@
 const { Paciente, Visita, Internacion, Cama, Habitacion, Usuario, ObraSocial, sequelize } = require('../models');
 const { Op } = require('sequelize');
+const bcrypt = require('bcryptjs');
 
-// 1. Dashboard de Mesa de Entrada (Sala de Espera)
+// ======================================================
+// 1. DASHBOARD MESA DE ENTRADA
+// ======================================================
 exports.dashboard = async (req, res) => {
     try {
         const espera = await Visita.findAll({
@@ -19,7 +22,9 @@ exports.dashboard = async (req, res) => {
     }
 };
 
-// 2. Buscar Paciente
+// ======================================================
+// 2. BUSCAR PACIENTE
+// ======================================================
 exports.buscarPaciente = async (req, res) => {
     const { dni } = req.query;
     let paciente = null;
@@ -50,7 +55,7 @@ exports.buscarPaciente = async (req, res) => {
             mensaje = "Paciente no encontrado. Complete los datos para ingresarlo.";
         }
     }
-    // Cargar obras sociales para el formulario
+
     const obrasSociales = await ObraSocial.findAll({
         where: { activo: true },
         order: [['nombre', 'ASC']]
@@ -66,7 +71,9 @@ exports.buscarPaciente = async (req, res) => {
     });
 };
 
-// 3. Registrar Visita
+// ======================================================
+// 3. REGISTRAR VISITA (Paciente existente)
+// ======================================================
 exports.registrarVisita = async (req, res) => {
     try {
         await Visita.create({ ...req.body, estado: 'Esperando' });
@@ -77,7 +84,9 @@ exports.registrarVisita = async (req, res) => {
     }
 };
 
-// 4. Registrar Completo (Paciente Nuevo + Visita + Usuario)
+// ======================================================
+// 4. REGISTRAR PACIENTE NUEVO + VISITA + USUARIO
+// ======================================================
 exports.registrarCompleto = async (req, res) => {
     const t = await sequelize.transaction();
     
@@ -88,7 +97,7 @@ exports.registrarCompleto = async (req, res) => {
             motivo, prioridad, tipo_ingreso 
         } = req.body;
 
-        // 1. Crear Paciente
+        // Crear Paciente
         const nuevoPaciente = await Paciente.create({
             dni, nombre, apellido, fecha_nacimiento, sexo,
             direccion: direccion || 'No especificada', 
@@ -98,12 +107,11 @@ exports.registrarCompleto = async (req, res) => {
             numero_afiliado
         }, { transaction: t });
 
-        // 2. Crear Cuenta de Usuario para el Paciente
-        const bcrypt = require('bcryptjs');
+        // Crear usuario del portal
         const primerNombre = nombre.trim().split(' ')[0].toLowerCase();
         const passwordPlana = `${primerNombre}${dni}`;
         const passwordHash = await bcrypt.hash(passwordPlana, 10);
-        const emailLogin = email ? email : `${dni}@paciente.his`;
+        const emailLogin = email || `${dni}@paciente.his`;
 
         await Usuario.create({
             nombre,
@@ -114,7 +122,7 @@ exports.registrarCompleto = async (req, res) => {
             paciente_id: nuevoPaciente.id
         }, { transaction: t });
 
-        // 3. Crear la Visita (Sala de espera)
+        // Crear Visita
         await Visita.create({
             paciente_id: nuevoPaciente.id,
             motivo, prioridad, tipo_ingreso,
@@ -131,7 +139,9 @@ exports.registrarCompleto = async (req, res) => {
     }
 };
 
-// 5. Atender
+// ======================================================
+// 5. ATENDER PACIENTE
+// ======================================================
 exports.atender = async (req, res) => {
     const { id } = req.params;
     try {
@@ -143,7 +153,9 @@ exports.atender = async (req, res) => {
     }
 };
 
-// 6. Finalizar Visita (Alta a Casa)
+// ======================================================
+// 6. FINALIZAR VISITA (Alta a casa)
+// ======================================================
 exports.finalizar = async (req, res) => {
     const { id } = req.params;
     try {
@@ -155,50 +167,48 @@ exports.finalizar = async (req, res) => {
     }
 };
 
-// 7. Derivar a Internación (ESTA ES LA QUE FALTABA)
+// ======================================================
+// 7. DERIVAR A INTERNACIÓN
+// ======================================================
 exports.internar = async (req, res) => {
     const { id } = req.params;
     try {
         const visita = await Visita.findByPk(id);
         if (!visita) return res.redirect('/mesa-entrada');
 
-        // Cerramos la guardia como "Derivado a Internación"
         await visita.update({ estado: 'Derivado a Internación' });
-
-        // Redirigimos al mapa de habitaciones en modo asignación
         res.redirect(`/habitaciones?paciente_id=${visita.paciente_id}`);
-
     } catch (error) {
         console.error("Error al derivar:", error);
         res.redirect('/mesa-entrada');
     }
 };
 
+// ======================================================
+// 8. INGRESO RÁPIDO NN (Emergencia)
+// ======================================================
 exports.ingresoRapidoNN = async (req, res) => {
     try {
-        // 1. Buscamos una cama libre que sea Individual o Shockroom
         const camaLibre = await Cama.findOne({
             where: { estado: 'Disponible' },
             include: [{
                 model: Habitacion,
-                where: { tipo: ['Individual', 'Shockroom'] } // Solo en estas habitaciones
+                where: { tipo: ['Individual', 'Shockroom'] }
             }]
         });
 
         if (!camaLibre) {
-            return res.redirect('/mesa-entrada?error=' + encodeURIComponent('No hay camas individuales o de Shockroom disponibles.'));
+            return res.redirect('/mesa-entrada?error=' + encodeURIComponent('No hay camas disponibles para ingreso NN.'));
         }
 
-        // 2. Creamos al paciente NN con un código aleatorio para no chocar DNIs
         const pacienteNN = await Paciente.create({
             es_nn: true,
             nombre: 'Emergencia',
             apellido: `NN-${Math.floor(Math.random() * 10000)}`,
             sexo: 'X',
-            dni: null // Importante para que no choque el campo único
+            dni: null
         });
 
-        // 3. Lo internamos directamente (esto dispara el hook y pone la cama en rojo)
         await Internacion.create({
             cama_id: camaLibre.id,
             paciente_id: pacienteNN.id,
@@ -208,7 +218,6 @@ exports.ingresoRapidoNN = async (req, res) => {
             estado: 'Activa'
         });
 
-        // 4. Lo llevamos al mapa para que vea a dónde lo asignó el sistema
         res.redirect('/habitaciones');
     } catch (error) {
         console.error("Error en Ingreso NN:", error);

@@ -2,15 +2,14 @@ const { Paciente, Internacion, Visita, Cama, Habitacion, Usuario, ObraSocial } =
 const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
-// 1. Listar Pacientes
+// ======================================================
+// 1. LISTAR PACIENTES
+// ======================================================
 exports.renderIndex = async (req, res) => {
     try {
         const pacientes = await Paciente.findAll({
             include: [
-                { 
-                    model: ObraSocial, 
-                    as: 'ObraSocial' 
-                },
+                { model: ObraSocial, as: 'ObraSocial' },
                 {
                     model: Internacion,
                     required: false,
@@ -36,8 +35,10 @@ exports.renderIndex = async (req, res) => {
     }
 };
 
-// 2. Mostrar Formulario Crear
-exports.renderCreate = async (req, res) => {   // ← Cambia a async
+// ======================================================
+// 2. MOSTRAR FORMULARIO CREAR PACIENTE
+// ======================================================
+exports.renderCreate = async (req, res) => {
     try {
         const obrasSociales = await ObraSocial.findAll({
             where: { activo: true },
@@ -48,7 +49,7 @@ exports.renderCreate = async (req, res) => {   // ← Cambia a async
             title: 'Nuevo Paciente',
             isEditing: false,
             data: null,
-            obrasSociales   // ← Nuevo
+            obrasSociales
         });
     } catch (error) {
         console.error(error);
@@ -62,7 +63,9 @@ exports.renderCreate = async (req, res) => {   // ← Cambia a async
     }
 };
 
-// 3. Guardar Nuevo Paciente (CREATE) + Auto-Crear Usuario
+// ======================================================
+// 3. CREAR PACIENTE + USUARIO DEL PORTAL
+// ======================================================
 exports.create = async (req, res) => {
     try {
         if (req.body.email === '') req.body.email = null;
@@ -70,15 +73,12 @@ exports.create = async (req, res) => {
 
         const nuevoPaciente = await Paciente.create(req.body);
 
-        // 2. Si NO es NN, le creamos su cuenta para el Portal
+        // Crear usuario del portal solo si no es NN
         if (!nuevoPaciente.es_nn && nuevoPaciente.dni && nuevoPaciente.nombre) {
-            
             const primerNombre = nuevoPaciente.nombre.trim().split(' ')[0].toLowerCase();
-            const passwordPlana = `${primerNombre}${nuevoPaciente.dni}`; // Ej: juan35123456
+            const passwordPlana = `${primerNombre}${nuevoPaciente.dni}`;
             const passwordHash = await bcrypt.hash(passwordPlana, 10);
-            
-            // Si no puso email, le inventamos uno para el login usando su DNI
-            const emailLogin = nuevoPaciente.email ? nuevoPaciente.email : `${nuevoPaciente.dni}@paciente.his`;
+            const emailLogin = nuevoPaciente.email || `${nuevoPaciente.dni}@paciente.his`;
 
             await Usuario.create({
                 nombre: nuevoPaciente.nombre,
@@ -102,14 +102,13 @@ exports.create = async (req, res) => {
     }
 };
 
-// 4. Mostrar Formulario Editar
+// ======================================================
+// 4. MOSTRAR FORMULARIO EDITAR
+// ======================================================
 exports.renderEdit = async (req, res) => {
     try {
         const paciente = await Paciente.findByPk(req.params.id, {
-            include: [
-                { model: ObraSocial, as: 'ObraSocial' },   // ← Nuevo
-                // ... el resto de includes que ya tenías
-            ]
+            include: [{ model: ObraSocial, as: 'ObraSocial' }]
         });
 
         if (!paciente) return res.redirect('/admision');
@@ -123,7 +122,7 @@ exports.renderEdit = async (req, res) => {
             title: 'Editar Paciente',
             isEditing: true,
             data: paciente,
-            obrasSociales   // ← Nuevo
+            obrasSociales
         });
     } catch (error) {
         console.error(error);
@@ -131,26 +130,24 @@ exports.renderEdit = async (req, res) => {
     }
 };
 
-// 5. Actualizar Paciente (UPDATE) - ¡AQUÍ ESTABA EL PROBLEMA!
+// ======================================================
+// 5. ACTUALIZAR PACIENTE
+// ======================================================
 exports.update = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // --- CORRECCIÓN CLAVE ---
-        // Si el usuario borra el email y lo deja vacío, Sequelize falla la validación 'isEmail'.
-        // Aquí forzamos que si es string vacío, se guarde como NULL.
         if (req.body.email === '') req.body.email = null;
         if (req.body.obra_social_id === '') req.body.obra_social_id = null;
-        
+
         if (req.body.dni && req.body.dni.trim() !== '') {
-            req.body.es_nn = false; 
+            req.body.es_nn = false;
         }
+
         await Paciente.update(req.body, { where: { id } });
         res.redirect('/admision');
     } catch (error) {
         console.error("Error al actualizar:", error);
-        
-        // Volvemos a mostrar el formulario con el error
         res.render('admission/create', {
             title: 'Editar Paciente',
             isEditing: true,
@@ -160,7 +157,9 @@ exports.update = async (req, res) => {
     }
 };
 
-// 6. Eliminar Paciente
+// ======================================================
+// 6. ELIMINAR PACIENTE
+// ======================================================
 exports.delete = async (req, res) => {
     try {
         await Paciente.destroy({ where: { id: req.params.id } });

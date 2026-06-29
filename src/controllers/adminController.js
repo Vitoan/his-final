@@ -1,4 +1,7 @@
 const { Usuario, Auditoria } = require('../models');
+const { Op } = require('sequelize');
+const { Paciente, Internacion, Cama, ObraSocial } = require('../models');
+const { sequelize } = require('../models');
 const bcrypt = require('bcryptjs');
 
 // 1. Listar todo el personal

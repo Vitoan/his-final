@@ -16,6 +16,12 @@ router.get('/usuarios/nuevo', soloAdmin, adminController.mostrarFormulario);
 router.post('/usuarios/guardar', soloAdmin, adminController.crearUsuario);
 router.post('/usuarios/eliminar/:id', soloAdmin, adminController.eliminarUsuario);
 router.get('/auditoria', adminController.verAuditoria);
+// Ruta principal del panel Admin
+router.get('/', soloAdmin, (req, res) => {
+    res.render('admin/dashboard', { 
+        title: 'Panel de Administración' 
+    });
+});
 
 
 module.exports = router;

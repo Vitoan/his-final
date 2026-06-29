@@ -1,0 +1,26 @@
+extends ../layouts/main
+
+block content
+  div(class="max-w-6xl mx-auto")
+    h1(class="text-4xl font-black mb-8") Panel de Administración
+
+    div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6")
+      a(href="/admin/usuarios" class="bg-white p-8 rounded-3xl border border-slate-200 hover:border-purple-300 transition-all group")
+        div(class="text-4xl mb-4") 👥
+        h3(class="font-bold text-xl") Gestión de Usuarios
+        p(class="text-slate-500 mt-2") Crear, modificar y eliminar personal
+
+      a(href="/admin/obras-sociales" class="bg-white p-8 rounded-3xl border border-slate-200 hover:border-blue-300 transition-all group")
+        div(class="text-4xl mb-4") 🏥
+        h3(class="font-bold text-xl") Obras Sociales
+        p(class="text-slate-500 mt-2") Gestionar coberturas médicas
+
+      a(href="/admin/reportes" class="bg-white p-8 rounded-3xl border border-slate-200 hover:border-emerald-300 transition-all group")
+        div(class="text-4xl mb-4") 📊
+        h3(class="font-bold text-xl") Reportes
+        p(class="text-slate-500 mt-2") Estadísticas del hospital
+
+      a(href="/admin/auditoria" class="bg-white p-8 rounded-3xl border border-slate-200 hover:border-amber-300 transition-all group")
+        div(class="text-4xl mb-4") 👁️
+        h3(class="font-bold text-xl") Auditoría
+        p(class="text-slate-500 mt-2") Registro de cambios
