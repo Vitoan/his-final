@@ -58,7 +58,7 @@ html(lang="es" class="light")
             +navLink('/habitaciones', '🛏️', 'Mapa de Camas', 'text-teal-500 dark:text-teal-400')
           if ['Admin', 'Admision', 'Enfermeria'].includes(usuario.rol)
             +navLink('/mesa-entrada', '🛎️', 'Mesa de Entrada', 'text-indigo-500 dark:text-indigo-400')
-          if ['Paciente', 'Admin'].includes(usuario.rol)
+          if usuario && usuario.rol === 'Paciente'
             +navLink('/portal/inicio', '🏥', 'Mi Portal de Salud', 'text-emerald-500 dark:text-emerald-400')
           
           if usuario.rol === 'Admin'

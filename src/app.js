@@ -60,9 +60,7 @@ app.use('/clinica', authMiddleware, checkRole(['Admin', 'Medico', 'Enfermeria'])
 app.use('/mesa-entrada', authMiddleware, checkRole(['Admin', 'Admision', 'Enfermeria']), require('./routes/mesa'));
 app.use('/turnos', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), require('./routes/turnos'));
 app.use('/estudios', authMiddleware, checkRole(['Admin', 'Medico', 'Enfermeria']), require('./routes/estudios'));
-app.use('/portal', authMiddleware, checkRole(['Paciente', 'Admin']), require('./routes/portal'));
-app.use('/api', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), require('./routes/api'));
-
+app.use('/portal', authMiddleware, checkRole(['Paciente']), require('./routes/portal'));app.use('/api', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), require('./routes/api'));
 // === RUTAS ADMIN (Importante: rutas específicas primero) ===
 app.use('/admin/obras-sociales', authMiddleware, checkRole(['Admin']), require('./routes/obrasSociales'));
 app.use('/admin/reportes', authMiddleware, checkRole(['Admin']), require('./routes/reportes'));
