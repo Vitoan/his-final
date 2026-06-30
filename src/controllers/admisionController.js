@@ -5,7 +5,9 @@ const {
     Cama, 
     Habitacion, 
     Usuario, 
-    ObraSocial 
+    ObraSocial,
+    Evolucion, 
+    SignosVitales       
 } = require("../models");
 
 const { Op } = require("sequelize");
@@ -187,17 +189,39 @@ exports.delete = async (req, res) => {
     }
 };
 
-// ======================================================
-// 7. DESACTIVAR PACIENTE
-// ======================================================
+// Desactivar paciente (mejorado)
 exports.desactivarPaciente = async (req, res) => {
     try {
         const { id } = req.params;
+        const paciente = await Paciente.findByPk(id);
+
         await Paciente.update({ activo: false }, { where: { id } });
 
         await registrarAuditoria(
             'Desactivó paciente',
-            `Paciente ID: ${id}`,
+            `Paciente: ${paciente ? paciente.nombre + ' ' + paciente.apellido : 'ID ' + id}`,
+            req.session.usuario.id,
+            req.ip
+        );
+
+        res.redirect('/admision');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/admision');
+    }
+};
+
+// Reactivar paciente (mejorado)
+exports.reactivarPaciente = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const paciente = await Paciente.findByPk(id);
+
+        await Paciente.update({ activo: true }, { where: { id } });
+
+        await registrarAuditoria(
+            'Reactivó paciente',
+            `Paciente: ${paciente ? paciente.nombre + ' ' + paciente.apellido : 'ID ' + id}`,
             req.session.usuario.id,
             req.ip
         );
@@ -210,23 +234,38 @@ exports.desactivarPaciente = async (req, res) => {
 };
 
 // ======================================================
-// 8. REACTIVAR PACIENTE
+// HISTORIA CLÍNICA
 // ======================================================
-exports.reactivarPaciente = async (req, res) => {
+exports.verHistoriaClinica = async (req, res) => {
     try {
-        const { id } = req.params;
-        await Paciente.update({ activo: true }, { where: { id } });
+        const paciente = await Paciente.findByPk(req.params.id, {
+            include: [
+                { model: ObraSocial, as: 'ObraSocial' },
+                {
+                    model: Internacion,
+                    include: [
+                        { model: Cama, include: [Habitacion] },
+                        { model: Evolucion, include: [{ model: Usuario, as: 'Autor' }] },
+                        { model: SignosVitales, include: [{ model: Usuario, as: 'Enfermero' }] }
+                    ],
+                    order: [['fecha_ingreso', 'DESC']]
+                }
+            ]
+        });
 
-        await registrarAuditoria(
-            'Reactivó paciente',
-            `Paciente ID: ${id}`,
-            req.session.usuario.id,
-            req.ip
-        );
+        console.log("Paciente encontrado:", paciente ? paciente.id : "NO ENCONTRADO"); // ← Para debug
 
-        res.redirect('/admision');
+        if (!paciente) {
+            console.log("Redirigiendo porque no se encontró el paciente con ID:", req.params.id);
+            return res.redirect('/admision');
+        }
+
+        res.render('admission/historia', {
+            title: `Historia Clínica - ${paciente.nombre} ${paciente.apellido}`,
+            paciente
+        });
     } catch (error) {
-        console.error(error);
+        console.error("❌ Error al cargar historia clínica:", error);
         res.redirect('/admision');
     }
 };

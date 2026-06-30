@@ -1,0 +1,64 @@
+extends ../layouts/main
+
+block content
+  div(class="max-w-6xl mx-auto")
+    // Header
+    div(class="mb-8 flex items-center justify-between")
+      div
+        a(href="/admision" class="text-slate-500 hover:text-slate-800 flex items-center gap-2 mb-2")
+          span ← Volver a Pacientes
+        h1(class="text-3xl font-bold") Historia Clínica
+        p(class="text-slate-500") #{paciente.nombre} #{paciente.apellido}
+
+      if paciente.activo
+        span(class="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-2xl text-sm font-bold") Activo
+      else
+        span(class="px-4 py-2 bg-red-100 text-red-700 rounded-2xl text-sm font-bold") Inactivo
+
+    // Datos básicos
+    div(class="bg-white border border-slate-200 rounded-3xl p-8 mb-8")
+      div(class="grid grid-cols-1 md:grid-cols-4 gap-8")
+        div
+          h3(class="text-sm uppercase tracking-widest text-slate-500 mb-1") DNI
+          p(class="text-2xl font-bold") #{paciente.dni || 'NN'}
+        div
+          h3(class="text-sm uppercase tracking-widest text-slate-500 mb-1") Obra Social
+          p(class="text-xl") #{paciente.ObraSocial ? paciente.ObraSocial.nombre : 'Particular'}
+        div
+          h3(class="text-sm uppercase tracking-widest text-slate-500 mb-1") Teléfono
+          p(class="text-xl") #{paciente.telefono || 'No registrado'}
+        div
+          h3(class="text-sm uppercase tracking-widest text-slate-500 mb-1") Internaciones
+          p(class="text-3xl font-bold text-blue-600") #{paciente.Internacions ? paciente.Internacions.length : 0}
+
+    // Lista de Episodios (Internaciones)
+    h2(class="text-2xl font-bold mb-6") Episodios / Internaciones
+
+    if paciente.Internacions && paciente.Internacions.length > 0
+      each internacion in paciente.Internacions
+        div(class="bg-white border border-slate-200 rounded-3xl p-8 mb-8")
+          div(class="flex justify-between items-start mb-6")
+            div
+              h3(class="font-bold text-xl") Internación ##{internacion.id}
+              p(class="text-slate-500") #{internacion.fecha_ingreso} #{internacion.fecha_egreso ? ' - Alta: ' + internacion.fecha_egreso : ' (Activa)'}
+            if internacion.Cama
+              span(class="bg-slate-100 px-4 py-2 rounded-2xl text-sm font-medium") Cama #{internacion.Cama.numero_cama}
+
+          // Evoluciones
+          if internacion.Evolucions && internacion.Evolucions.length > 0
+            h4(class="font-bold mb-4") Evoluciones
+            each evolucion in internacion.Evolucions
+              div(class="border-l-4 border-blue-500 pl-4 py-3 bg-slate-50 rounded-r-2xl mb-4")
+                div(class="flex justify-between text-xs text-slate-500 mb-2")
+                  span #{evolucion.createdAt}
+                  span #{evolucion.Autor ? evolucion.Autor.nombre : 'Desconocido'}
+                p(class="text-slate-700") #{evolucion.nota}
+
+    else
+      div(class="bg-slate-50 border border-slate-200 rounded-3xl p-12 text-center")
+        p(class="text-slate-500 italic") Este paciente no tiene internaciones registradas.
+
+    // Botón final
+    div(class="text-center mt-10")
+      a(href="/admision" class="inline-block bg-slate-200 hover:bg-slate-300 text-slate-700 px-8 py-3 rounded-2xl font-bold transition")
+        | ← Volver al listado de pacientes

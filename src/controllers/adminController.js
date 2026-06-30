@@ -111,10 +111,11 @@ exports.actualizarUsuario = async (req, res) => {
     }
 };
 
-// Desactivar usuario
+// Desactivar usuario 
 exports.desactivarUsuario = async (req, res) => {
     try {
         const { id } = req.params;
+        const usuario = await Usuario.findByPk(id);
 
         if (id == req.session.usuario.id) {
             return res.send("No puedes desactivar tu propia cuenta.");
@@ -124,7 +125,7 @@ exports.desactivarUsuario = async (req, res) => {
 
         await registrarAuditoria(
             'Desactivó usuario',
-            `Usuario ID: ${id}`,
+            `Usuario: ${usuario ? usuario.nombre : 'ID ' + id}`,
             req.session.usuario.id,
             req.ip
         );
@@ -136,16 +137,17 @@ exports.desactivarUsuario = async (req, res) => {
     }
 };
 
-// Reactivar usuario
+// Reactivar usuario (mejorado)
 exports.reactivarUsuario = async (req, res) => {
     try {
         const { id } = req.params;
+        const usuario = await Usuario.findByPk(id);
 
         await Usuario.update({ activo: true }, { where: { id } });
 
         await registrarAuditoria(
             'Reactivó usuario',
-            `Usuario ID: ${id}`,
+            `Usuario: ${usuario ? usuario.nombre : 'ID ' + id}`,
             req.session.usuario.id,
             req.ip
         );
@@ -200,7 +202,7 @@ exports.reportes = async (req, res) => {
             limit: 5
         });
 
-        res.render('admin/reportes', { 
+        res.render('admin/reportes', {
             title: 'Reportes del Sistema',
             totalPacientes,
             internacionesActivas,
@@ -212,7 +214,9 @@ exports.reportes = async (req, res) => {
         console.error(error);
         res.redirect('/admin');
     }
-    // ======================================================
+};
+
+// ======================================================
 // EXPORTAR TODAS LAS FUNCIONES
 // ======================================================
 module.exports = {
@@ -225,5 +229,4 @@ module.exports = {
     reactivarUsuario: exports.reactivarUsuario,
     verAuditoria: exports.verAuditoria,
     reportes: exports.reportes
-};
 };

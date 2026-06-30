@@ -1,4 +1,5 @@
 const { ObraSocial } = require('../models');
+const { registrarAuditoria } = require('../helpers/auditoria');
 
 exports.listar = async (req, res) => {
     try {
@@ -63,5 +64,48 @@ exports.eliminar = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.redirect('/admin/obras-sociales?error=true');
+    }
+};
+// Desactivar obra social (mejorado)
+exports.desactivarObraSocial = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const obra = await ObraSocial.findByPk(id);
+
+        await ObraSocial.update({ activo: false }, { where: { id } });
+
+        await registrarAuditoria(
+            'Desactivó obra social',
+            `Obra Social: ${obra ? obra.nombre : 'ID ' + id}`,
+            req.session.usuario.id,
+            req.ip
+        );
+
+        res.redirect('/admin/obras-sociales');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/admin/obras-sociales');
+    }
+};
+
+// Reactivar obra social (mejorado)
+exports.reactivarObraSocial = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const obra = await ObraSocial.findByPk(id);
+
+        await ObraSocial.update({ activo: true }, { where: { id } });
+
+        await registrarAuditoria(
+            'Reactivó obra social',
+            `Obra Social: ${obra ? obra.nombre : 'ID ' + id}`,
+            req.session.usuario.id,
+            req.ip
+        );
+
+        res.redirect('/admin/obras-sociales');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/admin/obras-sociales');
     }
 };

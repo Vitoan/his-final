@@ -23,5 +23,7 @@ router.post('/borrar/:id', admisionController.delete);
 // 5. Desactivar / Reactivar Paciente
 router.post('/desactivar/:id', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.desactivarPaciente);
 router.post('/reactivar/:id', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.reactivarPaciente);
+// 6. Ver Historia Clínican
+router.get('/historia/:id', admisionController.verHistoriaClinica);
 
 module.exports = router;
