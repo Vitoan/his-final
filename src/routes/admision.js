@@ -1,43 +1,37 @@
 const express = require('express');
 const router = express.Router();
-const admisionController = require('../controllers/admisionController');
 
-// === IMPORTAR MIDDLEWARES ===
+// Importamos ambos controladores
+const admisionController = require('../controllers/admisionController');
+const pacienteController = require('../controllers/pacienteController');
+
 const authMiddleware = require('../middlewares/auth');
 const checkRole = require('../middlewares/roles');
 
 // ======================================================
-// RUTAS DE PACIENTES
+// RUTAS DE PACIENTES (Gestión administrativa)
 // ======================================================
-// Listado de pacientes
-router.get('/', admisionController.renderIndex);
-
-// Crear paciente
-router.get('/nuevo', admisionController.renderCreate);
-router.post('/nuevo', admisionController.create);
-
-// Editar paciente
-router.get('/editar/:id', admisionController.renderEdit);
-router.post('/editar/:id', admisionController.update);
+router.get('/', pacienteController.renderIndex);                    // Listado de pacientes
+router.get('/nuevo', pacienteController.renderCreate);              // Formulario crear paciente
+router.post('/nuevo', pacienteController.create);                   // Guardar paciente
+router.get('/editar/:id', pacienteController.renderEdit);           // Formulario editar
+router.post('/editar/:id', pacienteController.update);              // Actualizar paciente
 
 // Desactivar / Reactivar paciente
-router.post('/desactivar/:id', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.desactivarPaciente);
-router.post('/reactivar/:id', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.reactivarPaciente);
+router.post('/desactivar/:id', authMiddleware, checkRole(['Admin', 'Admision']), pacienteController.desactivarPaciente);
+router.post('/reactivar/:id', authMiddleware, checkRole(['Admin', 'Admision']), pacienteController.reactivarPaciente);
 
 // Historia clínica
-router.get('/historia/:id', admisionController.verHistoriaClinica);
+router.get('/historia/:id', pacienteController.verHistoriaClinica);
 
 // ======================================================
 // RUTAS DE ADMISIÓN
 // ======================================================
-// Formulario y creación de admisión
 router.get('/nueva', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.renderNuevaAdmision);
 router.post('/nueva', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.crearAdmision);
 
-// Listado de admisiones
 router.get('/listado', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.renderListadoAdmisiones);
 
-// Cancelar y Revertir admisión
 router.post('/cancelar/:id', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.cancelarAdmision);
 router.post('/revertir/:id', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.revertirCancelacion);
 

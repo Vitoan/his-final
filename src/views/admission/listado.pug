@@ -39,9 +39,19 @@ block content
               td(class="p-5 text-sm text-slate-600") #{adm.fecha_admision}
 
               td(class="p-5 text-center")
-                if adm.estado === 'Activa' || adm.estado === 'Pendiente'
-                  form(action=`/admision/cancelar/${adm.id}` method="POST" class="inline")
-                    button(type="submit" class="text-amber-600 hover:underline text-sm") Cancelar
-                else if adm.estado === 'Cancelada'
-                  form(action=`/admision/revertir/${adm.id}` method="POST" class="inline")
-                    button(type="submit" class="text-emerald-600 hover:underline text-sm") Revertir
+                div(class="flex justify-center gap-2 flex-wrap")
+                  // Botón para asignar cama (NUEVO)
+                  if adm.estado === 'Activa' || adm.estado === 'Pendiente'
+                    if adm.Paciente
+                      a(href=`/habitaciones?paciente_id=${adm.Paciente.id}` 
+                        class="bg-violet-100 text-violet-700 hover:bg-violet-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors")
+                        | 🛏️ Asignar Cama
+
+                  // Botones de Cancelar / Revertir
+                  if adm.estado === 'Activa' || adm.estado === 'Pendiente'
+                    form(action=`/admision/cancelar/${adm.id}` method="POST" class="inline")
+                      button(type="submit" class="text-amber-600 hover:underline text-sm px-2") Cancelar
+
+                  else if adm.estado === 'Cancelada'
+                    form(action=`/admision/revertir/${adm.id}` method="POST" class="inline")
+                      button(type="submit" class="text-emerald-600 hover:underline text-sm px-2") Revertir
