@@ -17,6 +17,7 @@ const { registrarAuditoria } = require("../helpers/auditoria");
 // ======================================================
 exports.renderIndex = async (req, res) => {
     try {
+        const { search } = req.query;
         const pacientes = await Paciente.findAll({
             include: [
                 { model: ObraSocial, as: "ObraSocial" },
@@ -40,6 +41,7 @@ exports.renderIndex = async (req, res) => {
         res.render("admission/index", {
             title: "Listado de Pacientes",
             pacientes,
+            search,
         });
     } catch (error) {
         console.error(error);

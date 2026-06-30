@@ -6,7 +6,24 @@ block content
       div
         h2(class="text-xs font-bold text-blue-600 uppercase tracking-widest") Admisión
         h1(class="text-4xl font-black") Pacientes
+
       a(href="/admision/nuevo" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700") + Nuevo Paciente
+
+    // === BARRA DE BÚSQUEDA ===
+    div(class="mb-8")
+      form(action="/admision" method="GET" class="flex gap-3 max-w-md")
+        input(type="text" 
+              name="search" 
+              value=search 
+              placeholder="Buscar por DNI, nombre o apellido..." 
+              class="flex-1 border border-slate-300 rounded-xl px-5 py-3 focus:outline-none focus:border-blue-500")
+        button(type="submit" 
+              class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition")
+          | 🔍 Buscar
+        if search
+          a(href="/admision" 
+            class="text-slate-500 hover:text-slate-700 flex items-center px-4 text-sm")
+            | Limpiar
 
     div(class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm")
       table(class="w-full text-left border-collapse")
@@ -35,7 +52,7 @@ block content
               
               td(class="p-5 text-slate-600") #{paciente.telefono || '-'}
               
-              // Estado del paciente
+              // Estado
               td(class="p-5 text-center")
                 if paciente.activo
                   span(class="px-3 py-1 inline-flex text-xs font-bold rounded-full bg-emerald-100 text-emerald-700") Activo
