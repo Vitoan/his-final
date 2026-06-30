@@ -12,84 +12,82 @@ html(lang="es" class="light")
         darkMode: 'class',
         theme: {
           extend: {
-            fontFamily: { sans: ['Inter', 'sans-serif'] },
-            colors: {
-              primary: { light: '#2563eb', dark: '#f43f5e' }
-            }
+            fontFamily: { sans: ['Inter', 'sans-serif'] }
           }
         }
       }
-    
-    style.
-      body { font-family: 'Inter', sans-serif; }
-      /* Transiciones suaves */
-      * { transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
-      
-      /* Scrollbar moderna */
-      ::-webkit-scrollbar { width: 8px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-      .dark ::-webkit-scrollbar-thumb { background: #475569; }
 
-  // Texto base slate-900 (negro suave) en light, slate-50 (blanco suave) en dark
   body(class="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100 flex transition-colors duration-300")
-    
+
+    mixin navLink(href, icon, text)
+      a(href=href class="group flex items-center p-3 rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white transition-all font-medium")
+        span(class="mr-3 text-lg group-hover:scale-110 transition-transform") #{icon}
+        span #{text}
+
     if usuario
       aside(class="w-72 bg-white dark:bg-slate-800 border-r border-slate-300 dark:border-slate-700 hidden md:flex flex-col fixed h-full z-20 shadow-xl")
         
-        // --- AQUÍ ESTÁ EL CAMBIO ---
-        // Convertimos el div en un enlace 'a' que apunta a la raíz '/'
         a(href="/" class="p-8 flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer")
-          div(class="w-10 h-10 rounded-xl bg-blue-600 dark:bg-rose-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30") H
+          div(class="w-10 h-10 rounded-xl bg-blue-600 dark:bg-rose-600 flex items-center justify-center text-white font-bold shadow-lg") H
           span(class="text-xl font-bold tracking-tight text-slate-800 dark:text-white") HIS <span class="text-blue-600 dark:text-rose-500">App</span>
-        // ---------------------------
-        
-        nav(class="flex-1 px-4 space-y-3 overflow-y-auto mt-4")
-          mixin navLink(href, icon, text, activeColor)
-             a(href=href class="group flex items-center p-3.5 rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white transition-all font-medium")
-                span(class=`mr-3 ${activeColor} group-hover:scale-110 transition-transform`) #{icon}
-                span #{text}
 
-          if ['Admin', 'Admision', 'Enfermeria'].includes(usuario.rol)
-            +navLink('/admision', '📋', 'Admisión', 'text-blue-500 dark:text-rose-400')
-          if ['Admin', 'Medico', 'Enfermeria'].includes(usuario.rol)
-            +navLink('/clinica/dashboard', '🩺', 'Tablero Clínico', 'text-indigo-500 dark:text-purple-400')
-          if ['Admin', 'Admision', 'Enfermeria', 'Medico'].includes(usuario.rol)
-            +navLink('/habitaciones', '🛏️', 'Mapa de Camas', 'text-teal-500 dark:text-teal-400')
-          if ['Admin', 'Admision', 'Enfermeria'].includes(usuario.rol)
-            +navLink('/mesa-entrada', '🛎️', 'Mesa de Entrada', 'text-indigo-500 dark:text-indigo-400')
-          if usuario && usuario.rol === 'Paciente'
-            +navLink('/portal/inicio', '🏥', 'Mi Portal de Salud', 'text-emerald-500 dark:text-emerald-400')
-          
+        nav(class="flex-1 px-4 space-y-1 overflow-y-auto mt-2")
+
+          // =====================
+          // ROL: ADMISIÓN
+          // =====================
+          if ['Admin', 'Admision'].includes(usuario.rol)
+            div(class="px-3 pt-3 pb-1")
+              p(class="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 mb-1") Admisión y Camas
+            +navLink('/admision', '📋', 'Gestión de Pacientes')
+            +navLink('/admision/listado', '📝', 'Listado de Admisiones')
+            +navLink('/admision/nueva', '➕', 'Nueva Admisión')
+            +navLink('/habitaciones', '🛏️', 'Mapa de Camas')
+            +navLink('/mesa-entrada', '🛎️', 'Mesa de Entrada')
+
+          // =====================
+          // ROL: MÉDICO
+          // =====================
+          if ['Admin', 'Medico'].includes(usuario.rol)
+            div(class="px-3 pt-4 pb-1")
+              p(class="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 mb-1") Médico
+            +navLink('/clinica/dashboard', '🩺', 'Tablero Clínico')
+            // +navLink('/medico/evolucionar', '📝', 'Evoluciones')  // Descomentar si tenés listado
+
+          // =====================
+          // ROL: ENFERMERÍA
+          // =====================
+          if ['Admin', 'Enfermeria'].includes(usuario.rol)
+            div(class="px-3 pt-4 pb-1")
+              p(class="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 mb-1") Enfermería
+            +navLink('/clinica/dashboard', '🩺', 'Tablero Clínico')
+            // +navLink('/enfermeria/evaluar', '🩹', 'Signos Vitales')
+
+          // =====================
+          // ROL: ADMIN
+          // =====================
           if usuario.rol === 'Admin'
-             div(class="border-t border-slate-200 dark:border-slate-700 my-4")
-             +navLink('/admin/usuarios', '👥', 'Usuarios', 'text-purple-500 dark:text-pink-400')
+            div(class="px-3 pt-4 pb-1 border-t border-slate-200 dark:border-slate-700 mt-3")
+              p(class="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 mb-1") Administración
+            +navLink('/admin/usuarios', '👥', 'Gestión de Personal')
+            +navLink('/admin/auditoria', '📜', 'Auditoría del Sistema')
+            +navLink('/admin/reportes', '📊', 'Reportes')
 
-        div(class="p-6 border-t border-slate-200 dark:border-slate-700")
+          // =====================
+          // ROL: PACIENTE
+          // =====================
+          if usuario.rol === 'Paciente'
+            +navLink('/portal/inicio', '🏥', 'Mi Portal de Salud')
+
+        // Footer
+        div(class="p-6 border-t border-slate-200 dark:border-slate-700 mt-auto")
           div(class="flex items-center gap-3 mb-4")
             div(class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-600") #{usuario.nombre.charAt(0)}
             div
               p(class="text-sm font-bold truncate w-32 dark:text-white") #{usuario.nombre}
               p(class="text-xs text-slate-500 dark:text-slate-400") #{usuario.rol}
           
-          button(id="themeToggle" class="w-full mb-3 py-2 px-4 rounded-lg border border-slate-300 dark:border-slate-600 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex justify-center items-center gap-2")
-             span 🌙/☀️ Tema
-
           a(href="/auth/logout" class="block w-full text-center text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 py-2.5 rounded-lg transition-colors font-bold") Cerrar Sesión
 
-    main(class=`flex-1 ${usuario ? 'md:ml-72' : ''} p-6 md:p-12 lg:p-16 w-full fade-in`)
+    main(class=`flex-1 ${usuario ? 'md:ml-72' : ''} p-6 md:p-12 lg:p-16 w-full`)
       block content
-
-    script.
-      const themeToggle = document.getElementById('themeToggle');
-      const html = document.documentElement;
-      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        html.classList.add('dark');
-      } else { html.classList.remove('dark'); }
-      
-      if(themeToggle){
-        themeToggle.addEventListener('click', () => {
-          html.classList.toggle('dark');
-          localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
-        });
-      }

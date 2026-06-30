@@ -10,74 +10,90 @@ block content
     p(class="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto")
       | Sistema Integral de Gestión Hospitalaria. Selecciona un módulo para comenzar a trabajar.
 
-  // --- GRID DE MÓDULOS (HUB) ---
+  // --- GRID DE MÓDULOS POR ROL ---
   div(class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4")
 
-    // --- MÓDULO MESA DE ENTRADA (NUEVO) ---
-    a(href="/mesa-entrada" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
-      div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-indigo-50 dark:bg-indigo-900/20 rounded-full blur-3xl group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/40 transition-colors")
-      
-      div(class="relative z-10")
-        div(class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
-          | 🛎️
-        h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Mesa de Entrada
-        p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
-          | Recepción de pacientes, triaje, guardia y registro de visitas.
-    // 1. MÓDULO ADMISIÓN
-    a(href="/admision" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
-      div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-blue-50 dark:bg-blue-900/20 rounded-full blur-3xl group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 transition-colors")
-      
-      div(class="relative z-10")
-        div(class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
-          | 📋
-        h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Admisión
-        p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
-          | Registro de pacientes, gestión de datos personales y asignación de obra social.
+    // ============================================
+    // MÓDULOS PARA ADMISIÓN
+    // ============================================
+    if ['Admin', 'Admision'].includes(usuario.rol)
+      // Mesa de Entrada
+      a(href="/mesa-entrada" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
+        div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-indigo-50 dark:bg-indigo-900/20 rounded-full blur-3xl group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/40 transition-colors")
+        div(class="relative z-10")
+          div(class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
+            | 🛎️
+          h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Mesa de Entrada
+          p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
+            | Recepción de pacientes, triaje, guardia y registro de visitas.
 
-    // 2. MAPA DE CAMAS
-    a(href="/habitaciones" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
-      div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-rose-50 dark:bg-rose-900/20 rounded-full blur-3xl group-hover:bg-rose-100 dark:group-hover:bg-rose-900/40 transition-colors")
-      
-      div(class="relative z-10")
-        div(class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
-          | 🛏️
-        h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Gestión de Camas
-        p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
-          | Visualización en tiempo real de ocupación, limpieza y asignación de internaciones.
+      // Admisión
+      a(href="/admision" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
+        div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-blue-50 dark:bg-blue-900/20 rounded-full blur-3xl group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 transition-colors")
+        div(class="relative z-10")
+          div(class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
+            | 📋
+          h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Admisión
+          p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
+            | Registro de pacientes y gestión de admisiones.
 
-    // 3. TABLERO CLÍNICO
-    a(href="/clinica/dashboard" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
-      div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-teal-50 dark:bg-teal-900/20 rounded-full blur-3xl group-hover:bg-teal-100 dark:group-hover:bg-teal-900/40 transition-colors")
-      
-      div(class="relative z-10")
-        div(class="w-14 h-14 rounded-2xl bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
-          | 🩺
-        h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Área Clínica
-        p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
-          | Dashboard para médicos y enfermería. Evoluciones, signos vitales e historia clínica.
+      // Mapa de Camas
+      a(href="/habitaciones" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
+        div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-rose-50 dark:bg-rose-900/20 rounded-full blur-3xl group-hover:bg-rose-100 dark:group-hover:bg-rose-900/40 transition-colors")
+        div(class="relative z-10")
+          div(class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
+            | 🛏️
+          h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Gestión de Camas
+          p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
+            | Visualización en tiempo real de ocupación y asignación de camas.
 
-    // 4. ADMINISTRACIÓN (Solo si es Admin)
-    if usuario && usuario.rol === 'Admin'
+    // ============================================
+    // MÓDULO CLÍNICO (Médico + Enfermería)
+    // ============================================
+    if ['Admin', 'Medico', 'Enfermeria'].includes(usuario.rol)
+      a(href="/clinica/dashboard" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
+        div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-teal-50 dark:bg-teal-900/20 rounded-full blur-3xl group-hover:bg-teal-100 dark:group-hover:bg-teal-900/40 transition-colors")
+        div(class="relative z-10")
+          div(class="w-14 h-14 rounded-2xl bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
+            | 🩺
+          h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Área Clínica
+          p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
+            | Evoluciones, signos vitales e historia clínica.
+
+    // ============================================
+    // MÓDULOS SOLO PARA ADMIN
+    // ============================================
+    if usuario.rol === 'Admin'
+      // Gestión de Personal
       a(href="/admin/usuarios" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
         div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-purple-50 dark:bg-purple-900/20 rounded-full blur-3xl group-hover:bg-purple-100 dark:group-hover:bg-purple-900/40 transition-colors")
-        
         div(class="relative z-10")
           div(class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
-            | 🔐
-          h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Administración
+            | 👥
+          h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Gestión de Personal
           p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
-            | Gestión de usuarios del sistema, roles y configuración de seguridad.
-            if usuario && usuario.rol === 'Admin'
+            | Administración de usuarios y roles del sistema.
+
+      // Auditoría
       a(href="/admin/auditoria" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
         div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-amber-50 dark:bg-amber-900/20 rounded-full blur-3xl group-hover:bg-amber-100 dark:group-hover:bg-amber-900/40 transition-colors")
-        
         div(class="relative z-10")
           div(class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
-            | 👁️
-          h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Auditoría
+            | 📜
+          h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Auditoría del Sistema
           p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
-            | Registro histórico de movimientos, altas, bajas y accesos al sistema.
+            | Registro histórico de acciones y cambios en el sistema.
 
-  // --- FOOTER SIMPLE ---
+      // Reportes
+      a(href="/admin/reportes" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
+        div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-emerald-50 dark:bg-emerald-900/20 rounded-full blur-3xl group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/40 transition-colors")
+        div(class="relative z-10")
+          div(class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
+            | 📊
+          h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Reportes
+          p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
+            | Estadísticas e indicadores del sistema.
+
+  // --- FOOTER ---
   div(class="mt-20 text-center border-t border-slate-200 dark:border-slate-800 pt-8")
-    p(class="text-sm font-bold text-slate-400 uppercase tracking-widest") HIS System v1.0
+    p(class="text-sm font-bold text-slate-400 uppercase tracking-widest") HIS System v1.0rs

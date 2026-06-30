@@ -39,19 +39,30 @@ block content
               td(class="p-5 text-sm text-slate-600") #{adm.fecha_admision}
 
               td(class="p-5 text-center")
-                div(class="flex justify-center gap-2 flex-wrap")
-                  // Botón para asignar cama (NUEVO)
+                div(class="flex justify-center gap-2 flex-wrap items-center")
+
+                  // === Botón Asignar Cama ===
                   if adm.estado === 'Activa' || adm.estado === 'Pendiente'
                     if adm.Paciente
                       a(href=`/habitaciones?paciente_id=${adm.Paciente.id}` 
-                        class="bg-violet-100 text-violet-700 hover:bg-violet-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors")
+                        class="bg-violet-100 text-violet-700 hover:bg-violet-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1")
                         | 🛏️ Asignar Cama
 
-                  // Botones de Cancelar / Revertir
+                  // === Botón Historia Clínica (mejorada) ===
+                  if adm.Paciente
+                    a(href=`/clinica/historial/${adm.Paciente.id}` 
+                      class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1")
+                      | 📜 Historia
+
+                  // === Botones de Cancelar / Revertir ===
                   if adm.estado === 'Activa' || adm.estado === 'Pendiente'
                     form(action=`/admision/cancelar/${adm.id}` method="POST" class="inline")
-                      button(type="submit" class="text-amber-600 hover:underline text-sm px-2") Cancelar
+                      button(type="submit" 
+                             class="text-amber-600 hover:bg-amber-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors")
+                        | Cancelar
 
                   else if adm.estado === 'Cancelada'
                     form(action=`/admision/revertir/${adm.id}` method="POST" class="inline")
-                      button(type="submit" class="text-emerald-600 hover:underline text-sm px-2") Revertir
+                      button(type="submit" 
+                             class="text-emerald-600 hover:bg-emerald-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors")
+                        | Revertir
