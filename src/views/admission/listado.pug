@@ -1,0 +1,47 @@
+extends ../layouts/main
+
+block content
+  div(class="max-w-7xl mx-auto")
+    div(class="flex justify-between items-center mb-8")
+      h1(class="text-3xl font-bold") Listado de Admisiones
+      a(href="/admision/nueva" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700")
+        | + Nueva Admisión
+
+    div(class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm")
+      table(class="w-full text-left")
+        thead(class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider")
+          tr
+            th(class="p-5") Paciente
+            th(class="p-5") Tipo
+            th(class="p-5") Estado
+            th(class="p-5") Fecha
+            th(class="p-5 text-center") Acciones
+
+        tbody(class="divide-y divide-slate-100")
+          each adm in admisiones
+            tr(class="hover:bg-slate-50")
+              td(class="p-5 font-bold")
+                if adm.Paciente
+                  | #{adm.Paciente.apellido}, #{adm.Paciente.nombre}
+                else
+                  span(class="text-slate-400") Paciente eliminado
+
+              td(class="p-5") #{adm.tipo}
+
+              td(class="p-5")
+                if adm.estado === 'Activa' || adm.estado === 'Pendiente'
+                  span(class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold") #{adm.estado}
+                else if adm.estado === 'Cancelada'
+                  span(class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold") Cancelada
+                else
+                  span(class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-bold") #{adm.estado}
+
+              td(class="p-5 text-sm text-slate-600") #{adm.fecha_admision}
+
+              td(class="p-5 text-center")
+                if adm.estado === 'Activa' || adm.estado === 'Pendiente'
+                  form(action=`/admision/cancelar/${adm.id}` method="POST" class="inline")
+                    button(type="submit" class="text-amber-600 hover:underline text-sm") Cancelar
+                else if adm.estado === 'Cancelada'
+                  form(action=`/admision/revertir/${adm.id}` method="POST" class="inline")
+                    button(type="submit" class="text-emerald-600 hover:underline text-sm") Revertir

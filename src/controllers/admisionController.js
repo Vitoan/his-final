@@ -1,13 +1,14 @@
-const { 
-    Paciente, 
-    Internacion, 
-    Visita, 
-    Cama, 
-    Habitacion, 
-    Usuario, 
+const {
+    Paciente,
+    Internacion,
+    Visita,
+    Cama,
+    Habitacion,
+    Usuario,
     ObraSocial,
-    Evolucion, 
-    SignosVitales       
+    Evolucion,
+    SignosVitales,
+    Admision
 } = require("../models");
 
 const { Op } = require("sequelize");
@@ -15,7 +16,175 @@ const bcrypt = require("bcryptjs");
 const { registrarAuditoria } = require("../helpers/auditoria");
 
 // ======================================================
-// 1. LISTAR PACIENTES
+// ADMISIÓN - CREAR (con soporte para paciente NN)
+// ======================================================
+exports.crearAdmision = async (req, res) => {
+    try {
+        const {
+            paciente_id,
+            es_nn,
+            nombre,
+            apellido,
+            sexo,
+            tipo,
+            motivo
+        } = req.body;
+
+        let pacienteId = paciente_id;
+
+        // Si es paciente NN, lo creamos primero
+        if (es_nn === 'true' || es_nn === true) {
+            const nuevoPacienteNN = await Paciente.create({
+                nombre: nombre || 'NN',
+                apellido: apellido || 'NN',
+                sexo: sexo || 'X',
+                es_nn: true,
+                dni: null
+            });
+
+            pacienteId = nuevoPacienteNN.id;
+
+            await registrarAuditoria(
+                'Creó paciente NN',
+                `Paciente NN: ${nombre || 'NN'} ${apellido || 'NN'}`,
+                req.session.usuario.id,
+                req.ip
+            );
+        }
+
+        // Creamos la admisión
+        const nuevaAdmision = await Admision.create({
+            paciente_id: pacienteId,
+            tipo: tipo || 'Programada',
+            motivo: motivo,
+            estado: 'Pendiente',
+            usuario_id: req.session.usuario.id
+        });
+
+        await registrarAuditoria(
+            'Creó admisión',
+            `Admision ID: ${nuevaAdmision.id} - Tipo: ${tipo} - Paciente ID: ${pacienteId}`,
+            req.session.usuario.id,
+            req.ip
+        );
+
+        res.redirect('/admision');
+    } catch (error) {
+        console.error("Error al crear admisión:", error);
+        res.redirect('/admision?error=crear_admision');
+    }
+};
+// Renderizar formulario de nueva admisión con buscador
+exports.renderNuevaAdmision = async (req, res) => {
+    try {
+        const { search } = req.query;
+        let pacientesEncontrados = [];
+
+        if (search) {
+            pacientesEncontrados = await Paciente.findAll({
+                where: {
+                    [Op.or]: [
+                        { dni: { [Op.like]: `%${search}%` } },
+                        { apellido: { [Op.like]: `%${search}%` } },
+                        { nombre: { [Op.like]: `%${search}%` } }
+                    ]
+                },
+                limit: 10,
+                order: [['apellido', 'ASC']]
+            });
+        }
+
+        res.render('admission/nueva', {
+            title: 'Nueva Admisión',
+            pacientesEncontrados,
+            search
+        });
+    } catch (error) {
+        console.error(error);
+        res.redirect('/admision');
+    }
+};
+
+// Listado de admisiones
+exports.renderListadoAdmisiones = async (req, res) => {
+    try {
+        const admisiones = await Admision.findAll({
+            include: [
+                { model: Paciente },
+                { model: Usuario, as: 'RegistradoPor' }
+            ],
+            order: [['createdAt', 'DESC']]
+        });
+
+        res.render('admission/listado', {
+            title: 'Listado de Admisiones',
+            admisiones
+        });
+    } catch (error) {
+        console.error("❌ Error en listado de admisiones:", error);
+        res.redirect('/admision');
+    }
+};
+// ======================================================
+// CANCELAR Y REVERTIR ADMISIÓN
+// ======================================================
+exports.cancelarAdmision = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { motivo_cancelacion } = req.body;
+
+        const admision = await Admision.findByPk(id);
+        if (!admision) return res.redirect('/admision');
+
+        await admision.update({
+            estado: 'Cancelada',
+            motivo_cancelacion: motivo_cancelacion || 'Cancelado por usuario',
+            fecha_cancelacion: new Date()
+        });
+
+        await registrarAuditoria(
+            'Canceló admisión',
+            `Admision ID: ${id} - Motivo: ${motivo_cancelacion || 'No especificado'}`,
+            req.session.usuario.id,
+            req.ip
+        );
+
+        res.redirect('/admision');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/admision');
+    }
+};
+
+exports.revertirCancelacion = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const admision = await Admision.findByPk(id);
+        if (!admision) return res.redirect('/admision');
+
+        await admision.update({
+            estado: 'Activa',
+            motivo_cancelacion: null,
+            fecha_cancelacion: null
+        });
+
+        await registrarAuditoria(
+            'Revirtió cancelación de admisión',
+            `Admision ID: ${id}`,
+            req.session.usuario.id,
+            req.ip
+        );
+
+        res.redirect('/admision');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/admision');
+    }
+};
+
+// ======================================================
+// PACIENTES 
 // ======================================================
 exports.renderIndex = async (req, res) => {
     try {
@@ -51,9 +220,6 @@ exports.renderIndex = async (req, res) => {
     }
 };
 
-// ======================================================
-// 2. MOSTRAR FORMULARIO CREAR PACIENTE
-// ======================================================
 exports.renderCreate = async (req, res) => {
     try {
         const obrasSociales = await ObraSocial.findAll({
@@ -78,9 +244,6 @@ exports.renderCreate = async (req, res) => {
     }
 };
 
-// ======================================================
-// 3. CREAR PACIENTE + USUARIO DEL PORTAL
-// ======================================================
 exports.create = async (req, res) => {
     try {
         if (req.body.email === "") req.body.email = null;
@@ -88,7 +251,6 @@ exports.create = async (req, res) => {
 
         const nuevoPaciente = await Paciente.create(req.body);
 
-        // Crear usuario del portal solo si no es NN
         if (!nuevoPaciente.es_nn && nuevoPaciente.dni && nuevoPaciente.nombre) {
             const primerNombre = nuevoPaciente.nombre.trim().split(" ")[0].toLowerCase();
             const passwordPlana = `${primerNombre}${nuevoPaciente.dni}`;
@@ -105,7 +267,6 @@ exports.create = async (req, res) => {
             });
         }
 
-        // === REGISTRAR EN AUDITORÍA ===
         await registrarAuditoria(
             "Creó paciente",
             `Paciente: ${nuevoPaciente.nombre} ${nuevoPaciente.apellido} (DNI: ${nuevoPaciente.dni || "NN"})`,
@@ -125,9 +286,6 @@ exports.create = async (req, res) => {
     }
 };
 
-// ======================================================
-// 4. MOSTRAR FORMULARIO EDITAR
-// ======================================================
 exports.renderEdit = async (req, res) => {
     try {
         const paciente = await Paciente.findByPk(req.params.id, {
@@ -152,9 +310,6 @@ exports.renderEdit = async (req, res) => {
     }
 };
 
-// ======================================================
-// 5. ACTUALIZAR PACIENTE
-// ======================================================
 exports.update = async (req, res) => {
     try {
         const { id } = req.params;
@@ -176,9 +331,6 @@ exports.update = async (req, res) => {
     }
 };
 
-// ======================================================
-// 6. ELIMINAR PACIENTE
-// ======================================================
 exports.delete = async (req, res) => {
     try {
         await Paciente.destroy({ where: { id: req.params.id } });
@@ -189,12 +341,11 @@ exports.delete = async (req, res) => {
     }
 };
 
-// Desactivar paciente (mejorado)
+// Desactivar / Reactivar paciente
 exports.desactivarPaciente = async (req, res) => {
     try {
         const { id } = req.params;
         const paciente = await Paciente.findByPk(id);
-
         await Paciente.update({ activo: false }, { where: { id } });
 
         await registrarAuditoria(
@@ -203,7 +354,6 @@ exports.desactivarPaciente = async (req, res) => {
             req.session.usuario.id,
             req.ip
         );
-
         res.redirect('/admision');
     } catch (error) {
         console.error(error);
@@ -211,12 +361,10 @@ exports.desactivarPaciente = async (req, res) => {
     }
 };
 
-// Reactivar paciente (mejorado)
 exports.reactivarPaciente = async (req, res) => {
     try {
         const { id } = req.params;
         const paciente = await Paciente.findByPk(id);
-
         await Paciente.update({ activo: true }, { where: { id } });
 
         await registrarAuditoria(
@@ -225,7 +373,6 @@ exports.reactivarPaciente = async (req, res) => {
             req.session.usuario.id,
             req.ip
         );
-
         res.redirect('/admision');
     } catch (error) {
         console.error(error);
@@ -233,9 +380,7 @@ exports.reactivarPaciente = async (req, res) => {
     }
 };
 
-// ======================================================
-// HISTORIA CLÍNICA
-// ======================================================
+// Historia Clínica
 exports.verHistoriaClinica = async (req, res) => {
     try {
         const paciente = await Paciente.findByPk(req.params.id, {
@@ -253,19 +398,35 @@ exports.verHistoriaClinica = async (req, res) => {
             ]
         });
 
-        console.log("Paciente encontrado:", paciente ? paciente.id : "NO ENCONTRADO"); // ← Para debug
-
-        if (!paciente) {
-            console.log("Redirigiendo porque no se encontró el paciente con ID:", req.params.id);
-            return res.redirect('/admision');
-        }
+        if (!paciente) return res.redirect('/admision');
 
         res.render('admission/historia', {
             title: `Historia Clínica - ${paciente.nombre} ${paciente.apellido}`,
             paciente
         });
     } catch (error) {
-        console.error("❌ Error al cargar historia clínica:", error);
+        console.error("Error al cargar historia clínica:", error);
+        res.redirect('/admision');
+    }
+};
+exports.renderListadoAdmisiones = async (req, res) => {
+    try {
+        const admisiones = await Admision.findAll({
+            include: [
+                { model: Paciente }
+                // Comentamos el Usuario por ahora para simplificar
+            ],
+            order: [['createdAt', 'DESC']]
+        });
+
+        console.log("Admisiones encontradas:", admisiones.length);
+
+        res.render('admission/listado', {
+            title: 'Listado de Admisiones',
+            admisiones
+        });
+    } catch (error) {
+        console.error("❌ Error en listado de admisiones:", error);
         res.redirect('/admision');
     }
 };

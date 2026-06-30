@@ -6,24 +6,39 @@ const admisionController = require('../controllers/admisionController');
 const authMiddleware = require('../middlewares/auth');
 const checkRole = require('../middlewares/roles');
 
-// 1. Listado de Pacientes
+// ======================================================
+// RUTAS DE PACIENTES
+// ======================================================
+// Listado de pacientes
 router.get('/', admisionController.renderIndex);
 
-// 2. Crear Paciente
+// Crear paciente
 router.get('/nuevo', admisionController.renderCreate);
 router.post('/nuevo', admisionController.create);
 
-// 3. Editar Paciente
+// Editar paciente
 router.get('/editar/:id', admisionController.renderEdit);
 router.post('/editar/:id', admisionController.update);
 
-// 4. Borrar Paciente
-router.post('/borrar/:id', admisionController.delete);
-
-// 5. Desactivar / Reactivar Paciente
+// Desactivar / Reactivar paciente
 router.post('/desactivar/:id', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.desactivarPaciente);
 router.post('/reactivar/:id', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.reactivarPaciente);
-// 6. Ver Historia Clínican
+
+// Historia clínica
 router.get('/historia/:id', admisionController.verHistoriaClinica);
+
+// ======================================================
+// RUTAS DE ADMISIÓN
+// ======================================================
+// Formulario y creación de admisión
+router.get('/nueva', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.renderNuevaAdmision);
+router.post('/nueva', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.crearAdmision);
+
+// Listado de admisiones
+router.get('/listado', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.renderListadoAdmisiones);
+
+// Cancelar y Revertir admisión
+router.post('/cancelar/:id', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.cancelarAdmision);
+router.post('/revertir/:id', authMiddleware, checkRole(['Admin', 'Admision']), admisionController.revertirCancelacion);
 
 module.exports = router;
