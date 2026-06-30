@@ -1,0 +1,61 @@
+extends ../../layouts/main
+
+block content
+  div(class="max-w-2xl mx-auto mt-8")
+    
+    // Header
+    div(class="mb-8 flex items-center justify-between")
+      div
+        h2(class="text-xs font-bold text-blue-500 dark:text-rose-500 mb-1 tracking-widest uppercase") Infraestructura
+        h1(class="text-3xl font-bold text-slate-900 dark:text-white") Editar Ala
+      a(href="/admin/alas" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white font-bold flex items-center gap-2")
+        span ← 
+        | Volver al listado
+
+    // Formulario
+    div(class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2rem] shadow-sm p-8")
+      
+      form(action=`/admin/alas/editar/${ala.id}` method="POST" class="space-y-6")
+        
+        // Nombre
+        div
+          label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Nombre del Ala *
+          input(
+            type="text" 
+            name="nombre" 
+            value=ala.nombre 
+            required 
+            class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 dark:focus:ring-rose-500 outline-none dark:text-white"
+          )
+
+        // Descripción
+        div
+          label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Descripción
+          textarea(
+            name="descripcion" 
+            rows="4" 
+            class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 dark:focus:ring-rose-500 outline-none resize-y dark:text-white"
+          ) #{ala.descripcion || ''}
+
+        // Estado Activo
+        div(class="pt-2")
+          label(class="flex items-center gap-3 cursor-pointer")
+            input(
+              type="checkbox" 
+              name="activo" 
+              checked=ala.activo 
+              class="w-5 h-5 accent-blue-600"
+            )
+            span(class="text-sm font-bold text-slate-700 dark:text-slate-300") Ala activa
+
+        // Botones
+        div(class="pt-6 flex gap-4 border-t border-slate-100 dark:border-slate-700")
+          a(
+            href="/admin/alas" 
+            class="flex-1 text-center bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-xl transition-colors"
+          ) Cancelar
+          
+          button(
+            type="submit" 
+            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-md"
+          ) Guardar Cambios

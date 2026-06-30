@@ -7,6 +7,10 @@ const Ala = sequelize.define('Ala', {
         allowNull: false, 
         unique: true // Ej: 'Guardia', 'Terapia Intensiva', 'Pediatría'
     },
+    activo: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    },
     descripcion: { 
         type: DataTypes.STRING 
     }
