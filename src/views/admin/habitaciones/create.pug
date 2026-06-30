@@ -1,0 +1,69 @@
+extends ../../layouts/main
+
+block content
+  div(class="max-w-2xl mx-auto mt-8")
+    
+    // Header
+    div(class="mb-8 flex items-center justify-between")
+      div
+        h2(class="text-xs font-bold text-blue-500 dark:text-rose-500 mb-1 tracking-widest uppercase") Infraestructura
+        h1(class="text-3xl font-bold text-slate-900 dark:text-white") Nueva Habitación
+      a(href="/admin/habitaciones" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white font-bold flex items-center gap-2")
+        span ← 
+        | Volver al listado
+
+    // Formulario
+    div(class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2rem] shadow-sm p-8")
+      
+      form(action="/admin/habitaciones/guardar" method="POST" class="space-y-6")
+        
+        // Número de Habitación
+        div
+          label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Número de Habitación *
+          input(
+            type="text" 
+            name="numero" 
+            required 
+            placeholder="Ej: 101, 205, UCI-01"
+            class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 dark:focus:ring-rose-500 outline-none dark:text-white"
+          )
+
+        // Tipo de Habitación
+        div
+          label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Tipo de Habitación *
+          div(class="relative")
+            select(
+              name="tipo" 
+              class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 dark:focus:ring-rose-500 outline-none dark:text-white appearance-none cursor-pointer"
+              required
+            )
+              option(value="Individual") Individual
+              option(value="Compartida") Compartida
+              option(value="Shockroom") Shockroom / Emergencia
+            div(class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-500")
+              svg(class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7")
+
+        // Ala (Opcional)
+        div
+          label(class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2") Ala (Opcional)
+          select(
+            name="ala_id" 
+            class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 dark:focus:ring-rose-500 outline-none dark:text-white"
+          )
+            option(value="") -- Sin asignar --
+            if alas && alas.length > 0
+              each ala in alas
+                option(value=ala.id) #{ala.nombre}
+
+        // Botones
+        div(class="pt-6 flex gap-4 border-t border-slate-100 dark:border-slate-700")
+          a(
+            href="/admin/habitaciones" 
+            class="flex-1 text-center bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-xl transition-colors"
+          ) Cancelar
+          
+          button(
+            type="submit" 
+            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-md"
+          ) Crear Habitación

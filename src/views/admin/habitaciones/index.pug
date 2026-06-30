@@ -1,0 +1,81 @@
+extends ../../layouts/main
+
+block content
+  div(class="max-w-7xl mx-auto")
+    
+    // Header
+    div(class="flex justify-between items-center mb-8")
+      div
+        h2(class="text-xs font-bold text-blue-500 dark:text-rose-500 mb-1 tracking-widest uppercase") Infraestructura
+        h1(class="text-3xl font-bold text-slate-900 dark:text-white") Gestión de <span class="text-blue-600 dark:text-rose-500">Habitaciones</span>
+      
+      a(href="/admin/habitaciones/nuevo" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors")
+        span +
+        | Nueva Habitación
+
+    // Tabla
+    div(class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2rem] shadow-sm overflow-hidden")
+      table(class="w-full text-left border-collapse")
+        thead(class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider")
+          tr
+            th(class="p-5 font-bold") Habitación
+            th(class="p-5 font-bold") Tipo
+            th(class="p-5 font-bold") Ala
+            th(class="p-5 font-bold text-center") Camas
+            th(class="p-5 font-bold text-center") Estado
+            th(class="p-5 font-bold text-center") Acciones
+
+        tbody(class="divide-y divide-slate-100 dark:divide-slate-700")
+          if habitaciones && habitaciones.length > 0
+            each hab in habitaciones
+              tr(class="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors")
+                
+                td(class="p-5")
+                  span(class="font-bold text-lg text-slate-900 dark:text-white") #{hab.numero}
+
+                td(class="p-5")
+                  span(class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300")
+                    | #{hab.tipo}
+
+                td(class="p-5 text-slate-600 dark:text-slate-400")
+                  if hab.Ala
+                    | #{hab.Ala.nombre}
+                  else
+                    span(class="text-slate-400 italic") Sin asignar
+
+                td(class="p-5 text-center")
+                  span(class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold")
+                    | #{hab.Camas ? hab.Camas.length : 0}
+
+                td(class="p-5 text-center")
+                  if hab.activo
+                    span(class="px-3 py-1 inline-flex text-xs font-bold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300")
+                      | Activa
+                  else
+                    span(class="px-3 py-1 inline-flex text-xs font-bold rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300")
+                      | Inactiva
+
+                td(class="p-5 text-center")
+                  div(class="flex justify-center gap-2 flex-wrap")
+                    // Editar
+                    a(href=`/admin/habitaciones/editar/${hab.id}` 
+                      class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors")
+                      | ✏️ Editar
+
+                    if hab.activo
+                      // Desactivar
+                      form(action=`/admin/habitaciones/desactivar/${hab.id}` method="POST" class="inline")
+                        button(type="submit" 
+                               class="bg-amber-100 hover:bg-amber-200 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                               onclick="return confirm('¿Estás seguro de desactivar esta habitación?')")
+                          | Desactivar
+                    else
+                      // Reactivar
+                      form(action=`/admin/habitaciones/reactivar/${hab.id}` method="POST" class="inline")
+                        button(type="submit" 
+                               class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors")
+                          | Reactivar
+          else
+            tr
+              td(colspan="6" class="p-10 text-center text-slate-500 dark:text-slate-400")
+                | No hay habitaciones registradas en el sistema.

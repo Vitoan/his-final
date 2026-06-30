@@ -64,6 +64,7 @@ app.use('/portal', authMiddleware, checkRole(['Paciente']), require('./routes/po
 // === RUTAS ADMIN (Importante: rutas específicas primero) ===
 app.use('/admin/obras-sociales', authMiddleware, checkRole(['Admin']), require('./routes/obrasSociales'));
 app.use('/admin/alas', authMiddleware, checkRole(['Admin']), require('./routes/alas'));app.use('/admin/reportes', authMiddleware, checkRole(['Admin']), require('./routes/reportes'));
+app.use('/admin/habitaciones', authMiddleware, checkRole(['Admin']), require('./routes/habitacionesAdmin'));
 app.use('/admin', authMiddleware, checkRole(['Admin']), adminRoutes);
 // =====================================
 
