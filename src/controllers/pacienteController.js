@@ -16,6 +16,19 @@ const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 const { registrarAuditoria } = require('../helpers/auditoria');
 
+
+// Función para normalizar el valor de sexo
+function normalizarSexo(valor) {
+    if (!valor) return 'X';
+    
+    const v = valor.toString().toLowerCase().trim();
+    
+    if (v === 'f' || v === 'femenino' || v === 'female') return 'F';
+    if (v === 'm' || v === 'masculino' || v === 'male') return 'M';
+    
+    return 'X';
+}
+
 // ======================================================
 // LISTAR PACIENTES (para personal de admisión)
 // ======================================================
@@ -102,6 +115,8 @@ exports.create = async (req, res) => {
     try {
         if (req.body.email === "") req.body.email = null;
         if (req.body.obra_social_id === "") req.body.obra_social_id = null;
+        req.body.sexo = normalizarSexo(req.body.sexo);
+
 
         const nuevoPaciente = await Paciente.create(req.body);
 
@@ -181,6 +196,7 @@ exports.update = async (req, res) => {
         if (req.body.dni && req.body.dni.trim() !== "") {
             req.body.es_nn = false;
         }
+        req.body.sexo = normalizarSexo(req.body.sexo);
 
         await Paciente.update(req.body, { where: { id } });
 

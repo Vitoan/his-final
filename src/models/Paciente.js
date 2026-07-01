@@ -16,9 +16,13 @@ const Paciente = sequelize.define('Paciente', {
     },
     fecha_nacimiento: { type: DataTypes.DATEONLY },
     sexo: { 
-        type: DataTypes.ENUM('M', 'F', 'X'),
-        defaultValue: 'X'
-    },
+    type: DataTypes.ENUM('M', 'F', 'X'),
+    defaultValue: 'X',
+    allowNull: false,           
+    validate: {
+        isIn: [['M', 'F', 'X']]
+    }
+},
     obra_social: { type: DataTypes.STRING },           
     numero_afiliado: { type: DataTypes.STRING },
     direccion: { type: DataTypes.STRING, defaultValue: 'No especificada' },

@@ -1,4 +1,4 @@
-const { Admision, Paciente, Usuario } = require("../models");
+const { Admision, Paciente, Usuario, ObraSocial } = require("../models");
 const { Op } = require("sequelize");
 const { registrarAuditoria } = require("../helpers/auditoria");
 
@@ -17,7 +17,8 @@ exports.renderNuevaAdmision = async (req, res) => {
                         { dni: { [Op.like]: `%${search}%` } },
                         { apellido: { [Op.like]: `%${search}%` } },
                         { nombre: { [Op.like]: `%${search}%` } }
-                    ]
+                    ],
+                    activo: true
                 },
                 limit: 10,
                 order: [['apellido', 'ASC']]
@@ -31,7 +32,7 @@ exports.renderNuevaAdmision = async (req, res) => {
             error: req.query.error
         });
     } catch (error) {
-        console.error(error);
+        console.error("Error en renderNuevaAdmision:", error);
         res.redirect('/admision');
     }
 };
@@ -53,14 +54,17 @@ exports.crearAdmision = async (req, res) => {
 
         let pacienteId = paciente_id;
 
-        // Si es paciente NN, lo creamos primero
+        // === CREAR PACIENTE NN ===
         if (es_nn === 'true' || es_nn === true) {
             const nuevoPacienteNN = await Paciente.create({
                 nombre: nombre || 'NN',
                 apellido: apellido || 'NN',
                 sexo: sexo || 'X',
                 es_nn: true,
-                dni: null
+                dni: null,
+                fecha_nacimiento: null,
+                direccion: 'No especificada',
+                telefono: 'No especificado'
             });
 
             pacienteId = nuevoPacienteNN.id;
@@ -73,7 +77,7 @@ exports.crearAdmision = async (req, res) => {
             );
         }
 
-        // === VALIDACIÓN: Verificar si ya tiene admisión activa ===
+        // === VALIDACIÓN: No permitir admisión duplicada ===
         const admisionActiva = await Admision.findOne({
             where: {
                 paciente_id: pacienteId,
@@ -85,11 +89,11 @@ exports.crearAdmision = async (req, res) => {
             return res.redirect('/admision/nueva?error=ya_tiene_admision');
         }
 
-        // Creamos la admisión
+        // === CREAR ADMISIÓN ===
         const nuevaAdmision = await Admision.create({
             paciente_id: pacienteId,
             tipo: tipo || 'Programada',
-            motivo: motivo,
+            motivo: motivo || 'Sin motivo especificado',
             estado: 'Pendiente',
             usuario_id: req.session.usuario.id
         });
@@ -102,6 +106,7 @@ exports.crearAdmision = async (req, res) => {
         );
 
         res.redirect('/admision/listado');
+
     } catch (error) {
         console.error("Error al crear admisión:", error);
         res.redirect('/admision/nueva?error=crear_admision');
@@ -116,7 +121,10 @@ exports.renderListadoAdmisiones = async (req, res) => {
         const admisiones = await Admision.findAll({
             include: [
                 { model: Paciente },
-                { model: Usuario, as: 'RegistradoPor' }
+                { 
+                    model: Usuario, 
+                    as: 'RegistradoPor'   // ← Asegúrate de tener este alias en models/index.js
+                }
             ],
             order: [['createdAt', 'DESC']]
         });
@@ -168,7 +176,6 @@ exports.cancelarAdmision = async (req, res) => {
 exports.revertirCancelacion = async (req, res) => {
     try {
         const { id } = req.params;
-
         const admision = await Admision.findByPk(id);
         if (!admision) return res.redirect('/admision/listado');
 

@@ -23,28 +23,37 @@ const renderCreate = async (req, res) => {
             return res.redirect('/habitaciones?error=' + encodeURIComponent('La cama no está disponible.'));
         }
 
-        // === CANDADO DE GÉNERO ===
-        let generoRestringido = null;
-        const tipoHab = cama.Habitacion?.tipo?.toLowerCase() || '';
+// === CANDADO DE GÉNERO EN HABITACIONES COMPARTIDAS ===
+let generoRestringido = null;
+const tipoHab = cama.Habitacion?.tipo?.toLowerCase() || '';
 
-        if (tipoHab.includes('compartida')) {
-            const camasEnHabitacion = await Cama.findAll({
-                where: { habitacion_id: cama.Habitacion.id },
-                include: [{
-                    model: Internacion,
-                    where: { estado: 'Activa' },
-                    required: false,
-                    include: [{ model: Paciente }]
-                }]
-            });
+if (tipoHab.includes('compartida')) {
+    const camasEnHabitacion = await Cama.findAll({
+        where: { habitacion_id: cama.Habitacion.id },
+        include: [{
+            model: Internacion,
+            where: { estado: 'Activa' },
+            required: false,
+            include: [{ model: Paciente }]
+        }]
+    });
 
-            for (let c of camasEnHabitacion) {
-                if (c.Internacions?.[0]?.Paciente?.sexo && c.Internacions[0].Paciente.sexo !== 'X') {
-                    generoRestringido = c.Internacions[0].Paciente.sexo;
-                    break;
-                }
+    for (let c of camasEnHabitacion) {
+        if (c.Internacions && c.Internacions.length > 0 && c.Internacions[0].Paciente) {
+            const sexoOcupante = c.Internacions[0].Paciente.sexo || 'X';
+            const sexoNuevo = paciente_id 
+                ? (await Paciente.findByPk(paciente_id))?.sexo || 'X' 
+                : 'X';
+
+            // Solo aplicamos restricción si ambos tienen sexo definido y son distintos
+            if (sexoOcupante !== 'X' && sexoNuevo !== 'X' && sexoOcupante !== sexoNuevo) {
+                generoRestringido = sexoOcupante;
+                console.log(`🔒 Habitación restringida a sexo: ${generoRestringido}`);
+                break;
             }
         }
+    }
+}
 
         let condicionBusqueda = {};
         if (generoRestringido) {
