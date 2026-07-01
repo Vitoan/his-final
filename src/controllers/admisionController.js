@@ -3,7 +3,43 @@ const { Op } = require("sequelize");
 const { registrarAuditoria } = require("../helpers/auditoria");
 
 // ======================================================
-// RENDERIZAR FORMULARIO NUEVA ADMISIÓN + BUSCADOR
+// 1. LISTAR PACIENTES (Vista principal de Admisión)
+// ======================================================
+exports.renderIndex = async (req, res) => {
+    try {
+        const pacientes = await Paciente.findAll({
+            include: [
+                { model: ObraSocial, as: "ObraSocial" },
+                {
+                    model: Internacion,
+                    required: false,
+                    where: { fecha_egreso: null },
+                    include: [{ model: Cama, include: [Habitacion] }],
+                },
+                {
+                    model: Visita,
+                    required: false,
+                    where: { estado: { [Op.or]: ["Esperando", "En Atención"] } },
+                },
+            ],
+            order: [
+                ["apellido", "ASC"],
+                ["nombre", "ASC"],
+            ],
+        });
+
+        res.render("admission/index", {
+            title: "Listado de Pacientes",
+            pacientes,
+        });
+    } catch (error) {
+        console.error(error);
+        res.redirect("/");
+    }
+};
+
+// ======================================================
+// 2. MOSTRAR FORMULARIO NUEVA ADMISIÓN + BUSCADOR
 // ======================================================
 exports.renderNuevaAdmision = async (req, res) => {
     try {
@@ -16,29 +52,29 @@ exports.renderNuevaAdmision = async (req, res) => {
                     [Op.or]: [
                         { dni: { [Op.like]: `%${search}%` } },
                         { apellido: { [Op.like]: `%${search}%` } },
-                        { nombre: { [Op.like]: `%${search}%` } }
+                        { nombre: { [Op.like]: `%${search}%` } },
                     ],
-                    activo: true
+                    activo: true,
                 },
                 limit: 10,
-                order: [['apellido', 'ASC']]
+                order: [["apellido", "ASC"]],
             });
         }
 
-        res.render('admission/nueva', {
-            title: 'Nueva Admisión',
+        res.render("admission/nueva", {
+            title: "Nueva Admisión",
             pacientesEncontrados,
             search,
-            error: req.query.error
+            error: req.query.error,
         });
     } catch (error) {
         console.error("Error en renderNuevaAdmision:", error);
-        res.redirect('/admision');
+        res.redirect("/admision");
     }
 };
 
 // ======================================================
-// CREAR ADMISIÓN (con soporte para paciente NN + validación)
+// 3. CREAR ADMISIÓN (Flujo formal)
 // ======================================================
 exports.crearAdmision = async (req, res) => {
     try {
@@ -49,101 +85,99 @@ exports.crearAdmision = async (req, res) => {
             apellido,
             sexo,
             tipo,
-            motivo
+            motivo,
+            descripcion_nn,
         } = req.body;
 
         let pacienteId = paciente_id;
 
         // === CREAR PACIENTE NN ===
-        if (es_nn === 'true' || es_nn === true) {
-    const descripcionNN = req.body.descripcion_nn || 'Sin descripción';
-
-    const nuevoPacienteNN = await Paciente.create({
-        nombre: nombre || 'NN',
-        apellido: apellido || 'NN',
-        sexo: sexo || 'X',
-        es_nn: true,
-        dni: null,
-        fecha_nacimiento: null,
-        direccion: 'No especificada',
-        telefono: 'No especificado',
-        antecedentes: descripcionNN     // ← Guardamos la descripción aquí
-    });
+        if (es_nn === "true" || es_nn === true) {
+            const nuevoPacienteNN = await Paciente.create({
+                nombre: nombre || "NN",
+                apellido: apellido || "NN",
+                sexo: sexo || "X",
+                es_nn: true,
+                dni: null,
+                fecha_nacimiento: null,
+                direccion: "No especificada",
+                telefono: "No especificado",
+                antecedentes: descripcion_nn || "Ingreso de emergencia sin identificar",
+            });
 
             pacienteId = nuevoPacienteNN.id;
 
             await registrarAuditoria(
-                'Creó paciente NN',
-                `Paciente NN: ${nombre || 'NN'} ${apellido || 'NN'}`,
+                "Creó paciente NN",
+                `Paciente NN: ${nombre || "NN"} ${apellido || "NN"}`,
                 req.session.usuario.id,
                 req.ip
             );
         }
 
-        // === VALIDACIÓN: No permitir admisión duplicada ===
+        // === VALIDACIÓN: No permitir admisión duplicada activa ===
         const admisionActiva = await Admision.findOne({
             where: {
                 paciente_id: pacienteId,
-                estado: { [Op.or]: ['Pendiente', 'Activa'] }
-            }
+                estado: { [Op.or]: ["Pendiente", "Activa"] },
+            },
         });
 
         if (admisionActiva) {
-            return res.redirect('/admision/nueva?error=ya_tiene_admision');
+            return res.redirect("/admision/nueva?error=ya_tiene_admision");
         }
 
-        // === CREAR ADMISIÓN ===
+        // === CREAR LA ADMISIÓN ===
         const nuevaAdmision = await Admision.create({
             paciente_id: pacienteId,
-            tipo: tipo || 'Programada',
-            motivo: motivo || 'Sin motivo especificado',
-            estado: 'Pendiente',
-            usuario_id: req.session.usuario.id
+            tipo: tipo || "Programada",
+            motivo: motivo || "Sin motivo especificado",
+            estado: "Pendiente",
+            usuario_id: req.session.usuario.id,
         });
 
         await registrarAuditoria(
-            'Creó admisión',
+            "Creó admisión",
             `Admision ID: ${nuevaAdmision.id} - Tipo: ${tipo} - Paciente ID: ${pacienteId}`,
             req.session.usuario.id,
             req.ip
         );
 
-        res.redirect('/admision/listado');
-
+        res.redirect("/admision/listado");
     } catch (error) {
         console.error("Error al crear admisión:", error);
-        res.redirect('/admision/nueva?error=crear_admision');
+        res.redirect("/admision/nueva?error=crear_admision");
     }
 };
 
 // ======================================================
-// LISTADO DE ADMISIONES
+// 4. LISTADO DE ADMISIONES
 // ======================================================
 exports.renderListadoAdmisiones = async (req, res) => {
     try {
         const admisiones = await Admision.findAll({
             include: [
                 { model: Paciente },
-                { 
-                    model: Usuario, 
-                    as: 'RegistradoPor'   // ← Asegúrate de tener este alias en models/index.js
-                }
+                {
+                    model: Usuario,
+                    as: "RegistradoPor",
+                },
             ],
-            order: [['createdAt', 'DESC']]
+            order: [["createdAt", "DESC"]],
         });
 
-        res.render('admission/listado', {
-            title: 'Listado de Admisiones',
-            admisiones
+        res.render("admission/listado", {
+            title: "Listado de Admisiones",
+            admisiones,
         });
     } catch (error) {
         console.error("Error en listado de admisiones:", error);
-        res.redirect('/admision');
+        res.redirect("/admision");
     }
 };
 
 // ======================================================
-// CANCELAR ADMISIÓN
+// 5. CANCELAR ADMISIÓN
 // ======================================================
 exports.cancelarAdmision = async (req, res) => {
     try {
@@ -151,53 +185,53 @@ exports.cancelarAdmision = async (req, res) => {
         const { motivo_cancelacion } = req.body;
 
         const admision = await Admision.findByPk(id);
-        if (!admision) return res.redirect('/admision/listado');
+        if (!admision) return res.redirect("/admision/listado");
 
         await admision.update({
-            estado: 'Cancelada',
-            motivo_cancelacion: motivo_cancelacion || 'Cancelado por usuario',
-            fecha_cancelacion: new Date()
+            estado: "Cancelada",
+            motivo_cancelacion: motivo_cancelacion || "Cancelado por usuario",
+            fecha_cancelacion: new Date(),
         });
 
         await registrarAuditoria(
-            'Canceló admisión',
-            `Admision ID: ${id} - Motivo: ${motivo_cancelacion || 'No especificado'}`,
+            "Canceló admisión",
+            `Admision ID: ${id} - Motivo: ${motivo_cancelacion || "No especificado"}`,
             req.session.usuario.id,
             req.ip
         );
 
-        res.redirect('/admision/listado');
+        res.redirect("/admision/listado");
     } catch (error) {
         console.error(error);
-        res.redirect('/admision/listado');
+        res.redirect("/admision/listado");
     }
 };
 
 // ======================================================
-// REVERTIR CANCELACIÓN
+// 6. REVERTIR CANCELACIÓN
 // ======================================================
 exports.revertirCancelacion = async (req, res) => {
     try {
         const { id } = req.params;
         const admision = await Admision.findByPk(id);
-        if (!admision) return res.redirect('/admision/listado');
+        if (!admision) return res.redirect("/admision/listado");
 
         await admision.update({
-            estado: 'Activa',
+            estado: "Activa",
             motivo_cancelacion: null,
-            fecha_cancelacion: null
+            fecha_cancelacion: null,
         });
 
         await registrarAuditoria(
-            'Revirtió cancelación de admisión',
+            "Revirtió cancelación de admisión",
             `Admision ID: ${id}`,
             req.session.usuario.id,
             req.ip
         );
 
-        res.redirect('/admision/listado');
+        res.redirect("/admision/listado");
     } catch (error) {
         console.error(error);
-        res.redirect('/admision/listado');
+        res.redirect("/admision/listado");
     }
 };

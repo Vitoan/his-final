@@ -56,7 +56,7 @@ app.use('/habitaciones', authMiddleware, checkRole(['Admin', 'Admision', 'Enferm
 app.use('/internacion', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), internacionesRoutes);
 app.use('/enfermeria', authMiddleware, checkRole(['Admin', 'Enfermeria']), enfermeriaRoutes);
 app.use('/medico', authMiddleware, checkRole(['Admin', 'Medico']), medicoRoutes);
-app.use('/clinica', authMiddleware, checkRole(['Admin', 'Medico', 'Enfermeria']), clinicaRoutes);
+app.use('/clinica', authMiddleware, checkRole(['Admin', 'Medico', 'Enfermeria', 'Paciente']), clinicaRoutes);
 app.use('/mesa-entrada', authMiddleware, checkRole(['Admin', 'Admision', 'Enfermeria']), require('./routes/mesa'));
 app.use('/turnos', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), require('./routes/turnos'));
 app.use('/estudios', authMiddleware, checkRole(['Admin', 'Medico', 'Enfermeria']), require('./routes/estudios'));

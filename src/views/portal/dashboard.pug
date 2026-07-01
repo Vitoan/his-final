@@ -2,6 +2,7 @@ extends ../layouts/main
 
 block content
   div(class="max-w-6xl mx-auto mt-10 mb-20 px-4")
+    
     //- Bienvenida
     div(class="mb-10 text-center md:text-left")
       h1(class="text-4xl font-black text-slate-900") Hola, #{paciente.nombre} 👋
@@ -28,25 +29,42 @@ block content
           else
             p(class="text-slate-400 italic") No tienes turnos programados.
 
-        //- ESTUDIOS RECIENTES
+        //- ESTUDIOS RECIENTES (MEJORADO)
         section(class="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm")
           h3(class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2") 🔬 Mis Estudios y Resultados
+          
           if paciente.Estudios && paciente.Estudios.length > 0
-            div(class="grid grid-cols-1 md:grid-cols-2 gap-4")
-              each est in paciente.Estudios
-                div(class="p-4 border border-slate-100 rounded-2xl hover:bg-slate-50 transition-colors")
-                  div(class="flex justify-between items-start mb-2")
-                    span(class="text-xs font-bold uppercase tracking-widest text-fuchsia-600") #{est.tipo_estudio}
+            div(class="space-y-4")
+              each est in paciente.Estudios.slice(0, 4)
+                div(class="p-4 border border-slate-200 rounded-2xl")
+                  div(class="flex justify-between items-start")
+                    div
+                      span(class="text-xs font-bold uppercase tracking-widest text-fuchsia-600") #{est.tipo_estudio}
+                      p(class="font-bold text-slate-900 mt-1") #{est.descripcion}
+                    
                     if est.estado === 'Realizado'
-                      span(class="text-emerald-600 text-xs font-bold") ✅ Listo
+                      span(class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full") ✅ Listo
                     else
-                      span(class="text-amber-600 text-xs font-bold") ⏳ En proceso
-                  p(class="font-bold text-slate-900") #{est.descripcion}
-                  if est.estado === 'Realizado'
-                    button(onclick=`alert('Resultado del informe:\\n\\n${est.resultado}')` class="mt-3 text-xs font-bold text-blue-600 hover:underline") Ver mi resultado →
+                      span(class="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full") ⏳ Pendiente
+
+                  if est.estado === 'Realizado' && est.resultado
+                    details(class="mt-3")
+                      summary(class="cursor-pointer text-sm font-bold text-blue-600 hover:underline")
+                        | Ver resultado del estudio
+                      div(class="mt-3 p-4 bg-slate-50 rounded-xl text-sm text-slate-700 whitespace-pre-line border border-slate-200")
+                        | #{est.resultado}
+          else
+            p(class="text-slate-400 italic") No tienes estudios registrados.
+
+        //- BOTÓN VER HISTORIA CLÍNICA
+        div(class="mt-2")
+          a(href=`/clinica/historial/${paciente.id}` 
+            class="block w-full text-center bg-white border-2 border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-3.5 rounded-2xl transition-colors")
+            | 📜 Ver mi Historia Clínica completa
 
       //- COLUMNA DERECHA: Datos y Estado Actual
       div(class="space-y-8")
+        
         //- FICHA PERSONAL
         div(class="bg-indigo-600 text-white rounded-[2rem] p-8 shadow-lg shadow-indigo-200")
           h3(class="font-bold text-lg mb-4 opacity-80") Mi Ficha
@@ -55,7 +73,7 @@ block content
             p(class="text-sm") DNI: #{paciente.dni}
             p(class="text-sm") Obra Social: #{paciente.obra_social || 'Particular'}
         
-        //- ESTADO DE INTERNACIÓN (Si aplica)
+        //- ESTADO DE INTERNACIÓN
         if paciente.Internacions && paciente.Internacions.some(i => i.estado === 'Activa')
           - const inter = paciente.Internacions.find(i => i.estado === 'Activa')
           div(class="bg-rose-50 border-2 border-rose-200 rounded-[2rem] p-8")
@@ -67,15 +85,15 @@ block content
             if ultimosSignos
               div(class="mt-6 pt-6 border-t border-rose-200")
                 h4(class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3") 📊 Últimos Signos Vitales
-                div(class="grid grid-cols-3 gap-2 text-center bg-white dark:bg-slate-950 rounded-xl p-3 border border-rose-100 dark:border-slate-800")
+                div(class="grid grid-cols-3 gap-2 text-center bg-white rounded-xl p-3 border border-rose-100")
                   div
                     span(class="block text-[9px] text-slate-400 uppercase") Presión
-                    span(class="font-mono font-bold text-slate-800 dark:text-slate-100 text-xs") #{ultimosSignos.presion_arterial || '-'}
-                  div(class="border-l border-slate-100 dark:border-slate-800")
+                    span(class="font-mono font-bold text-slate-800 text-xs") #{ultimosSignos.presion_arterial || '-'}
+                  div(class="border-l border-slate-100")
                     span(class="block text-[9px] text-slate-400 uppercase") Pulso
-                    span(class="font-mono font-bold text-slate-800 dark:text-slate-100 text-xs") #{ultimosSignos.frecuencia_cardiaca || '-'}
-                  div(class="border-l border-slate-100 dark:border-slate-800")
+                    span(class="font-mono font-bold text-slate-800 text-xs") #{ultimosSignos.frecuencia_cardiaca || '-'}
+                  div(class="border-l border-slate-100")
                     span(class="block text-[9px] text-slate-400 uppercase") Temp
-                    span(class="font-mono font-bold text-slate-800 dark:text-slate-100 text-xs") #{ultimosSignos.temperatura || '-'}°
+                    span(class="font-mono font-bold text-slate-800 text-xs") #{ultimosSignos.temperatura || '-'}°
                 if ultimosSignos.observaciones
-                  p(class="text-xs text-slate-500 dark:text-slate-400 italic mt-3 line-clamp-2") "#{ultimosSignos.observaciones}"
+                  p(class="text-xs text-slate-500 italic mt-3 line-clamp-2") "#{ultimosSignos.observaciones}"

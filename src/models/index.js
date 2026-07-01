@@ -100,12 +100,16 @@ AdministracionMedicamento.belongsTo(Usuario, { as: 'Enfermero', foreignKey: 'enf
 ObraSocial.hasMany(Paciente, { foreignKey: 'obra_social_id' });
 Paciente.belongsTo(ObraSocial, { foreignKey: 'obra_social_id', as: 'ObraSocial' });
 
-// Relaciones de Admision
+// === RELACIONES DE ADMISIÓN ===
 Admision.belongsTo(Paciente, { foreignKey: 'paciente_id' });
 Paciente.hasMany(Admision, { foreignKey: 'paciente_id' });
 
-Admision.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'RegistradoPor' });
+Admision.belongsTo(Usuario, { as: 'RegistradoPor', foreignKey: 'usuario_id' });
 Usuario.hasMany(Admision, { foreignKey: 'usuario_id' });
+
+// Una admisión puede tener una internación (opcional)
+//Admision.hasOne(Internacion, { foreignKey: 'admision_id' });
+//Internacion.belongsTo(Admision, { foreignKey: 'admision_id' });
 
 // 3. EXPORTAMOS TODO
 module.exports = { 

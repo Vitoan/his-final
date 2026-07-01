@@ -27,14 +27,21 @@ exports.listarMapa = async (req, res) => {
         });
 
         let asignandoPaciente = null;
-        if (req.query.paciente_id) {
-            asignandoPaciente = await Paciente.findByPk(req.query.paciente_id);
-        }
+let admisionId = null;
+
+if (req.query.paciente_id) {
+    asignandoPaciente = await Paciente.findByPk(req.query.paciente_id);
+}
+
+if (req.query.admision_id) {
+    admisionId = req.query.admision_id;
+}
 
         res.render('rooms/index', { 
             title: 'Mapa de Camas', 
             alas: alas, 
             asignandoPaciente,
+            admisionId,
             error: req.query.error 
         });
 

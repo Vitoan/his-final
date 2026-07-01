@@ -2,67 +2,97 @@ extends ../layouts/main
 
 block content
   div(class="max-w-7xl mx-auto")
+    
+    // Header
     div(class="flex justify-between items-center mb-8")
-      h1(class="text-3xl font-bold") Listado de Admisiones
-      a(href="/admision/nueva" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700")
-        | + Nueva Admisión
+      div
+        h2(class="text-xs font-bold text-blue-500 uppercase tracking-widest mb-1") Admisión
+        h1(class="text-3xl font-black") Listado de Admisiones
+      a(href="/admision/nueva" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors")
+        span +
+        | Nueva Admisión
 
+    // Tabla
     div(class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm")
-      table(class="w-full text-left")
+      table(class="w-full text-left border-collapse")
         thead(class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider")
           tr
-            th(class="p-5") Paciente
-            th(class="p-5") Tipo
-            th(class="p-5") Estado
-            th(class="p-5") Fecha
-            th(class="p-5 text-center") Acciones
+            th(class="p-5 font-bold") Paciente
+            th(class="p-5 font-bold") Tipo
+            th(class="p-5 font-bold") Motivo
+            th(class="p-5 font-bold text-center") Estado
+            th(class="p-5 font-bold") Fecha
+            th(class="p-5 font-bold text-center") Acciones
 
         tbody(class="divide-y divide-slate-100")
-          each adm in admisiones
-            tr(class="hover:bg-slate-50")
-              td(class="p-5 font-bold")
-                if adm.Paciente
-                  | #{adm.Paciente.apellido}, #{adm.Paciente.nombre}
-                else
-                  span(class="text-slate-400") Paciente eliminado
-
-              td(class="p-5") #{adm.tipo}
-
-              td(class="p-5")
-                if adm.estado === 'Activa' || adm.estado === 'Pendiente'
-                  span(class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold") #{adm.estado}
-                else if adm.estado === 'Cancelada'
-                  span(class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold") Cancelada
-                else
-                  span(class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-bold") #{adm.estado}
-
-              td(class="p-5 text-sm text-slate-600") #{adm.fecha_admision}
-
-              td(class="p-5 text-center")
-                div(class="flex justify-center gap-2 flex-wrap items-center")
-
-                  // === Botón Asignar Cama ===
-                  if adm.estado === 'Activa' || adm.estado === 'Pendiente'
-                    if adm.Paciente
-                      a(href=`/habitaciones?paciente_id=${adm.Paciente.id}` 
-                        class="bg-violet-100 text-violet-700 hover:bg-violet-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1")
-                        | 🛏️ Asignar Cama
-
-                  // === Botón Historia Clínica (mejorada) ===
+          if admisiones && admisiones.length > 0
+            each adm in admisiones
+              tr(class="hover:bg-slate-50 transition-colors")
+                
+                // Paciente
+                td(class="p-5")
                   if adm.Paciente
-                    a(href=`/clinica/historial/${adm.Paciente.id}` 
-                      class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1")
-                      | 📜 Historia
+                    p(class="font-bold text-slate-900") #{adm.Paciente.apellido}, #{adm.Paciente.nombre}
+                    if adm.Paciente.es_nn
+                      span(class="inline-block mt-1 bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded") NN
+                  else
+                    span(class="text-slate-400 italic") Paciente eliminado
 
-                  // === Botones de Cancelar / Revertir ===
-                  if adm.estado === 'Activa' || adm.estado === 'Pendiente'
-                    form(action=`/admision/cancelar/${adm.id}` method="POST" class="inline")
-                      button(type="submit" 
-                             class="text-amber-600 hover:bg-amber-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors")
-                        | Cancelar
+                // Tipo
+                td(class="p-5")
+                  span(class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700")
+                    | #{adm.tipo}
 
+                // Motivo
+                td(class="p-5 text-sm text-slate-600 max-w-xs truncate")
+                  | #{adm.motivo || 'Sin motivo'}
+
+                // Estado
+                td(class="p-5 text-center")
+                  if adm.estado === 'Activa'
+                    span(class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold") Activa
+                  else if adm.estado === 'Pendiente'
+                    span(class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold") Pendiente
                   else if adm.estado === 'Cancelada'
-                    form(action=`/admision/revertir/${adm.id}` method="POST" class="inline")
-                      button(type="submit" 
-                             class="text-emerald-600 hover:bg-emerald-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors")
-                        | Revertir
+                    span(class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold") Cancelada
+                  else
+                    span(class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-bold") #{adm.estado}
+
+                // Fecha
+                td(class="p-5 text-sm text-slate-600")
+                  | #{new Date(adm.createdAt).toLocaleDateString()}
+
+                // Acciones
+                td(class="p-5")
+                  div(class="flex justify-center gap-2 flex-wrap")
+                    
+                    // Asignar Cama
+                    if adm.estado === 'Activa' || adm.estado === 'Pendiente'
+                      if adm.Paciente
+                        a(href=`/habitaciones?paciente_id=${adm.Paciente.id}&admision_id=${adm.id}` 
+  S
+
+                    // Historia Clínica (NUEVO)
+                    if adm.Paciente
+                      a(href=`/clinica/historial/${adm.Paciente.id}` 
+                        class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1")
+                        | 📜 Historia
+
+                    // Cancelar
+                    if adm.estado === 'Activa' || adm.estado === 'Pendiente'
+                        form(action=`/admision/cancelar/${adm.id}` method="POST" class="inline")
+                            button(type="submit" 
+                                  class="bg-amber-100 hover:bg-amber-200 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                                  onclick="return confirm('¿Estás seguro de cancelar esta admisión?')")
+                                | Cancelar
+
+                    // Revertir
+                    if adm.estado === 'Cancelada'
+                        form(action=`/admision/revertir/${adm.id}` method="POST" class="inline")
+                            button(type="submit" 
+                                  class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors")
+                                | Revertir
+          else
+            tr
+              td(colspan="6" class="p-12 text-center text-slate-500")
+                | No hay admisiones registradas aún.

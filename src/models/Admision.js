@@ -26,6 +26,15 @@ const Admision = sequelize.define('Admision', {
     fecha_cancelacion: {
         type: DataTypes.DATE,
         allowNull: true
+    },
+    // === NUEVOS CAMPOS ===
+    paciente_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    usuario_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
 }, {
     tableName: 'admisiones',

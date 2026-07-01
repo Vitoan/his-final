@@ -51,6 +51,8 @@ block content
     // MÓDULO CLÍNICO (Médico + Enfermería)
     // ============================================
     if ['Admin', 'Medico', 'Enfermeria'].includes(usuario.rol)
+      
+      // Tarjeta 1: Área Clínica (ya existente)
       a(href="/clinica/dashboard" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
         div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-teal-50 dark:bg-teal-900/20 rounded-full blur-3xl group-hover:bg-teal-100 dark:group-hover:bg-teal-900/40 transition-colors")
         div(class="relative z-10")
@@ -59,6 +61,17 @@ block content
           h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Área Clínica
           p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
             | Evoluciones, signos vitales e historia clínica.
+
+      // === NUEVA TARJETA: ESTUDIOS MÉDICOS ===
+      if ['Admin', 'Medico'].includes(usuario.rol)
+        a(href="/estudios" class="group relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden")
+          div(class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-violet-50 dark:bg-violet-900/20 rounded-full blur-3xl group-hover:bg-violet-100 dark:group-hover:bg-violet-900/40 transition-colors")
+          div(class="relative z-10")
+            div(class="w-14 h-14 rounded-2xl bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-300 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform")
+              | 📋
+            h3(class="text-2xl font-bold text-slate-900 dark:text-white mb-2") Estudios Médicos
+            p(class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed")
+              | Solicitar radiografías, laboratorios y ver resultados.
 
     // ============================================
     // MÓDULOS SOLO PARA ADMIN

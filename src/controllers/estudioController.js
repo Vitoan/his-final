@@ -20,10 +20,23 @@ exports.listarEstudios = async (req, res) => {
 // 2. Mostrar formulario para solicitar un estudio nuevo
 exports.renderSolicitar = async (req, res) => {
     try {
+        const { paciente_id } = req.query; // ← Nuevo: capturamos el paciente desde la URL
+
         const pacientes = await Paciente.findAll({ order: [['apellido', 'ASC']] });
         const medicos = await Usuario.findAll({ where: { rol: 'Medico' } });
 
-        res.render('estudios/create', { title: 'Solicitar Estudio', pacientes, medicos });
+        // Buscamos el paciente si viene por query
+        let pacientePreseleccionado = null;
+        if (paciente_id) {
+            pacientePreseleccionado = await Paciente.findByPk(paciente_id);
+        }
+
+        res.render('estudios/create', { 
+            title: 'Solicitar Estudio', 
+            pacientes, 
+            medicos,
+            pacientePreseleccionado   // ← Lo pasamos a la vista
+        });
     } catch (error) {
         console.error("Error al cargar formulario:", error);
         res.redirect('/estudios');
@@ -59,7 +72,14 @@ exports.renderCargarResultado = async (req, res) => {
 
         if (!estudio) return res.redirect('/estudios');
 
-        res.render('estudios/resultado', { title: 'Cargar Resultado', estudio });
+        // Si ya tiene resultado, lo mostramos en modo solo lectura
+        const yaTieneResultado = estudio.resultado && estudio.resultado.trim() !== '';
+
+        res.render('estudios/resultado', { 
+            title: 'Resultado del Estudio', 
+            estudio,
+            yaTieneResultado   // ← Nueva variable
+        });
     } catch (error) {
         console.error("Error al cargar estudio:", error);
         res.redirect('/estudios');

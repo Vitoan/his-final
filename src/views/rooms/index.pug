@@ -76,6 +76,7 @@ block content
                         - nombrePaciente = internacionActiva.Paciente.nombre + ' ' + internacionActiva.Paciente.apellido
 
                   // Estilos según estado
+                                    
                   if cama.estado === 'Disponible'
                     - estadoClass = 'border-green-300 bg-green-50 text-green-800 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300'
                     - icono = '✨'
@@ -97,28 +98,26 @@ block content
                       div
                         p(class="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold mb-1") Paciente Internado
                         p(class="nombre-paciente font-bold text-slate-900 dark:text-white text-lg leading-tight mb-3") #{nombrePaciente}
+
                         if cama.Internacions && cama.Internacions.length > 0 && cama.Internacions[0].Paciente
                           - const pac = cama.Internacions[0].Paciente
                           if pac.es_nn && pac.antecedentes
                             p(class="text-xs text-orange-600 italic mt-1 leading-tight") #{pac.antecedentes}
-                        // === BOTONES MEJORADOS ===
+
+                        // Botones de acciones
                         div(class="grid grid-cols-3 gap-2 mb-2")
                           a(href=`/enfermeria/evaluar/${idInternacion}` class="text-center py-2 px-2 rounded-xl bg-teal-100 text-teal-800 border border-teal-200 dark:bg-teal-900/60 dark:text-teal-200 text-xs font-bold hover:bg-teal-200 transition-colors")
                             | 🩺 Signos
-
                           a(href=`/medico/evolucionar/${idInternacion}` class="text-center py-2 px-2 rounded-xl bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900/60 dark:text-blue-200 text-xs font-bold hover:bg-blue-200 transition-colors")
                             | 📝 Evolución
-
                           a(href=`/clinica/historial/${pacienteId}` class="text-center py-2 px-2 rounded-xl bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold hover:bg-indigo-200 transition-colors")
                             | 📜 Historia
 
                         div(class="grid grid-cols-3 gap-2")
                           a(href=`/internacion/${idInternacion}/transferir` class="text-center py-2 px-2 rounded-xl bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold hover:bg-amber-200 transition-colors")
                             | 🔄 Traslado
-
                           a(href=`/internacion/${idInternacion}/alta` class="text-center py-2 px-2 rounded-xl bg-red-100 text-red-800 border border-red-200 text-xs font-bold hover:bg-red-200 transition-colors")
                             | ✅ Alta
-
                           form(action=`/internacion/${idInternacion}/cancelar` method="POST" onsubmit="return confirm('¿Está seguro de cancelar esta internación?');" class="flex-1")
                             button(type="submit" class="w-full text-center py-2 px-2 rounded-xl bg-slate-200 text-slate-700 border border-slate-300 dark:bg-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-300 transition-colors")
                               | ❌ Cancelar
@@ -132,13 +131,14 @@ block content
                     else
                       div(class="flex justify-between items-end mt-2")
                         span(class="text-sm font-bold dark:text-green-200") Lista para uso
-                        - const internarUrl = asignandoPaciente ? `/internacion/nuevo?cama_id=${cama.id}&paciente_id=${asignandoPaciente.id}` : `/internacion/nuevo?cama_id=${cama.id}`
-                        a(href=internarUrl class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-green-700") + Internar
-
-    else
-      div(class="text-center py-20")
-        p(class="text-xl text-slate-500 font-bold") No hay alas ni habitaciones configuradas en el sistema.
-
+                        
+                        - const baseUrl = `/internacion/nuevo?cama_id=${cama.id}`
+                        
+                        if asignandoPaciente
+                          - const internarUrl = `${baseUrl}&paciente_id=${asignandoPaciente.id}&admision_id=${admisionId || ''}`
+                          a(href=internarUrl class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-green-700") + Internar
+                        else
+                          a(href=baseUrl class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-green-700") + Internar
   script.
     // Buscador simple
     const searchInput = document.getElementById('searchInput');

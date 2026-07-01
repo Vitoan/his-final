@@ -261,11 +261,23 @@ exports.reactivarPaciente = async (req, res) => {
 };
 
 // ======================================================
-// VER HISTORIA CLÍNICA
+// VER HISTORIA CLÍNICA (con seguridad para pacientes)
 // ======================================================
 exports.verHistoriaClinica = async (req, res) => {
     try {
-        const paciente = await Paciente.findByPk(req.params.id, {
+        const { id } = req.params; // ID del paciente
+
+        // === SEGURIDAD: Solo el paciente puede ver su propia historia ===
+        if (req.session.usuario.rol === 'Paciente') {
+            const idPacienteDelUsuario = req.session.usuario.paciente_id;
+
+            if (!idPacienteDelUsuario || parseInt(id) !== idPacienteDelUsuario) {
+                return res.status(403).send("No tienes permiso para ver esta historia clínica.");
+            }
+        }
+
+        // === Cargar datos normalmente ===
+        const paciente = await Paciente.findByPk(id, {
             include: [
                 { model: ObraSocial, as: 'ObraSocial' },
                 {
@@ -286,6 +298,7 @@ exports.verHistoriaClinica = async (req, res) => {
             title: `Historia Clínica - ${paciente.nombre} ${paciente.apellido}`,
             paciente
         });
+
     } catch (error) {
         console.error("Error al cargar historia clínica:", error);
         res.redirect('/admision');
