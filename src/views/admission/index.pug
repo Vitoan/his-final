@@ -6,24 +6,7 @@ block content
       div
         h2(class="text-xs font-bold text-blue-600 uppercase tracking-widest") Admisión
         h1(class="text-4xl font-black") Pacientes
-
       a(href="/admision/nuevo" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700") + Nuevo Paciente
-
-    // === BARRA DE BÚSQUEDA ===
-    div(class="mb-8")
-      form(action="/admision" method="GET" class="flex gap-3 max-w-md")
-        input(type="text" 
-              name="search" 
-              value=search 
-              placeholder="Buscar por DNI, nombre o apellido..." 
-              class="flex-1 border border-slate-300 rounded-xl px-5 py-3 focus:outline-none focus:border-blue-500")
-        button(type="submit" 
-              class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition")
-          | 🔍 Buscar
-        if search
-          a(href="/admision" 
-            class="text-slate-500 hover:text-slate-700 flex items-center px-4 text-sm")
-            | Limpiar
 
     div(class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm")
       table(class="w-full text-left border-collapse")
@@ -40,25 +23,42 @@ block content
           each paciente in pacientes
             tr(class="hover:bg-slate-50 transition-colors")
               
-              td(class="p-5 font-bold") #{paciente.apellido}, #{paciente.nombre}
-              
+              // Nombre + Descripción NN
+              td(class="p-5")
+                div
+                  p(class="font-bold") #{paciente.apellido}, #{paciente.nombre}
+                  
+                  // === DESCRIPCIÓN DE PACIENTE NN ===
+                  if paciente.es_nn && paciente.antecedentes
+                    div(class="mt-1")
+                      span(class="inline-block bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded")
+                        | NN
+                      span(class="ml-2 text-xs text-orange-600 italic") #{paciente.antecedentes}
+
+              // DNI
               td(class="p-5") #{paciente.dni || 'NN'}
-              
+
+              // Obra Social
               td(class="p-5")
                 if paciente.ObraSocial && paciente.ObraSocial.nombre
                   span(class="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full") #{paciente.ObraSocial.nombre}
                 else
                   span(class="text-slate-400") #{paciente.obra_social || 'Particular'}
-              
+
+              // Teléfono
               td(class="p-5 text-slate-600") #{paciente.telefono || '-'}
-              
+
               // Estado
               td(class="p-5 text-center")
-                if paciente.activo
-                  span(class="px-3 py-1 inline-flex text-xs font-bold rounded-full bg-emerald-100 text-emerald-700") Activo
+                if paciente.Internacions && paciente.Internacions.length > 0
+                  span(class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-lg") Internado
+                else if paciente.Visita && paciente.Visita.length > 0
+                  span(class="bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1 rounded-lg") En Espera
+                else if paciente.es_nn
+                  span(class="bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-lg") NN
                 else
-                  span(class="px-3 py-1 inline-flex text-xs font-bold rounded-full bg-red-100 text-red-700") Inactivo
-              
+                  span(class="bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1 rounded-lg") Activo
+
               // Acciones
               td(class="p-5 text-center flex justify-center gap-3")
                 a(href=`/admision/editar/${paciente.id}` class="text-blue-600 hover:underline") Editar

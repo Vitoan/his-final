@@ -97,7 +97,10 @@ block content
                       div
                         p(class="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold mb-1") Paciente Internado
                         p(class="nombre-paciente font-bold text-slate-900 dark:text-white text-lg leading-tight mb-3") #{nombrePaciente}
-
+                        if cama.Internacions && cama.Internacions.length > 0 && cama.Internacions[0].Paciente
+                          - const pac = cama.Internacions[0].Paciente
+                          if pac.es_nn && pac.antecedentes
+                            p(class="text-xs text-orange-600 italic mt-1 leading-tight") #{pac.antecedentes}
                         // === BOTONES MEJORADOS ===
                         div(class="grid grid-cols-3 gap-2 mb-2")
                           a(href=`/enfermeria/evaluar/${idInternacion}` class="text-center py-2 px-2 rounded-xl bg-teal-100 text-teal-800 border border-teal-200 dark:bg-teal-900/60 dark:text-teal-200 text-xs font-bold hover:bg-teal-200 transition-colors")

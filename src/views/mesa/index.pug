@@ -2,62 +2,102 @@ extends ../layouts/main
 
 block content
   div(class="max-w-7xl mx-auto mt-6 mb-10")
-    div(class="mb-8")
-      h2(class="text-xs font-bold text-blue-500 uppercase tracking-widest mb-1") Recepción y Triage
-      h1(class="text-4xl font-black text-slate-900") Mesa de Entrada
+    
+    // Header
+    div(class="flex justify-between items-center mb-8")
+      div
+        h1(class="text-4xl font-black text-slate-900") Mesa de Entrada
+        p(class="text-slate-500 mt-1") Recepción y gestión de pacientes sin turno
 
-    //- BOTONES DE ACCIÓN RÁPIDA
-    div(class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12")
-      //- Botón 1: Ingreso Normal
-      a(href="/mesa-entrada/nuevo" class="bg-white border-2 border-blue-100 p-6 rounded-[2rem] shadow-sm hover:shadow-md hover:border-blue-300 transition-all flex flex-col items-center text-center group")
-        div(class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform") 📝
-        h3(class="font-bold text-slate-800 text-lg") Registrar Visita / Turno
-        p(class="text-sm text-slate-500 mt-2") Buscar paciente e ingresarlo a la sala de espera.
+      // Botón principal: Ingreso Rápido NN
+      form(action="/mesa-entrada/ingreso-nn" method="POST" 
+           onsubmit="return confirm('¿Realizar ingreso rápido de paciente NN?');")
+        button(type="submit" 
+               class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-2xl flex items-center gap-2 shadow-md transition-all active:scale-95")
+          span(class="text-xl") 🚨
+          | Ingreso Rápido NN
 
-      //- Botón 2: Padrón
-      a(href="/admision" class="bg-white border-2 border-indigo-100 p-6 rounded-[2rem] shadow-sm hover:shadow-md hover:border-indigo-300 transition-all flex flex-col items-center text-center group")
-        div(class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform") 🗂️
-        h3(class="font-bold text-slate-800 text-lg") Padrón de Pacientes
-        p(class="text-sm text-slate-500 mt-2") Ver, editar o actualizar historias clínicas.
+    // Buscador rápido
+    div(class="bg-white border border-slate-200 rounded-3xl p-6 mb-8 shadow-sm")
+      form(action="/mesa-entrada/nuevo" method="GET" class="flex gap-4 items-end")
+        div(class="flex-1")
+          label(class="block text-sm font-bold text-slate-600 mb-2") Buscar paciente por DNI
+          input(type="text" name="dni" placeholder="Ingrese DNI..." 
+                class="w-full px-4 py-3 border border-slate-300 rounded-2xl text-lg focus:ring-2 focus:ring-blue-500 outline-none")
+        button(type="submit" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-2xl font-bold h-[52px]")
+          | Buscar y Registrar Visita
 
-      //- Botón 3: INGRESO NN (Formulario directo)
-      form(action="/mesa-entrada/ingreso-nn" method="POST" onsubmit="return confirm('¿Registrar ingreso de emergencia NN en Shockroom/Individual?');" class="h-full")
-        button(type="submit" class="w-full h-full bg-gradient-to-br from-red-500 to-red-700 p-6 rounded-[2rem] shadow-md hover:shadow-lg transition-all flex flex-col items-center text-center group")
-          div(class="w-16 h-16 bg-white/20 text-white rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform") 🚨
-          h3(class="font-bold text-white text-lg") INGRESO RÁPIDO NN
-          p(class="text-sm text-red-100 mt-2") Asigna cama y paciente aleatorio al instante.
+    // Mensaje de orientación
+    div(class="mb-6 flex items-center gap-3 text-sm text-slate-500")
+      span(class="text-xl") ℹ️
+      p 
+        | ¿Necesita registrar un paciente con todos sus datos? 
+        a(href="/admision/nuevo" class="text-blue-600 hover:underline font-bold") Ir a Admisión
 
-    //- SALA DE ESPERA
-    h3(class="text-xl font-black text-slate-800 mb-6 flex items-center gap-2") 
-      span ⏳ 
-      | Pacientes en Sala de Espera
+    // Sala de Espera
+    div(class="mb-4 flex items-center justify-between")
+      h2(class="text-2xl font-bold text-slate-800") Pacientes en Sala de Espera
+      if espera && espera.length > 0
+        span(class="px-4 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-bold")
+          | #{espera.length} en espera
 
     if espera && espera.length > 0
       div(class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm")
         table(class="w-full text-left border-collapse")
           thead(class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider")
             tr
-              th(class="p-4 font-bold") Hora
+              th(class="p-4 font-bold") Llegada
               th(class="p-4 font-bold") Paciente
               th(class="p-4 font-bold") Motivo
+              th(class="p-4 font-bold text-center") Prioridad
+              th(class="p-4 font-bold text-center") Estado
               th(class="p-4 font-bold text-center") Acciones
+
           tbody(class="divide-y divide-slate-100")
             each visita in espera
               tr(class="hover:bg-slate-50 transition-colors")
-                td(class="p-4 text-sm font-bold text-slate-700") #{new Date(visita.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                
+                td(class="p-4")
+                  div(class="font-bold text-slate-800") 
+                    | #{new Date(visita.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  div(class="text-xs text-slate-400") 
+                    | #{new Date(visita.createdAt).toLocaleDateString()}
+
                 td(class="p-4")
                   p(class="font-bold text-slate-900") #{visita.Paciente.apellido}, #{visita.Paciente.nombre}
                   if visita.Paciente.es_nn
-                    span(class="inline-block mt-1 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase") Sin Identificar
-                td(class="p-4")
-                  if paciente.ObraSocial
-                     span(class="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full") #{paciente.ObraSocial.nombre}
-                  else
-                span(class="text-slate-400") #{paciente.obra_social || 'Particular'}
+                    span(class="inline-block mt-1 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-md") SIN IDENTIFICAR
+
                 td(class="p-4 text-sm text-slate-600") #{visita.motivo}
+
+                td(class="p-4 text-center")
+                  if visita.prioridad === 'Alta/Emergencia'
+                    span(class="bg-red-100 text-red-700 px-3 py-1 rounded-lg text-xs font-bold") 🔴 Alta
+                  else if visita.prioridad === 'Media'
+                    span(class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-lg text-xs font-bold") 🟡 Media
+                  else
+                    span(class="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-xs font-bold") 🟢 Baja
+
+                td(class="p-4 text-center")
+                  if visita.estado === 'En Atención'
+                    span(class="bg-orange-100 text-orange-700 px-3 py-1 rounded-lg text-xs font-bold") En Atención
+                  else
+                    span(class="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold") Esperando
+
                 td(class="p-4 flex justify-center gap-2")
-                  a(href=`/mesa-entrada/internar/${visita.id}` class="bg-violet-100 text-violet-700 hover:bg-violet-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors") Internar
-                  a(href=`/mesa-entrada/finalizar/${visita.id}` class="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors") Alta
+                  a(href=`/mesa-entrada/atender/${visita.id}` 
+                    class="bg-slate-800 hover:bg-black text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors") Llamar
+                  
+                  a(href=`/mesa-entrada/internar/${visita.id}` 
+                    class="bg-violet-100 text-violet-700 hover:bg-violet-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors") Internar
+                  
+                  a(href=`/mesa-entrada/finalizar/${visita.id}` 
+                    class="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors") Alta
     else
-      div(class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-10 text-center")
-        p(class="text-slate-500 font-bold") No hay pacientes esperando en este momento.
+      // Estado vacío
+      div(class="bg-white border border-slate-200 rounded-3xl p-16 text-center")
+        div(class="text-6xl mb-6 opacity-30") 🛎️
+        h3(class="text-2xl font-bold text-slate-700 mb-2") No hay pacientes esperando
+        p(class="text-slate-500 max-w-md mx-auto") 
+          | Los pacientes que lleguen por guardia o sin turno aparecerán en esta lista.

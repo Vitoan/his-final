@@ -56,16 +56,19 @@ exports.crearAdmision = async (req, res) => {
 
         // === CREAR PACIENTE NN ===
         if (es_nn === 'true' || es_nn === true) {
-            const nuevoPacienteNN = await Paciente.create({
-                nombre: nombre || 'NN',
-                apellido: apellido || 'NN',
-                sexo: sexo || 'X',
-                es_nn: true,
-                dni: null,
-                fecha_nacimiento: null,
-                direccion: 'No especificada',
-                telefono: 'No especificado'
-            });
+    const descripcionNN = req.body.descripcion_nn || 'Sin descripción';
+
+    const nuevoPacienteNN = await Paciente.create({
+        nombre: nombre || 'NN',
+        apellido: apellido || 'NN',
+        sexo: sexo || 'X',
+        es_nn: true,
+        dni: null,
+        fecha_nacimiento: null,
+        direccion: 'No especificada',
+        telefono: 'No especificado',
+        antecedentes: descripcionNN     // ← Guardamos la descripción aquí
+    });
 
             pacienteId = nuevoPacienteNN.id;
 

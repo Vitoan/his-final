@@ -1,10 +1,21 @@
-const { Paciente, Visita, Internacion, Cama, Habitacion, Usuario, ObraSocial, sequelize } = require('../models');
+const { 
+    Paciente, 
+    Visita, 
+    Internacion, 
+    Cama, 
+    Habitacion, 
+    Usuario, 
+    ObraSocial, 
+    Admision,           
+    sequelize 
+} = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
 // ======================================================
 // 1. DASHBOARD MESA DE ENTRADA
 // ======================================================
+// 1. Dashboard de Mesa de Entrada (Sala de Espera)
 exports.dashboard = async (req, res) => {
     try {
         const espera = await Visita.findAll({
@@ -12,12 +23,23 @@ exports.dashboard = async (req, res) => {
                 estado: { [Op.or]: ['Esperando', 'En Atención'] }, 
                 createdAt: { [Op.gte]: new Date(new Date().setHours(0, 0, 0, 0)) }
             },
-            include: [Paciente],
+            include: [
+                { 
+                    model: Paciente,
+                    include: [
+                        { model: ObraSocial, as: 'ObraSocial' }
+                    ]
+                }
+            ],
             order: [['estado', 'ASC'], ['prioridad', 'DESC'], ['createdAt', 'ASC']]
         });
-        res.render('mesa/index', { title: 'Mesa de Entrada', espera });
+
+        res.render('mesa/index', { 
+            title: 'Mesa de Entrada', 
+            espera 
+        });
     } catch (error) {
-        console.error(error);
+        console.error("Error en Mesa de Entrada:", error);
         res.redirect('/');
     }
 };
@@ -184,43 +206,70 @@ exports.internar = async (req, res) => {
     }
 };
 
-// ======================================================
-// 8. INGRESO RÁPIDO NN (Emergencia)
-// ======================================================
+// Ingreso rápido de Emergencia NN (MEJORADO)
 exports.ingresoRapidoNN = async (req, res) => {
     try {
+        // Buscar cama disponible (prioridad Shockroom → Individual)
         const camaLibre = await Cama.findOne({
             where: { estado: 'Disponible' },
             include: [{
                 model: Habitacion,
-                where: { tipo: ['Individual', 'Shockroom'] }
-            }]
+                where: { tipo: { [Op.in]: ['Shockroom', 'Individual'] } }
+            }],
+            order: [
+                [Habitacion, 'tipo', 'DESC'],
+                ['id', 'ASC']
+            ]
         });
 
         if (!camaLibre) {
-            return res.redirect('/mesa-entrada?error=' + encodeURIComponent('No hay camas disponibles para ingreso NN.'));
+            return res.redirect('/mesa-entrada?error=' + 
+                encodeURIComponent('No hay camas disponibles en Shockroom ni Individual.'));
         }
 
+        // Crear paciente NN
         const pacienteNN = await Paciente.create({
-            es_nn: true,
-            nombre: 'Emergencia',
-            apellido: `NN-${Math.floor(Math.random() * 10000)}`,
-            sexo: 'X',
-            dni: null
+    es_nn: true,
+    nombre: 'Emergencia',
+    apellido: `NN-${Math.floor(Math.random() * 10000)}`,
+    sexo: 'X',
+    dni: null,
+    direccion: 'No especificada',
+    telefono: 'No especificado',
+    antecedentes: 'Ingreso rápido de emergencia - Sin documentación'   // ← Descripción por defecto
+});
+
+        // Crear Admisión
+        await Admision.create({
+            paciente_id: pacienteNN.id,
+            tipo: 'Emergencia',
+            motivo: 'Ingreso rápido de emergencia (NN)',
+            estado: 'Activa',
+            usuario_id: req.session.usuario.id
         });
 
+        // Crear Internación
         await Internacion.create({
             cama_id: camaLibre.id,
             paciente_id: pacienteNN.id,
             origen: 'Guardia',
-            motivo: 'Ingreso rápido de paciente no identificado (Emergencia)',
+            motivo: 'Ingreso rápido de emergencia (NN)',
             prioridad_triage: 'Rojo',
             estado: 'Activa'
         });
 
+        // Auditoría
+        await registrarAuditoria(
+            'Ingreso Rápido NN',
+            `Paciente NN creado e internado en Cama ${camaLibre.numero_cama}`,
+            req.session.usuario.id,
+            req.ip
+        );
+
         res.redirect('/habitaciones');
+
     } catch (error) {
-        console.error("Error en Ingreso NN:", error);
-        res.redirect('/mesa-entrada?error=Error_Critico');
+        console.error("Error en Ingreso Rápido NN:", error);
+        res.redirect('/mesa-entrada?error=' + encodeURIComponent('Error al realizar el ingreso rápido.'));
     }
 };

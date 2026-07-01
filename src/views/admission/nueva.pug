@@ -77,6 +77,16 @@ block content
                   option(value="F") Femenino
                   option(value="X" selected) No especificado
 
+              // === NUEVO CAMPO: DESCRIPCIÓN NN ===
+              div
+                label(class="block text-xs font-bold text-red-700 mb-1") Descripción breve (opcional)
+                textarea(
+                  name="descripcion_nn" 
+                  rows="3" 
+                  placeholder="Ej: Varón aprox 40 años, sin documentación, traído por ambulancia..."
+                  class="w-full border border-red-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-red-500 outline-none text-sm"
+                )
+
               div
                 label(class="block text-xs font-bold text-red-700 mb-1") Tipo de Admisión
                 select(name="tipo" class="w-full border border-red-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-red-500 outline-none" required)
@@ -91,18 +101,3 @@ block content
 
             button(type="submit" class="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-2xl transition")
               | Registrar Paciente NN + Admisión
-
-    script.
-        // Mostrar u ocultar campos de paciente NN según la selección
-        const esNNRadios = document.querySelectorAll('input[name="es_nn"]');
-        const nnFields = document.getElementById('nn-fields');
-    
-        esNNRadios.forEach(radio => {
-            radio.addEventListener('change', () => {
-            if (radio.value === 'true' && radio.checked) {
-                nnFields.classList.remove('hidden');
-            } else {
-                nnFields.classList.add('hidden');
-            }
-            });
-        });
