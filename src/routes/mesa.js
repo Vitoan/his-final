@@ -15,12 +15,10 @@ router.post('/guardar', mesaController.registrarVisita);
 router.post('/guardar-completo', mesaController.registrarCompleto);
 
 // 5. Acciones de Botones
-router.get('/atender/:id', mesaController.atender);     // Botón Negro "Llamar"
-router.get('/finalizar/:id', mesaController.finalizar); // Botón Verde "Alta"
+router.post('/atender/:id', mesaController.atender);
+router.post('/finalizar/:id', mesaController.finalizar);
+router.post('/internar/:id', mesaController.internar);
 
-// --- ESTA ES LA LÍNEA QUE TE FALTA ---
-router.get('/internar/:id', mesaController.internar);   // Botón Violeta "Internar"
-// Ingreso rápido de Emergencia NN
 router.post('/ingreso-nn', mesaController.ingresoRapidoNN);
 
 

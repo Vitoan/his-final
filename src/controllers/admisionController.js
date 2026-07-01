@@ -1,4 +1,4 @@
-const { Admision, Paciente, Usuario, ObraSocial } = require("../models");
+const { Admision, Paciente, Usuario, ObraSocial, Internacion, Cama, Habitacion, Visita } = require("../models");
 const { Op } = require("sequelize");
 const { registrarAuditoria } = require("../helpers/auditoria");
 

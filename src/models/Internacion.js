@@ -32,9 +32,7 @@ const Internacion = sequelize.define('Internacion', {
 }, { 
     tableName: 'internaciones',
     timestamps: true,
-    // --- MAGIA AUTOMÁTICA (HOOKS) ---
     hooks: {
-        // Se ejecuta DESPUÉS de guardar una nueva internación
         afterCreate: async (internacion, options) => {
             if (internacion.cama_id) {
                 // Si le asignaron una cama, la marcamos como Ocupada
@@ -44,7 +42,6 @@ const Internacion = sequelize.define('Internacion', {
                 );
             }
         },
-        // Se ejecuta DESPUÉS de actualizar una internación (ej. darle el alta)
         afterUpdate: async (internacion, options) => {
             const estadosAlta = ['Alta_Medica', 'Traslado', 'Defuncion'];
             

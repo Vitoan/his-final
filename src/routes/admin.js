@@ -19,10 +19,4 @@ router.post('/usuarios/reactivar/:id', adminController.reactivarUsuario);
 // Auditoría
 router.get('/auditoria', adminController.verAuditoria);
 
-// Obras Sociales (usamos el controlador de obras sociales)
-router.use('/obras-sociales', require('./obrasSociales'));
-
-// Reportes
-router.get('/reportes', adminController.reportes);
-
 module.exports = router;

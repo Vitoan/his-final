@@ -1,4 +1,3 @@
-// Importamos el Modelo Usuario (Sequelize) en lugar de la conexión db raw
 const { Usuario } = require('../models'); 
 const bcrypt = require('bcryptjs');
 
@@ -10,13 +9,15 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // --- CAMBIO CLAVE AQUÍ: Usamos Sequelize (findOne) ---
         const usuario = await Usuario.findOne({ where: { email } });
         
         if (!usuario) {
             return res.render('auth/login', { error: 'Usuario no encontrado' });
         }
-        // ----------------------------------------------------
+
+        if (!usuario.activo) {
+            return res.render('auth/login', { error: 'Usuario desactivado. Consulte con administración.' });
+        }
 
         const validPassword = await bcrypt.compare(password, usuario.password);
 
@@ -24,10 +25,8 @@ exports.login = async (req, res) => {
             return res.render('auth/login', { error: 'Contraseña incorrecta' });
         }
 
-        // Guardamos sesión (Sequelize devuelve un objeto, usamos .dataValues o directo)
-        req.session.usuario = usuario; 
+        req.session.usuario = usuario.get({ plain: true }); 
         
-        // Redirección basada en Rol (Requisito del PDF)
         if (usuario.rol === 'Medico' || usuario.rol === 'Enfermeria') {
             res.redirect('/clinica/dashboard');
         } else if (usuario.rol === 'Paciente') {

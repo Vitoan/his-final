@@ -348,7 +348,6 @@ exports.renderDashboard = async (req, res) => {
                 order: [['createdAt', 'DESC']]
             });
 
-            // === NUEVO: Indicaciones / Medicamentos Activos ===
             indicacionesActivas = await Indicacion.findAll({
                 where: { 
                     internacion_id: activeInternacion.id,

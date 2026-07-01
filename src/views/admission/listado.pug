@@ -72,7 +72,6 @@ block content
                         a(href=`/habitaciones?paciente_id=${adm.Paciente.id}&admision_id=${adm.id}` class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1")
                           | 🛏️ Asignar Cama
 
-                    // Historia Clínica (NUEVO)
                     if adm.Paciente
                       a(href=`/clinica/historial/${adm.Paciente.id}` 
                         class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1")

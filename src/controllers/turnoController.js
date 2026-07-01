@@ -25,8 +25,6 @@ exports.renderCrearTurno = async (req, res) => {
         // Buscamos todos los pacientes para el desplegable
         const pacientes = await Paciente.findAll({ order: [['apellido', 'ASC']] });
         
-        // Buscamos a los usuarios que sean Médicos (asumiendo que tienes un campo 'rol')
-        // Si tu campo de rol se llama distinto, avísame.
         const medicos = await Usuario.findAll({ 
             where: { rol: 'Medico' },
             order: [['nombre', 'ASC']] 

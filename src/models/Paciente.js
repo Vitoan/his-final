@@ -38,7 +38,6 @@ const Paciente = sequelize.define('Paciente', {
     contacto_emergencia_nombre: { type: DataTypes.STRING, allowNull: true },
     contacto_emergencia_telefono: { type: DataTypes.STRING, allowNull: true },
     
-    // === NUEVO CAMPO ===
     obra_social_id: { 
         type: DataTypes.INTEGER,
         allowNull: true 

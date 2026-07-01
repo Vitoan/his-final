@@ -27,7 +27,6 @@ const Admision = sequelize.define('Admision', {
         type: DataTypes.DATE,
         allowNull: true
     },
-    // === NUEVOS CAMPOS ===
     paciente_id: {
         type: DataTypes.INTEGER,
         allowNull: false

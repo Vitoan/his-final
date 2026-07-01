@@ -4,7 +4,10 @@ const sequelize = require('../config/database');
 const Cama = sequelize.define('Cama', {
     numero_cama: { type: DataTypes.INTEGER },
     estado: { type: DataTypes.ENUM('Disponible', 'Ocupada', 'Mantenimiento', 'Limpieza'), defaultValue: 'Disponible' }
-}, { timestamps: false });
+}, {
+    tableName: 'camas',
+    timestamps: false
+});
 
 
 

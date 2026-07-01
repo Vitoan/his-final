@@ -220,10 +220,10 @@ INSERT INTO `estudios` (`id`, `fecha_solicitud`, `tipo_estudio`, `descripcion`, 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `evolucions`
+-- Estructura de tabla para la tabla `evoluciones`
 --
 
-CREATE TABLE `evolucions` (
+CREATE TABLE `evoluciones` (
   `id` int(11) NOT NULL,
   `tipo` enum('Medico','Enfermeria') NOT NULL,
   `nota` text NOT NULL,
@@ -236,10 +236,10 @@ CREATE TABLE `evolucions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `evolucions`
+-- Volcado de datos para la tabla `evoluciones`
 --
 
-INSERT INTO `evolucions` (`id`, `tipo`, `nota`, `signos_vitales`, `fecha`, `createdAt`, `updatedAt`, `internacion_id`, `autor_id`) VALUES
+INSERT INTO `evoluciones` (`id`, `tipo`, `nota`, `signos_vitales`, `fecha`, `createdAt`, `updatedAt`, `internacion_id`, `autor_id`) VALUES
 (1, 'Medico', 'Paciente ingresa por dolor de pecho típico. ECG inicial con cambios inespecíficos. Troponina basal pedida. Se inicia protocolo de dolor de pecho.', NULL, '2026-05-29 21:22:37', '2026-05-27 21:22:37', '2026-05-29 21:22:37', 1, 2),
 (2, 'Medico', 'Paciente evoluciona favorablemente. Sin reaparición del dolor. Segundo set de enzimas cardíacas negativo. ECG sin cambios dinámicos.', NULL, '2026-05-29 21:22:37', '2026-05-28 21:22:37', '2026-05-29 21:22:37', 1, 2),
 (3, 'Enfermeria', 'Control de guardia mañana. Paciente refiere sentirse óptimo y sin dolor precordial. Tolera dieta general. Signos vitales estables.', NULL, '2026-05-29 21:22:37', '2026-05-29 21:22:37', '2026-05-29 21:22:37', 1, 4),
@@ -256,10 +256,10 @@ INSERT INTO `evolucions` (`id`, `tipo`, `nota`, `signos_vitales`, `fecha`, `crea
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `habitacions`
+-- Estructura de tabla para la tabla `habitaciones`
 --
 
-CREATE TABLE `habitacions` (
+CREATE TABLE `habitaciones` (
   `id` int(11) NOT NULL,
   `numero` varchar(255) NOT NULL,
   `tipo` enum('Individual','Compartida','Shockroom') DEFAULT 'Individual',
@@ -267,10 +267,10 @@ CREATE TABLE `habitacions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `habitacions`
+-- Volcado de datos para la tabla `habitaciones`
 --
 
-INSERT INTO `habitacions` (`id`, `numero`, `tipo`, `ala_id`) VALUES
+INSERT INTO `habitaciones` (`id`, `numero`, `tipo`, `ala_id`) VALUES
 (1, 'SHOCK-1', 'Shockroom', 1),
 (2, 'UTI-101', 'Individual', 2),
 (3, 'UTI-102', 'Individual', 2),
@@ -506,6 +506,7 @@ INSERT INTO `turnos` (`id`, `fecha`, `hora`, `especialidad`, `motivo`, `estado`,
 CREATE TABLE `usuarios` (
   `id` int(11) NOT NULL,
   `nombre` varchar(255) NOT NULL,
+  `apellido` varchar(255) DEFAULT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `rol` enum('Admin','Medico','Enfermeria','Admision','Paciente') NOT NULL DEFAULT 'Admision',
@@ -519,23 +520,23 @@ CREATE TABLE `usuarios` (
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `rol`, `activo`, `createdAt`, `updatedAt`, `paciente_id`) VALUES
-(1, 'Administrador General', 'admin@his.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Admin', 1, '2026-05-29 21:22:37', '2026-06-29 17:30:44', NULL),
-(2, 'Gregory House', 'medico@his.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Medico', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', NULL),
-(3, 'Lisa Cuddy', 'cuddy@his.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Medico', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', NULL),
-(4, 'Joy Nurse', 'enfermera@his.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Enfermeria', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', NULL),
-(5, 'Recepción Mesa', 'admision@his.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Admision', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', NULL),
-(6, 'Juan Carlos Pérez', 'juan.perez@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 1),
-(7, 'Roberto Benítez', 'roberto.benitez@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 2),
-(8, 'Ana María Gómez', 'ana.gomez@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 3),
-(9, 'Clara Luz Rodríguez', 'clara.rodriguez@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 4),
-(10, 'Carlos D\'Alessandro', 'carlos.dalessandro@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 6),
-(11, 'Valentina Herrera', 'valentina.herrera@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 7),
-(13, 'Mariano López', 'mariano.lopez@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 9),
-(14, 'Elena Peralta', 'elena.peralta@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 10),
-(15, 'Mario Domínguez', 'mario.dominguez@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 11),
-(16, 'Sandro', 'sandro@yopmail.com', '$2b$10$TaM7.QnbGjFrPklYdcPGturbW9MFYhGJYQvNYZhYXD20WT2DWxVC2', 'Paciente', 1, '2026-06-23 17:20:36', '2026-06-29 17:43:46', 12),
-(17, 'Victor ', 'vic@yopmail.com', '$2b$10$Jo1W1/.zJhW0cBajOQj6ge.KOOU2kbyMBK9jsGJtOcbrQ3ygJyjx2', 'Paciente', 1, '2026-06-29 11:27:08', '2026-06-30 10:24:25', 13);
+INSERT INTO `usuarios` (`id`, `nombre`, `apellido`, `email`, `password`, `rol`, `activo`, `createdAt`, `updatedAt`, `paciente_id`) VALUES
+(1, 'Administrador General', NULL, 'admin@his.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Admin', 1, '2026-05-29 21:22:37', '2026-06-29 17:30:44', NULL),
+(2, 'Gregory House', NULL, 'medico@his.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Medico', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', NULL),
+(3, 'Lisa Cuddy', NULL, 'cuddy@his.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Medico', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', NULL),
+(4, 'Joy Nurse', NULL, 'enfermera@his.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Enfermeria', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', NULL),
+(5, 'Recepción Mesa', NULL, 'admision@his.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Admision', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', NULL),
+(6, 'Juan Carlos Pérez', NULL, 'juan.perez@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 1),
+(7, 'Roberto Benítez', NULL, 'roberto.benitez@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 2),
+(8, 'Ana María Gómez', NULL, 'ana.gomez@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 3),
+(9, 'Clara Luz Rodríguez', NULL, 'clara.rodriguez@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 4),
+(10, 'Carlos D\'Alessandro', NULL, 'carlos.dalessandro@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 6),
+(11, 'Valentina Herrera', NULL, 'valentina.herrera@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 7),
+(13, 'Mariano López', NULL, 'mariano.lopez@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 9),
+(14, 'Elena Peralta', NULL, 'elena.peralta@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 10),
+(15, 'Mario Domínguez', NULL, 'mario.dominguez@email.com', '$2b$10$5qNzsld3tbID66r8sYinBe4YvDXZ.QzsTJ/RrgSez0SG53.aaiPb2', 'Paciente', 1, '2026-05-29 21:22:37', '2026-05-29 21:22:37', 11),
+(16, 'Sandro', NULL, 'sandro@yopmail.com', '$2b$10$TaM7.QnbGjFrPklYdcPGturbW9MFYhGJYQvNYZhYXD20WT2DWxVC2', 'Paciente', 1, '2026-06-23 17:20:36', '2026-06-29 17:43:46', 12),
+(17, 'Victor ', NULL, 'vic@yopmail.com', '$2b$10$Jo1W1/.zJhW0cBajOQj6ge.KOOU2kbyMBK9jsGJtOcbrQ3ygJyjx2', 'Paciente', 1, '2026-06-29 11:27:08', '2026-06-30 10:24:25', 13);
 
 -- --------------------------------------------------------
 
@@ -673,17 +674,17 @@ ALTER TABLE `estudios`
   ADD KEY `internacion_id` (`internacion_id`);
 
 --
--- Indices de la tabla `evolucions`
+-- Indices de la tabla `evoluciones`
 --
-ALTER TABLE `evolucions`
+ALTER TABLE `evoluciones`
   ADD PRIMARY KEY (`id`),
   ADD KEY `internacion_id` (`internacion_id`),
   ADD KEY `autor_id` (`autor_id`);
 
 --
--- Indices de la tabla `habitacions`
+-- Indices de la tabla `habitaciones`
 --
-ALTER TABLE `habitacions`
+ALTER TABLE `habitaciones`
   ADD PRIMARY KEY (`id`),
   ADD KEY `ala_id` (`ala_id`);
 
@@ -970,15 +971,15 @@ ALTER TABLE `estudios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT de la tabla `evolucions`
+-- AUTO_INCREMENT de la tabla `evoluciones`
 --
-ALTER TABLE `evolucions`
+ALTER TABLE `evoluciones`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
--- AUTO_INCREMENT de la tabla `habitacions`
+-- AUTO_INCREMENT de la tabla `habitaciones`
 --
-ALTER TABLE `habitacions`
+ALTER TABLE `habitaciones`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
@@ -1163,65 +1164,65 @@ ALTER TABLE `auditoria`
 -- Filtros para la tabla `camas`
 --
 ALTER TABLE `camas`
-  ADD CONSTRAINT `camas_ibfk_1` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_10` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_11` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_12` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_13` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_14` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_15` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_16` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_17` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_18` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_19` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_2` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_20` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_21` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_22` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_23` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_24` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_25` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_26` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_27` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_28` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_29` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_3` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_30` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_31` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_32` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_33` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_34` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_35` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_36` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_37` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_38` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_39` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_4` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_40` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_41` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_42` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_43` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_44` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_45` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_46` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_47` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_48` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_49` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_5` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_50` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_51` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_52` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_53` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_54` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_55` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_56` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_57` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_58` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_59` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_6` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_7` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_8` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `camas_ibfk_9` FOREIGN KEY (`habitacion_id`) REFERENCES `habitacions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `camas_ibfk_1` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_10` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_11` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_12` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_13` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_14` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_15` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_16` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_17` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_18` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_19` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_2` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_20` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_21` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_22` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_23` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_24` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_25` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_26` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_27` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_28` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_29` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_3` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_30` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_31` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_32` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_33` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_34` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_35` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_36` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_37` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_38` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_39` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_4` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_40` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_41` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_42` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_43` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_44` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_45` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_46` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_47` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_48` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_49` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_5` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_50` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_51` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_52` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_53` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_54` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_55` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_56` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_57` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_58` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_59` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_6` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_7` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_8` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `camas_ibfk_9` FOREIGN KEY (`habitacion_id`) REFERENCES `habitaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `estudios`
@@ -1290,75 +1291,75 @@ ALTER TABLE `estudios`
   ADD CONSTRAINT `estudios_ibfk_98` FOREIGN KEY (`medico_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Filtros para la tabla `evolucions`
+-- Filtros para la tabla `evoluciones`
 --
-ALTER TABLE `evolucions`
-  ADD CONSTRAINT `evolucions_ibfk_10` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_100` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_102` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_104` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_106` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_108` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_110` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_112` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_114` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_116` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_117` FOREIGN KEY (`internacion_id`) REFERENCES `internaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_118` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_12` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_14` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_16` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_18` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_2` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_20` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_22` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_24` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_26` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_28` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_30` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_32` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_34` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_36` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_38` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_4` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_40` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_42` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_44` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_46` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_48` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_50` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_52` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_54` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_56` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_58` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_6` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_60` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_62` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_64` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_66` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_68` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_70` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_72` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_74` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_76` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_78` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_8` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_80` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_82` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_84` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_86` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_88` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_90` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_92` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_94` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_96` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `evolucions_ibfk_98` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `evoluciones`
+  ADD CONSTRAINT `evoluciones_ibfk_10` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_100` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_102` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_104` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_106` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_108` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_110` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_112` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_114` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_116` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_117` FOREIGN KEY (`internacion_id`) REFERENCES `internaciones` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_118` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_12` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_14` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_16` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_18` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_2` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_20` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_22` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_24` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_26` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_28` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_30` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_32` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_34` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_36` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_38` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_4` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_40` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_42` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_44` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_46` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_48` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_50` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_52` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_54` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_56` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_58` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_6` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_60` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_62` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_64` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_66` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_68` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_70` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_72` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_74` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_76` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_78` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_8` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_80` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_82` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_84` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_86` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_88` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_90` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_92` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_94` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_96` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `evoluciones_ibfk_98` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Filtros para la tabla `habitacions`
+-- Filtros para la tabla `habitaciones`
 --
-ALTER TABLE `habitacions`
-  ADD CONSTRAINT `habitacions_ibfk_1` FOREIGN KEY (`ala_id`) REFERENCES `alas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `habitaciones`
+  ADD CONSTRAINT `habitaciones_ibfk_1` FOREIGN KEY (`ala_id`) REFERENCES `alas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `indicaciones`

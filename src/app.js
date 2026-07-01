@@ -33,10 +33,14 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // --- 5. CONFIGURACIÓN DE SESIÓN ---
 app.use(session({
-    secret: 'secreto_super_seguro_his_2025',
+    secret: process.env.SESSION_SECRET || 'his_defensa_local_2026',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }
+    cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+    }
 }));
 
 // --- 6. MIDDLEWARE DE USUARIO GLOBAL ---
@@ -60,10 +64,12 @@ app.use('/clinica', authMiddleware, checkRole(['Admin', 'Medico', 'Enfermeria', 
 app.use('/mesa-entrada', authMiddleware, checkRole(['Admin', 'Admision', 'Enfermeria']), require('./routes/mesa'));
 app.use('/turnos', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), require('./routes/turnos'));
 app.use('/estudios', authMiddleware, checkRole(['Admin', 'Medico']), require('./routes/estudios'));
-app.use('/portal', authMiddleware, checkRole(['Paciente']), require('./routes/portal'));app.use('/api', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), require('./routes/api'));
+app.use('/portal', authMiddleware, checkRole(['Paciente']), require('./routes/portal'));
+app.use('/api', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), require('./routes/api'));
 // === RUTAS ADMIN (Importante: rutas específicas primero) ===
 app.use('/admin/obras-sociales', authMiddleware, checkRole(['Admin']), require('./routes/obrasSociales'));
-app.use('/admin/alas', authMiddleware, checkRole(['Admin']), require('./routes/alas'));app.use('/admin/reportes', authMiddleware, checkRole(['Admin']), require('./routes/reportes'));
+app.use('/admin/alas', authMiddleware, checkRole(['Admin']), require('./routes/alas'));
+app.use('/admin/reportes', authMiddleware, checkRole(['Admin']), require('./routes/reportes'));
 app.use('/admin/habitaciones', authMiddleware, checkRole(['Admin']), require('./routes/habitacionesAdmin'));
 app.use('/admin', authMiddleware, checkRole(['Admin']), adminRoutes);
 // =====================================
@@ -78,24 +84,6 @@ app.get('/', (req, res) => {
         }
     } else {
         res.redirect('/auth/login');
-    }
-});
-
-// --- RUTA DE DESARROLLO (Comentar o eliminar en versión final) ---
-app.get('/setup-usuarios', async (req, res) => {
-    try {
-        const { Usuario } = require('./models');
-        const bcrypt = require('bcryptjs');
-        const passwordHash = await bcrypt.hash('123456', 10);
-
-        await Usuario.findOrCreate({
-            where: { email: 'admin@his.com' },
-            defaults: { nombre: 'Admin', apellido: 'Sistema', email: 'admin@his.com', password: passwordHash, rol: 'Admin' }
-        });
-
-        res.send('✅ Usuario Admin creado (admin@his.com / 123456)');
-    } catch (error) {
-        res.send('Error: ' + error.message);
     }
 });
 

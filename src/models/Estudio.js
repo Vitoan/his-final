@@ -8,13 +8,11 @@ const Estudio = sequelize.define('Estudio', {
     },
     tipo_estudio: { 
         type: DataTypes.STRING, 
-        allowNull: false 
-        // Ej: 'Laboratorio', 'Radiografía', 'Ecografía', 'Tomografía'
+        allowNull: false
     },
     descripcion: { 
         type: DataTypes.TEXT, 
-        allowNull: false 
-        // Ej: 'Hemograma completo', 'Placa de tórax frente y perfil'
+        allowNull: false
     },
     estado: { 
         type: DataTypes.ENUM('Pendiente', 'Realizado', 'Cancelado'), 
@@ -28,6 +26,9 @@ const Estudio = sequelize.define('Estudio', {
         type: DataTypes.DATE, 
         allowNull: true 
     }
+}, {
+    tableName: 'estudios',
+    timestamps: true
 });
 
 module.exports = Estudio;

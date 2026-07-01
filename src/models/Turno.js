@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // Importamos tu conexión directa
+const sequelize = require('../config/database');
 
 const Turno = sequelize.define('Turno', {
     fecha: { 
@@ -23,9 +23,9 @@ const Turno = sequelize.define('Turno', {
         type: DataTypes.ENUM('Programado', 'Asistió', 'Cancelado'), 
         defaultValue: 'Programado' 
     }
+}, {
+    tableName: 'turnos',
+    timestamps: true
 });
-
-// Nota: Las relaciones (hasMany, belongsTo) ya las definimos en tu index.js, 
-// así que no hace falta repetirlas aquí.
 
 module.exports = Turno;

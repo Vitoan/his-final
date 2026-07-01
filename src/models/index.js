@@ -57,7 +57,6 @@ Paciente.hasMany(Visita, { foreignKey: 'paciente_id' });
 Visita.belongsTo(Paciente, { foreignKey: 'paciente_id' });
 
 
-// --- 2. NUEVAS RELACIONES DE TURNOS ---
 // Un paciente tiene muchos turnos
 Paciente.hasMany(Turno, { foreignKey: 'paciente_id' });
 Turno.belongsTo(Paciente, { foreignKey: 'paciente_id' });
@@ -66,7 +65,6 @@ Turno.belongsTo(Paciente, { foreignKey: 'paciente_id' });
 Usuario.hasMany(Turno, { foreignKey: 'medico_id' });
 Turno.belongsTo(Usuario, { as: 'Medico', foreignKey: 'medico_id' });
 
-// --- 3. NUEVAS RELACIONES DE ESTUDIOS ---
 // Un paciente tiene muchos estudios
 Paciente.hasMany(Estudio, { foreignKey: 'paciente_id' });
 Estudio.belongsTo(Paciente, { foreignKey: 'paciente_id' });
@@ -96,7 +94,6 @@ AdministracionMedicamento.belongsTo(Indicacion, { foreignKey: 'indicacion_id' })
 Usuario.hasMany(AdministracionMedicamento, { foreignKey: 'enfermero_id' });
 AdministracionMedicamento.belongsTo(Usuario, { as: 'Enfermero', foreignKey: 'enfermero_id' });
 
-// === NUEVA RELACIÓN ===
 ObraSocial.hasMany(Paciente, { foreignKey: 'obra_social_id' });
 Paciente.belongsTo(ObraSocial, { foreignKey: 'obra_social_id', as: 'ObraSocial' });
 
