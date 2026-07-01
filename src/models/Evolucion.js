@@ -6,6 +6,9 @@ const Evolucion = sequelize.define('Evolucion', {
     nota: { type: DataTypes.TEXT, allowNull: false }, 
     signos_vitales: { type: DataTypes.JSON }, // Ej: { "presion": "120/80", "temp": 36.5 }
     fecha: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
-}, { timestamps: true });
+}, { 
+    tableName: 'evoluciones',
+    timestamps: true 
+});
 
 module.exports = Evolucion;

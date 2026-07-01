@@ -20,10 +20,9 @@ exports.listarEstudios = async (req, res) => {
 // 2. Mostrar formulario para solicitar un estudio nuevo
 exports.renderSolicitar = async (req, res) => {
     try {
-        const { paciente_id } = req.query; // ← Nuevo: capturamos el paciente desde la URL
+        const { paciente_id } = req.query;
 
         const pacientes = await Paciente.findAll({ order: [['apellido', 'ASC']] });
-        const medicos = await Usuario.findAll({ where: { rol: 'Medico' } });
 
         // Buscamos el paciente si viene por query
         let pacientePreseleccionado = null;
@@ -34,8 +33,7 @@ exports.renderSolicitar = async (req, res) => {
         res.render('estudios/create', { 
             title: 'Solicitar Estudio', 
             pacientes, 
-            medicos,
-            pacientePreseleccionado   // ← Lo pasamos a la vista
+            pacientePreseleccionado
         });
     } catch (error) {
         console.error("Error al cargar formulario:", error);
@@ -46,7 +44,8 @@ exports.renderSolicitar = async (req, res) => {
 // 3. Guardar la solicitud del estudio
 exports.solicitar = async (req, res) => {
     try {
-        const { paciente_id, medico_id, tipo_estudio, descripcion } = req.body;
+        const { paciente_id, tipo_estudio, descripcion } = req.body;
+        const medico_id = req.session.usuario.id; // Asignación automática del médico
         
         await Estudio.create({
             paciente_id,

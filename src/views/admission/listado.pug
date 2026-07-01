@@ -69,8 +69,8 @@ block content
                     // Asignar Cama
                     if adm.estado === 'Activa' || adm.estado === 'Pendiente'
                       if adm.Paciente
-                        a(href=`/habitaciones?paciente_id=${adm.Paciente.id}&admision_id=${adm.id}` 
-  S
+                        a(href=`/habitaciones?paciente_id=${adm.Paciente.id}&admision_id=${adm.id}` class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1")
+                          | 🛏️ Asignar Cama
 
                     // Historia Clínica (NUEVO)
                     if adm.Paciente

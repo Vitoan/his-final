@@ -36,7 +36,7 @@ exports.mostrarFormulario = (req, res) => {
 };
 
 exports.crearUsuario = async (req, res) => {
-    const { nombre, email, password, rol } = req.body;
+    const { nombre, apellido, email, password, rol } = req.body;
 
     try {
         const existe = await Usuario.findOne({ where: { email } });
@@ -51,6 +51,7 @@ exports.crearUsuario = async (req, res) => {
 
         await Usuario.create({
             nombre,
+            apellido,
             email,
             password: passwordHash,
             rol
@@ -58,7 +59,7 @@ exports.crearUsuario = async (req, res) => {
 
         await registrarAuditoria(
             'Creó usuario',
-            `Usuario: ${nombre} (${email}) | Rol: ${rol}`,
+            `Usuario: ${nombre} ${apellido} (${email}) | Rol: ${rol}`,
             req.session.usuario.id,
             req.ip
         );
@@ -92,14 +93,14 @@ exports.mostrarFormularioEditar = async (req, res) => {
 // Actualizar usuario
 exports.actualizarUsuario = async (req, res) => {
     try {
-        const { nombre, email, rol } = req.body;
+        const { nombre, apellido, email, rol } = req.body;
         const { id } = req.params;
 
-        await Usuario.update({ nombre, email, rol }, { where: { id } });
+        await Usuario.update({ nombre, apellido, email, rol }, { where: { id } });
 
         await registrarAuditoria(
             'Modificó usuario',
-            `Usuario ID: ${id} | Nombre: ${nombre} | Rol: ${rol}`,
+            `Usuario ID: ${id} | Nombre: ${nombre} ${apellido} | Rol: ${rol}`,
             req.session.usuario.id,
             req.ip
         );

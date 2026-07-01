@@ -101,26 +101,51 @@ if (tipoHab.includes('compartida')) {
 // 2. CREAR NUEVA INTERNACIÓN
 // ======================================================
 const create = async (req, res) => {
+    const t = await sequelize.transaction();
     try {
         const { cama_id, paciente_id, origen, motivo, prioridad_triage, admision_id } = req.body;
 
-        const camaDestino = await Cama.findByPk(cama_id, { include: [Habitacion] });
-        const pacienteNuevo = await Paciente.findByPk(paciente_id);
+        const camaDestino = await Cama.findByPk(cama_id, { include: [Habitacion], transaction: t });
+        const pacienteNuevo = await Paciente.findByPk(paciente_id, { transaction: t });
 
         if (!camaDestino || !pacienteNuevo) {
+            await t.rollback();
             return res.redirect('/habitaciones?error=' + encodeURIComponent('Datos inválidos de cama o paciente.'));
         }
 
         // CANDADO BACKEND 1: Verificar disponibilidad de cama
         if (camaDestino.estado !== 'Disponible') {
+            await t.rollback();
             return res.redirect(`/internacion/nuevo?cama_id=${cama_id}&error=Cama_No_Disponible`);
         }
 
-        // CANDADO BACKEND 2: Verificar género en habitación compartida (tu código actual)
+        // CANDADO BACKEND 2: Verificar sexo en habitación compartida
         const tipoHab = camaDestino.Habitacion && camaDestino.Habitacion.tipo ? camaDestino.Habitacion.tipo.toLowerCase() : '';
 
         if (tipoHab.includes('compartida')) {
-            // ... tu lógica actual de validación de género ...
+            const camasEnHabitacion = await Cama.findAll({
+                where: { habitacion_id: camaDestino.habitacion_id },
+                include: [{
+                    model: Internacion,
+                    where: { estado: 'Activa' },
+                    required: false,
+                    include: [{ model: Paciente }]
+                }],
+                transaction: t
+            });
+
+            for (let c of camasEnHabitacion) {
+                if (c.Internacions && c.Internacions.length > 0 && c.Internacions[0].Paciente) {
+                    const sexoOcupante = c.Internacions[0].Paciente.sexo || 'X';
+                    const sexoNuevo = pacienteNuevo.sexo || 'X';
+
+                    // Si hay pacientes de otro sexo, cancelamos
+                    if (sexoOcupante !== 'X' && sexoNuevo !== 'X' && sexoOcupante !== sexoNuevo) {
+                        await t.rollback();
+                        return res.redirect(`/internacion/nuevo?cama_id=${cama_id}&paciente_id=${paciente_id}&error=` + encodeURIComponent(`La habitación está asignada a pacientes de sexo ${sexoOcupante}.`));
+                    }
+                }
+            }
         }
 
         // === CREAR INTERNACIÓN ===
@@ -131,13 +156,13 @@ const create = async (req, res) => {
             motivo,
             prioridad_triage,
             estado: 'Activa'
-        });
+        }, { transaction: t });
 
         // === ÚLTIMO PASO DE LA OPCIÓN A: Actualizar Admisión a Activa ===
         if (admision_id) {
             await Admision.update(
                 { estado: 'Activa' },
-                { where: { id: admision_id } }
+                { where: { id: admision_id }, transaction: t }
             );
 
             await registrarAuditoria(
@@ -148,9 +173,11 @@ const create = async (req, res) => {
             );
         }
 
+        await t.commit();
         res.redirect('/habitaciones');
 
     } catch (error) {
+        await t.rollback();
         console.error("Error al internar paciente:", error);
         res.redirect('/habitaciones');
     }
@@ -279,6 +306,34 @@ const procesarTransferencia = async (req, res) => {
         if (!nuevaCama || nuevaCama.estado !== 'Disponible') {
             await t.rollback();
             return res.redirect(`/internacion/${id}/transferir?error=` + encodeURIComponent('La cama de destino no está disponible.'));
+        }
+
+        // CANDADO GÉNERO TRANSFERENCIA:
+        const tipoHab = nuevaCama.Habitacion && nuevaCama.Habitacion.tipo ? nuevaCama.Habitacion.tipo.toLowerCase() : '';
+        if (tipoHab.includes('compartida')) {
+            const camasEnHabitacion = await Cama.findAll({
+                where: { habitacion_id: nuevaCama.habitacion_id },
+                include: [{
+                    model: Internacion,
+                    where: { estado: 'Activa' },
+                    required: false,
+                    include: [{ model: Paciente }]
+                }],
+                transaction: t
+            });
+
+            for (let c of camasEnHabitacion) {
+                if (c.Internacions && c.Internacions.length > 0 && c.Internacions[0].Paciente) {
+                    const sexoOcupante = c.Internacions[0].Paciente.sexo || 'X';
+                    const sexoPaciente = internacion.Paciente.sexo || 'X';
+
+                    // Si hay pacientes de otro sexo, cancelamos la transferencia
+                    if (sexoOcupante !== 'X' && sexoPaciente !== 'X' && sexoOcupante !== sexoPaciente) {
+                        await t.rollback();
+                        return res.redirect(`/internacion/${id}/transferir?error=` + encodeURIComponent(`La habitación de destino está ocupada por pacientes de sexo ${sexoOcupante}.`));
+                    }
+                }
+            }
         }
 
         const viejaCamaId = internacion.cama_id;

@@ -59,7 +59,7 @@ app.use('/medico', authMiddleware, checkRole(['Admin', 'Medico']), medicoRoutes)
 app.use('/clinica', authMiddleware, checkRole(['Admin', 'Medico', 'Enfermeria', 'Paciente']), clinicaRoutes);
 app.use('/mesa-entrada', authMiddleware, checkRole(['Admin', 'Admision', 'Enfermeria']), require('./routes/mesa'));
 app.use('/turnos', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), require('./routes/turnos'));
-app.use('/estudios', authMiddleware, checkRole(['Admin', 'Medico', 'Enfermeria']), require('./routes/estudios'));
+app.use('/estudios', authMiddleware, checkRole(['Admin', 'Medico']), require('./routes/estudios'));
 app.use('/portal', authMiddleware, checkRole(['Paciente']), require('./routes/portal'));app.use('/api', authMiddleware, checkRole(['Admin', 'Admision', 'Medico', 'Enfermeria']), require('./routes/api'));
 // === RUTAS ADMIN (Importante: rutas específicas primero) ===
 app.use('/admin/obras-sociales', authMiddleware, checkRole(['Admin']), require('./routes/obrasSociales'));
@@ -71,7 +71,11 @@ app.use('/admin', authMiddleware, checkRole(['Admin']), adminRoutes);
 // --- RUTA RAÍZ ---
 app.get('/', (req, res) => {
     if (req.session.usuario) {
-        res.render('index', { title: 'Inicio - HIS Pro' });
+        if (req.session.usuario.rol === 'Paciente') {
+            res.redirect('/portal/inicio');
+        } else {
+            res.render('index', { title: 'Inicio - HIS Pro' });
+        }
     } else {
         res.redirect('/auth/login');
     }

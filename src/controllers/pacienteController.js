@@ -9,6 +9,7 @@ const {
     ObraSocial,
     SignosVitales,
     Evolucion,
+    Indicacion,
     Visita,
  
 } = require('../models');
@@ -265,18 +266,15 @@ exports.reactivarPaciente = async (req, res) => {
 // ======================================================
 exports.verHistoriaClinica = async (req, res) => {
     try {
-        const { id } = req.params; // ID del paciente
+        const { id } = req.params;
 
-        // === SEGURIDAD: Solo el paciente puede ver su propia historia ===
         if (req.session.usuario.rol === 'Paciente') {
             const idPacienteDelUsuario = req.session.usuario.paciente_id;
-
             if (!idPacienteDelUsuario || parseInt(id) !== idPacienteDelUsuario) {
                 return res.status(403).send("No tienes permiso para ver esta historia clínica.");
             }
         }
 
-        // === Cargar datos normalmente ===
         const paciente = await Paciente.findByPk(id, {
             include: [
                 { model: ObraSocial, as: 'ObraSocial' },
@@ -306,12 +304,11 @@ exports.verHistoriaClinica = async (req, res) => {
 };
 
 // ======================================================
-// DASHBOARD DEL PORTAL DEL PACIENTE
+// DASHBOARD DEL PORTAL DEL PACIENTE (CON INDICACIONES)
 // ======================================================
 exports.renderDashboard = async (req, res) => {
     try {
         const pacienteId = req.session.usuario.paciente_id;
-
         if (!pacienteId) {
             return res.send("Este usuario no tiene una ficha de paciente vinculada.");
         }
@@ -342,9 +339,22 @@ exports.renderDashboard = async (req, res) => {
             : null;
 
         let ultimosSignos = null;
+        let indicacionesActivas = [];
+
         if (activeInternacion) {
+            // Últimos signos vitales
             ultimosSignos = await SignosVitales.findOne({
                 where: { internacion_id: activeInternacion.id },
+                order: [['createdAt', 'DESC']]
+            });
+
+            // === NUEVO: Indicaciones / Medicamentos Activos ===
+            indicacionesActivas = await Indicacion.findAll({
+                where: { 
+                    internacion_id: activeInternacion.id,
+                    estado: 'Activa'
+                },
+                include: [{ model: Usuario, as: 'Medico' }],
                 order: [['createdAt', 'DESC']]
             });
         }
@@ -352,8 +362,10 @@ exports.renderDashboard = async (req, res) => {
         res.render('portal/dashboard', {
             title: 'Mi Portal de Salud',
             paciente,
-            ultimosSignos
+            ultimosSignos,
+            indicacionesActivas     // ← Nueva variable
         });
+
     } catch (error) {
         console.error("Error en el portal:", error);
         res.redirect('/');

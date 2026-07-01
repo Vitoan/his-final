@@ -1,42 +1,29 @@
-const { Ala, Habitacion, Cama, Internacion, Paciente, Evolucion, SignosVitales } = require('../models');
+const { Ala, Habitacion, Cama, Internacion, Paciente, Evolucion, SignosVitales, Usuario } = require('../models');
 
 // 1. Cargar el Mapa de Camas (Dashboard)
 const dashboard = async (req, res) => {
     try {
-        // Buscamos todas las Alas con toda su estructura anidada
-        const alas = await Ala.findAll({
+        const pacientes = await Internacion.findAll({
+            where: { estado: 'Activa' },
             include: [
-                {
-                    model: Habitacion,
-                    include: [
-                        {
-                            model: Cama,
-                            include: [
-                                {
-                                    model: Internacion,
-                                    where: { estado: 'Activa' }, // Solo internaciones en curso
-                                    required: false, // Si la cama está libre (no tiene internación activa), igual la trae
-                                    include: [{ model: Paciente }]
-                                }
-                            ]
-                        }
-                    ]
+                { model: Paciente },
+                { model: Cama, include: [Habitacion] },
+                { 
+                    model: Evolucion, 
+                    required: false,
+                    include: [{ model: Usuario, as: 'Autor' }]
                 }
             ],
-            // Ordenamos alfabéticamente el Ala, luego por número de habitación y número de cama
             order: [
-                ['nombre', 'ASC'],
-                [Habitacion, 'numero', 'ASC'],
-                [Habitacion, Cama, 'numero_cama', 'ASC']
+                [Evolucion, 'createdAt', 'DESC']
             ]
         });
 
-        // Enviamos la variable 'alas' a tu vista index.pug
-        res.render('index', { alas }); 
+        res.render('clinical/dashboard', { pacientes }); 
 
     } catch (error) {
-        console.error("Error cargando el dashboard:", error);
-        res.render('index', { error: 'Error interno al cargar el mapa de camas.', alas: [] });
+        console.error("Error cargando el dashboard clínico:", error);
+        res.render('clinical/dashboard', { error: 'Error interno al cargar el tablero clínico.', pacientes: [] });
     }
 };
 

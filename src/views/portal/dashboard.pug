@@ -10,7 +10,7 @@ block content
 
     div(class="grid grid-cols-1 lg:grid-cols-3 gap-8")
       
-      //- COLUMNA IZQUIERDA: Turnos y Estudios
+      //- COLUMNA IZQUIERDA
       div(class="lg:col-span-2 space-y-8")
         
         //- PRÓXIMOS TURNOS
@@ -56,13 +56,34 @@ block content
           else
             p(class="text-slate-400 italic") No tienes estudios registrados.
 
+        //- MIS INDICACIONES / MEDICAMENTOS (NUEVO)
+        section(class="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm")
+          h3(class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2") 💊 Mis Indicaciones y Medicamentos
+          
+          if indicacionesActivas && indicacionesActivas.length > 0
+            div(class="space-y-4")
+              each ind in indicacionesActivas
+                div(class="p-4 border border-emerald-200 bg-emerald-50 rounded-2xl")
+                  div(class="flex justify-between items-start")
+                    div
+                      p(class="font-bold text-emerald-900 text-lg") #{ind.descripcion}
+                      p(class="text-sm text-emerald-700 mt-1") 
+                        | Dosis: #{ind.dosis || '-'} • Frecuencia: #{ind.frecuencia || '-'}
+                    span(class="px-3 py-1 bg-emerald-200 text-emerald-800 text-xs font-bold rounded-full self-start") Activa
+                  
+                  if ind.Medico
+                    p(class="text-xs text-emerald-600 mt-2") 
+                      | Indicado por: Dr/a. #{ind.Medico.nombre} #{ind.Medico.apellido}
+          else
+            p(class="text-slate-400 italic") No tienes indicaciones de medicamentos activas en este momento.
+
         //- BOTÓN VER HISTORIA CLÍNICA
         div(class="mt-2")
           a(href=`/clinica/historial/${paciente.id}` 
             class="block w-full text-center bg-white border-2 border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-3.5 rounded-2xl transition-colors")
             | 📜 Ver mi Historia Clínica completa
 
-      //- COLUMNA DERECHA: Datos y Estado Actual
+      //- COLUMNA DERECHA
       div(class="space-y-8")
         
         //- FICHA PERSONAL
@@ -73,7 +94,7 @@ block content
             p(class="text-sm") DNI: #{paciente.dni}
             p(class="text-sm") Obra Social: #{paciente.obra_social || 'Particular'}
         
-        //- ESTADO DE INTERNACIÓN
+        //- ESTADO DE INTERNACIÓN + SIGNOS VITALES
         if paciente.Internacions && paciente.Internacions.some(i => i.estado === 'Activa')
           - const inter = paciente.Internacions.find(i => i.estado === 'Activa')
           div(class="bg-rose-50 border-2 border-rose-200 rounded-[2rem] p-8")

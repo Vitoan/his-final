@@ -30,6 +30,8 @@ exports.login = async (req, res) => {
         // Redirección basada en Rol (Requisito del PDF)
         if (usuario.rol === 'Medico' || usuario.rol === 'Enfermeria') {
             res.redirect('/clinica/dashboard');
+        } else if (usuario.rol === 'Paciente') {
+            res.redirect('/portal/inicio');
         } else {
             res.redirect('/');
         }

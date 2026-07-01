@@ -57,15 +57,6 @@ exports.editar = async (req, res) => {
     }
 };
 
-exports.eliminar = async (req, res) => {
-    try {
-        await ObraSocial.destroy({ where: { id: req.params.id } });
-        res.redirect('/admin/obras-sociales');
-    } catch (error) {
-        console.error(error);
-        res.redirect('/admin/obras-sociales?error=true');
-    }
-};
 // Desactivar obra social (mejorado)
 exports.desactivarObraSocial = async (req, res) => {
     try {

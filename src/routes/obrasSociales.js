@@ -10,7 +10,6 @@ router.get('/nuevo', obraSocialController.mostrarCrear);
 router.post('/guardar', obraSocialController.crear);
 router.get('/editar/:id', obraSocialController.mostrarEditar);
 router.post('/editar/:id', obraSocialController.editar);
-router.post('/eliminar/:id', obraSocialController.eliminar);
 router.post('/desactivar/:id', authMiddleware, checkRole(['Admin']), obraSocialController.desactivarObraSocial);
 router.post('/reactivar/:id', authMiddleware, checkRole(['Admin']), obraSocialController.reactivarObraSocial);
 
