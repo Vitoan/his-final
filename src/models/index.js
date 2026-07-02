@@ -107,9 +107,7 @@ Paciente.hasMany(Admision, { foreignKey: 'paciente_id' });
 Admision.belongsTo(Usuario, { as: 'RegistradoPor', foreignKey: 'usuario_id' });
 Usuario.hasMany(Admision, { foreignKey: 'usuario_id' });
 
-// Una admisión puede tener una internación (opcional)
-//Admision.hasOne(Internacion, { foreignKey: 'admision_id' });
-//Internacion.belongsTo(Admision, { foreignKey: 'admision_id' });
+// Una admisión opcionalmente puede derivar en una internación (relación gestionada manualmente por admision_id)
 
 // 3. EXPORTAMOS TODO
 module.exports = { 

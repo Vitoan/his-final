@@ -5,7 +5,7 @@ const internacionController = require('../controllers/internacionController');
 // 1. Mostrar el formulario
 router.get('/nuevo', internacionController.renderCreate);
 
-// 2. Guardar los datos en la base de datos (¡ESTA ES LA RUTA QUE TE DABA 404!)
+// 2. Guardar los datos en la base de datos
 router.post('/nuevo', internacionController.create);
 
 // 3. Mostrar formulario de Alta
