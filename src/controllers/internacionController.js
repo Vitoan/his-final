@@ -41,12 +41,9 @@ if (tipoHab.includes('compartida')) {
     for (let c of camasEnHabitacion) {
         if (c.Internacions && c.Internacions.length > 0 && c.Internacions[0].Paciente) {
             const sexoOcupante = c.Internacions[0].Paciente.sexo || 'X';
-            const sexoNuevo = paciente_id 
-                ? (await Paciente.findByPk(paciente_id))?.sexo || 'X' 
-                : 'X';
 
-            // Solo aplicamos restricción si ambos tienen sexo definido y son distintos
-            if (sexoOcupante !== 'X' && sexoNuevo !== 'X' && sexoOcupante !== sexoNuevo) {
+            // Si hay un ocupante con sexo definido, la habitación queda restringida a ese sexo
+            if (sexoOcupante !== 'X') {
                 generoRestringido = sexoOcupante;
                 console.log(`🔒 Habitación restringida a sexo: ${generoRestringido}`);
                 break;
