@@ -70,7 +70,7 @@ exports.finalizarLimpieza = async (req, res) => {
 exports.listar = async (req, res) => {
     try {
         const habitaciones = await Habitacion.findAll({
-            include: [{ model: Ala }],
+            include: [{ model: Ala }, { model: Cama }],
             order: [['numero', 'ASC']]
         });
         res.render('admin/habitaciones/index', {
