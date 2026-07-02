@@ -6,7 +6,14 @@ block content
       div
         h2(class="text-xs font-bold text-blue-600 uppercase tracking-widest") Admisión
         h1(class="text-4xl font-black") Pacientes
-      a(href="/admision/nuevo" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700") + Nuevo Paciente
+      a(href="/admision/nuevo" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-sm transition") + Nuevo Paciente
+
+    //- Barra de búsqueda
+    form(action="/admision" method="GET" class="mb-6 flex gap-4")
+      input(type="text" name="search" value=(search || '') placeholder="Buscar por Nombre, Apellido o DNI..." class="flex-1 px-5 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm")
+      button(type="submit" class="bg-slate-800 text-white px-8 py-3 rounded-xl font-bold hover:bg-slate-900 shadow-sm transition") Buscar
+      if search
+        a(href="/admision" class="bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold hover:bg-slate-300 shadow-sm transition flex items-center") Limpiar
 
     div(class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm")
       table(class="w-full text-left border-collapse")
