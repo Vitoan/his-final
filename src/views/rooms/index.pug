@@ -116,8 +116,9 @@ block content
                         div(class="grid grid-cols-3 gap-2")
                           a(href=`/internacion/${idInternacion}/transferir` class="text-center py-2 px-2 rounded-xl bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold hover:bg-amber-200 transition-colors")
                             | 🔄 Traslado
-                          a(href=`/internacion/${idInternacion}/alta` class="text-center py-2 px-2 rounded-xl bg-red-100 text-red-800 border border-red-200 text-xs font-bold hover:bg-red-200 transition-colors")
-                            | ✅ Alta
+                          if usuario && (usuario.rol === 'Admin' || usuario.rol === 'Medico')
+                            a(href=`/internacion/${idInternacion}/alta` class="text-center py-2 px-2 rounded-xl bg-red-100 text-red-800 border border-red-200 text-xs font-bold hover:bg-red-200 transition-colors")
+                              | ✅ Alta
                           form(action=`/internacion/${idInternacion}/cancelar` method="POST" onsubmit="return confirm('¿Está seguro de cancelar esta internación?');" class="flex-1")
                             button(type="submit" class="w-full text-center py-2 px-2 rounded-xl bg-slate-200 text-slate-700 border border-slate-300 dark:bg-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-300 transition-colors")
                               | ❌ Cancelar
