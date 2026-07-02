@@ -48,49 +48,55 @@ exports.dashboard = async (req, res) => {
 // 2. BUSCAR PACIENTE
 // ======================================================
 exports.buscarPaciente = async (req, res) => {
-    const { dni } = req.query;
-    let paciente = null;
-    let mostrarAlta = false;
-    let mensaje = null;
+    try {
+        let { dni } = req.query;
+        let paciente = null;
+        let mostrarAlta = false;
+        let mensaje = null;
 
-    if (dni) {
-        paciente = await Paciente.findOne({ 
-            where: { dni },
-            include: [
-                { model: ObraSocial, as: 'ObraSocial' },
-                {
-                    model: Internacion,
-                    required: false,
-                    where: { fecha_egreso: null },
-                    include: [{ model: Cama, include: [Habitacion] }]
-                },
-                {
-                    model: Visita,
-                    required: false,
-                    where: { estado: { [Op.or]: ['Esperando', 'En Atención'] } }
-                }
-            ]
-        });
-        
-        if (!paciente) {
-            mostrarAlta = true;
-            mensaje = "Paciente no encontrado. Complete los datos para ingresarlo.";
+        if (dni) {
+            dni = dni.trim();
+            paciente = await Paciente.findOne({ 
+                where: { dni },
+                include: [
+                    { model: ObraSocial, as: 'ObraSocial' },
+                    {
+                        model: Internacion,
+                        required: false,
+                        where: { fecha_egreso: null },
+                        include: [{ model: Cama, include: [Habitacion] }]
+                    },
+                    {
+                        model: Visita,
+                        required: false,
+                        where: { estado: { [Op.or]: ['Esperando', 'En Atención'] } }
+                    }
+                ]
+            });
+            
+            if (!paciente) {
+                mostrarAlta = true;
+                mensaje = "Paciente no encontrado. Complete los datos para ingresarlo.";
+            }
         }
+
+        const obrasSociales = await ObraSocial.findAll({
+            where: { activo: true },
+            order: [['nombre', 'ASC']]
+        });
+
+        res.render('mesa/checkin', {
+            title: 'Registrar Ingreso',
+            paciente,
+            dniBuscado: dni,
+            mostrarAlta,
+            obrasSociales,
+            mensaje
+        });
+    } catch (error) {
+        console.error("Error al buscar paciente por DNI:", error);
+        res.redirect('/mesa-entrada?error=Error_Al_Buscar');
     }
-
-    const obrasSociales = await ObraSocial.findAll({
-        where: { activo: true },
-        order: [['nombre', 'ASC']]
-    });
-
-    res.render('mesa/checkin', {
-        title: 'Registrar Ingreso',
-        paciente,
-        dniBuscado: dni,
-        mostrarAlta,
-        obrasSociales,
-        mensaje
-    });
 };
 
 // ======================================================

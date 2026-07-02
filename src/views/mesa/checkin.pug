@@ -39,11 +39,12 @@ block content
             p #[strong Tel:] #{paciente.telefono || '-'}
             p #[strong Obra Soc:] #{paciente.ObraSocial ? paciente.ObraSocial.nombre : (paciente.obra_social || 'Particular')}
 
-      div(class="bg-white dark:bg-slate-800 p-8 rounded-[2rem] shadow-lg border border-slate-200 dark:border-slate-700")
-        form(action="/mesa-entrada/guardar" method="POST" class="space-y-6")
-          input(type="hidden" name="paciente_id" value=paciente.id)
-          +camposVisita()
-          button(type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg text-lg") ✅ Registrar Ingreso
+      if !(paciente.Internacions && paciente.Internacions.length > 0)
+        div(class="bg-white dark:bg-slate-800 p-8 rounded-[2rem] shadow-lg border border-slate-200 dark:border-slate-700")
+          form(action="/mesa-entrada/guardar" method="POST" class="space-y-6")
+            input(type="hidden" name="paciente_id" value=paciente.id)
+            +camposVisita()
+            button(type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg text-lg") ✅ Registrar Ingreso
 
     else if mostrarAlta
       div(class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 p-6 rounded-2xl mb-6 flex items-start gap-4 animate-fade-in")
