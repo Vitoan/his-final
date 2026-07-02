@@ -45,7 +45,8 @@ exports.mostrarEditar = async (req, res) => {
 };
 
 exports.editar = async (req, res) => {
-    const { nombre, descripcion, activo } = req.body;
+    const { nombre, descripcion } = req.body;
+    const activo = req.body.activo === 'on';
     try {
         await ObraSocial.update({ nombre, descripcion, activo }, { 
             where: { id: req.params.id } 
